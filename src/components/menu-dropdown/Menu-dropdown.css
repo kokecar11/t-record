@@ -1,0 +1,8 @@
+.menu{
+    @apply absolute z-10 mt-2 mr-3 w-40 bg-white shadow-lg overflow-hidden dark:bg-slate-900 origin-top-right right-0
+}
+.menu-option{
+    @apply px-4 py-2 text-sm flex items-center text-violet-900 hover:bg-violet-900 hover:bg-opacity-10 hover:text-violet-900 
+    dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 cursor-pointer
+    hover:border-b-2 hover:border-violet-900 dark:hover:border-b-2 dark:hover:border-white
+}

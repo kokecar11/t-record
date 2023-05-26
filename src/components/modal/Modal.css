@@ -1,0 +1,4 @@
+
+.modal {
+    @apply inset-0 z-40 bg-black bg-opacity-25 backdrop-blur-sm justify-center items-center
+}

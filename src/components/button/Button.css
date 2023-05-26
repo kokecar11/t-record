@@ -1,0 +1,34 @@
+.btn {
+    @apply px-6 py-2.5 mx-2 font-semibold transition-all focus:bg-opacity-80 rounded-lg hover:bg-opacity-90 text-white
+}
+.btn-outlined {
+    @apply btn bg-transparent border-solid border
+}
+.btn-violet {
+    @apply btn bg-violet-900
+}
+
+.btn-slate {
+    @apply btn bg-slate-700
+}
+
+.btn-slate:disabled , .btn-violet:disabled{
+    @apply bg-opacity-30 text-opacity-30 cursor-auto
+}
+
+.btn-ghost {
+    @apply btn bg-gray-200 !text-violet-500
+}
+
+.btn-outlined-violet{
+    @apply btn-outlined border-violet-200 !text-violet-900 dark:!text-violet-200
+}
+
+.btn-outlined-purple{
+    @apply  btn-outlined border-purple-500 !text-purple-500
+}
+
+.btn-outlined-ghost{
+    @apply font-semibold mx-2 bg-transparent border border-gray-900 text-gray-900 rounded-md px-6 py-2 
+    hover:bg-opacity-90 transition-all focus:bg-opacity-80
+}

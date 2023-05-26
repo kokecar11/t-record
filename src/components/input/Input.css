@@ -1,0 +1,10 @@
+.label-input{
+    @apply block mb-2 text-base text-violet-800 dark:text-white font-semibold
+}
+
+.input{
+    @apply block rounded-lg w-full px-5 py-3 mt-2 text-violet-800 placeholder-violet-800 placeholder-opacity-40 bg-white border border-violet-500
+    focus:border-violet-800 focus:ring-violet-800 focus:outline-none focus:ring-1 focus:ring-opacity-80
+    dark:border-white dark:border-opacity-40 dark:bg-slate-700 dark:text-white dark:placeholder-white dark:placeholder-opacity-40
+    dark:focus:border-white dark:focus:ring-white dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-opacity-20
+}

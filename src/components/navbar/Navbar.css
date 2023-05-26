@@ -1,0 +1,15 @@
+.nav-link {
+    @apply text-violet-500 p-5 font-semibold transition duration-200 ease-in-out
+    hover:bg-violet-500 hover:bg-opacity-10 hover:border-violet-500 hover:border-b-2
+    dark:hover:bg-white dark:hover:bg-opacity-10 dark:hover:border-white dark:hover:border-b-2 dark:text-white
+}
+    
+.active-nav-item {
+    @apply border-b-2 border-violet-900  bg-violet-900 bg-opacity-20
+    dark:border-violet-900 dark:text-white dark:bg-white dark:bg-opacity-20
+}
+  
+.navbar {
+    @apply sticky top-0 z-10 bg-white backdrop-filter backdrop-blur-lg bg-opacity-20 border-b border-violet-900 border-opacity-90
+    dark:bg-slate-900 dark:border-violet-900 dark:border-opacity-90 dark:backdrop-blur-lg dark:bg-opacity-20
+}
