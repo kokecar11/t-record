@@ -34,6 +34,5 @@ export interface Database {
 export const supabase = createClient<Database>(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
-  );
-
+);
 export type MarkerType = Database['public']['Tables']['MarkerTest']['Row'];

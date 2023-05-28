@@ -1,19 +1,29 @@
 import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Form, routeAction$, server$, z, zod$ } from '@builder.io/qwik-city';
+import { type DocumentHead, Form, routeAction$, server$, z, zod$, routeLoader$ } from '@builder.io/qwik-city';
 
 import { useAuth } from '~/auth/hooks/use-auth';
 import { supabase } from '~/core/supabase/supabase';
+import { validateInitMarker } from '~/marker/helper/validators';
 
+import type { User } from 'supabase-auth-helpers-qwik';
 import type { MarkerStateI } from '~/marker/interfaces/marker';
 import Card from '~/components/card/Card';
-import { Tag } from '~/components/tag/Tag';
-import { FeLoop, FePlus, FeTimeline } from '~/components/icons/icons';
+import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
 import MiniDashboard from '~/components/mini-dashboard/Mini-dashboard';
+import { Tag } from '~/components/tag/Tag';
+import { FeLoop, FePlus, FeTimeline } from '~/components/icons/icons';
 import { Indicator } from '~/components/mini-dashboard/indicator/Indicator';
-import Modal from '~/components/modal/Modal';
 import { Input } from '~/components/input/Input';
 import { useModal } from '~/core/hooks/use-modal';
+
+export const useCheckAuth = routeLoader$(({cookie, redirect}) => {
+  const authCookie = cookie.get('_session');
+  if (authCookie){
+    return;
+  }
+  redirect(302,'/login')
+})
 
 export const taskForm = zod$({
   start_title: z.string({
@@ -30,8 +40,9 @@ export const taskForm = zod$({
 
 export const useCreateMarker = routeAction$(
   async (dataForm, {cookie}) => {
+    const user:User =  cookie.get('_user')!.json()
     const insertData = {
-      fk_user:  cookie.get('fk_user')?.value,
+      fk_user: user.id,
       ...dataForm
     }
     await supabase.from('MarkerTest').insert(insertData)
@@ -56,6 +67,27 @@ export const getMarkers = server$(
       }
 });
 
+export const getIndicatorsMarkers = server$(async function() {
+  
+  const user:User = this.cookie.get('_user')!.json();
+
+  const { data } = await supabase.from('countstatusperuser').select('*').eq('fk_user',user.id);
+
+  const recordingCount = data?.find(marker => marker.status === 'RECORDING')?.statuscount | 0;
+  const recordedCount = data?.find(marker => marker.status === 'RECORDED')?.statuscount | 0;
+  const unRecordedCount = data?.find(marker => marker.status === 'UNRECORDED')?.statuscount | 0;
+  const totalMarkers = recordingCount + recordedCount + unRecordedCount;
+  
+  const indicators = [
+      {title: 'Total', counter: totalMarkers},
+      {title: 'Recording', counter: recordingCount},
+      {title: 'Unrecorded', counter: unRecordedCount},
+      {title: 'Recorded', counter: recordedCount},
+  ];
+  
+  return indicators
+});
+
 export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, markerId:number, markerTitle:string) {
     const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
@@ -77,8 +109,7 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     const data = await respStream.json();
     const live = data.status;
     
-    // if (live !== 404){
-      if(true){
+    if (live !== 404){
       if(isStartMarker){
         const { data } = await supabase.from('MarkerTest')
         .update({ status: 'RECORDING' })
@@ -96,48 +127,34 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     return {data}
 });
 
+export const getStatusStream = server$( async function(){
+  const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
+  const urlApiTwitch = 'https://api.twitch.tv/helix/streams';
+  const providerToken: { provider_token:string, provider_refresh_token:string } = this.cookie.get('_provider')!.json();
+  const user:User = this.cookie.get('_user')!.json();
+  const headers = {
+      'Authorization':"Bearer " + providerToken.provider_token,
+      'Client-Id': TWITCH_CLIENT_ID
+  };
+  const resp = await fetch(`${urlApiTwitch}?user_id=${user.user_metadata.provider_id}`, {
+      headers
+  });
+  const {data} = (await resp.json()) as {data: {title:string, type:string}[]};
+  if (data.length > 0){
+    return data;
+  }
 
-export const getIndicatorsMarkers = server$(async () => {
-  const { data } = await supabase.from('view_indicators_markers').select('*');
-
-  const recordingCount = data?.find(marker => marker.status === 'RECORDING')?.count_status_marker | 0;
-  const recordedCount = data?.find(marker => marker.status === 'RECORDED')?.count_status_marker | 0;
-  const unRecordedCount = data?.find(marker => marker.status === 'UNRECORDED')?.count_status_marker | 0;
-  const totalMarkers = recordingCount + recordedCount + unRecordedCount;
-  
-  const indicators = [
-      {title: 'Total', counter: totalMarkers},
-      {title: 'Recording', counter: recordingCount},
-      {title: 'Unrecorded', counter: unRecordedCount},
-      {title: 'Recorded', counter: recordedCount},
-  ];
-  
-  return indicators
+  return [{
+    title:'Stream not live',
+    type: 'offline'
+  }];
 });
-  
   
 const STATUS_MARKER = Object.freeze({
     RECORDED: 'success',
     RECORDING:'warning',
     UNRECORDED:'danger'
-}) 
-export const validateInitMarker = (status:string, streamStatus:string, streamDate:string | Date, isInit:boolean) => {
-    const stream = new Date(streamDate).toDateString()
-    
-    if(Date.parse(stream) < Date.now()){ //TODO:VALIDAR FECHA EXACTA
-        return true
-    }
-    if (status === 'RECORDED'){
-        return true
-    }
-    if (status === 'RECORDING' || status === 'RECORDED' || streamStatus === 'offline' ){
-        if (isInit) return true
-    }
-    if (status === 'UNRECORDED' && streamStatus === 'live' ){
-        return false
-    }
-    if (streamStatus === 'offline') return true
-}
+}); 
 
 export default component$(() => {
     const markerList = useStore<MarkerStateI>({
@@ -148,19 +165,22 @@ export default component$(() => {
     })
 
     const statusOfStream = useStore({
-        type: 'live',
+        type: 'offline',
         title: 'Stream not live'
     });
     const createMarker = useCreateMarker();
     const { getAuthSession } = useAuth();
-    const {isVisibleModal, showModal} = useModal();
+    const { isVisibleModal, showModal } = useModal();
 
     useVisibleTask$(async ({track}) => {
       const auth = await getAuthSession();
+      const stream = await getStatusStream()
       track(()=> [markerList.isLoading])
       markerList.isLoading = false
       markerList.markers = await getMarkers(auth.user.id);
       markerList.indicators = await getIndicatorsMarkers();
+      statusOfStream.type = stream[0].type
+      statusOfStream.title = stream[0].title
     })
 
     return (
@@ -250,13 +270,13 @@ export default component$(() => {
                       (<Tag text='Live' variant='danger'/>) : 
                       (<Tag text='Offline' variant='secondary'/>) 
                     }
-                    {/* <Button class="btn-violet btn-xs flex items-center justify-center mx-auto" onClick$={async () => {
+                    <Button class="btn-violet btn-xs flex items-center justify-center mx-auto" onClick$={async () => {
                       const stream = await getStatusStream()
                       statusOfStream.type = stream[0].type
                       statusOfStream.title = stream[0].title
                       }}>
                       <FeLoop class="text-xl" />
-                    </Button> */}
+                    </Button>
                   </div>
                   
                 </div>
@@ -293,3 +313,13 @@ export default component$(() => {
       </div>
     )
 });
+
+export const head: DocumentHead = {
+  title: 'Dashboard | T-Record',
+  meta: [
+    {
+      name: 'description',
+      content: 'Qwik site description',
+    },
+  ],
+};

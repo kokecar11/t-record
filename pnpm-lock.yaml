@@ -3,9 +3,9 @@ lockfileVersion: 5.4
 specifiers:
   '@builder.io/qwik': ^1.1.4
   '@builder.io/qwik-city': ^1.1.4
-  '@supabase/supabase-js': ^2.22.0
+  '@supabase/supabase-js': ^2.23.0
   '@types/eslint': 8.37.0
-  '@types/node': ^20.2.3
+  '@types/node': ^20.2.5
   '@typescript-eslint/eslint-plugin': 5.59.5
   '@typescript-eslint/parser': 5.59.5
   autoprefixer: ^10.4.14
@@ -21,14 +21,14 @@ specifiers:
   vite-tsconfig-paths: 4.2.0
 
 dependencies:
-  '@supabase/supabase-js': 2.22.0
-  supabase-auth-helpers-qwik: 0.0.3_r3gkvssv2zdfxym6k2bu33pzk4
+  '@supabase/supabase-js': 2.23.0
+  supabase-auth-helpers-qwik: 0.0.3_paqa2vxp4xzsw3jurctqppoxge
 
 devDependencies:
   '@builder.io/qwik': 1.1.4_undici@5.22.1
   '@builder.io/qwik-city': 1.1.4
   '@types/eslint': 8.37.0
-  '@types/node': 20.2.3
+  '@types/node': 20.2.5
   '@typescript-eslint/eslint-plugin': 5.59.5_zaj6dsh3leplki3sfxgbx2w2za
   '@typescript-eslint/parser': 5.59.5_3qfatcekpgbllh6uk5ivyhkbxq
   autoprefixer: 10.4.14_postcss@8.4.23
@@ -39,7 +39,7 @@ devDependencies:
   tailwindcss: 3.3.2
   typescript: 5.0.4
   undici: 5.22.1
-  vite: 4.3.5_@types+node@20.2.3
+  vite: 4.3.5_@types+node@20.2.5
   vite-tsconfig-paths: 4.2.0_j3n3bmbdtt5x6j7a7ljkizyfq4
 
 packages:
@@ -406,12 +406,12 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@supabase/auth-helpers-shared/0.3.4_r3gkvssv2zdfxym6k2bu33pzk4:
+  /@supabase/auth-helpers-shared/0.3.4_paqa2vxp4xzsw3jurctqppoxge:
     resolution: {integrity: sha512-8I3D0SPHHexkFTSfPg0nZgJSVazWoB3tZDpT6IjRv6w89vDMUzO99Lit4H9anVLF4teW8c/nJJxawDNbDlgbgg==}
     peerDependencies:
       '@supabase/supabase-js': ^2.0.4
     dependencies:
-      '@supabase/supabase-js': 2.22.0
+      '@supabase/supabase-js': 2.23.0
       jose: 4.14.4
     dev: false
 
@@ -423,16 +423,16 @@ packages:
       - encoding
     dev: false
 
-  /@supabase/gotrue-js/2.27.0:
-    resolution: {integrity: sha512-KWoo6giZDLuF2wcN+g8DZPnTa6n9k3v7WNWTUpniPjE8H3MPMJcHka+8uHQFpvMFGUNt+ULNNbhGiaVR4PzJyA==}
+  /@supabase/gotrue-js/2.27.2:
+    resolution: {integrity: sha512-VVD3M//E7A/fuJsvXVfu7Sv8AuxMHL4owRtp6GoRNxtedHJCngcZzZpIWuQUjbwnNmrfvUQEDuxqNZQVqFbJQw==}
     dependencies:
       cross-fetch: 3.1.6
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@supabase/postgrest-js/1.6.1:
-    resolution: {integrity: sha512-WDBUPOCOwcZonaCwEodwdA8hwWYOiXroDF9vWGxZxKAnuSVE2Ieci/kvhR4EsWvgGST2h90LRowgO+msXe8+fA==}
+  /@supabase/postgrest-js/1.7.0:
+    resolution: {integrity: sha512-wLADHZ5jm7LljF4GigK0H2vc1wGupBY2hGYfb4fVo0UuyMftmA6tOYy+ZpMH/vPq01CUFwXGwvIke6kyqh/QDg==}
     dependencies:
       cross-fetch: 3.1.6
     transitivePeerDependencies:
@@ -457,12 +457,12 @@ packages:
       - encoding
     dev: false
 
-  /@supabase/supabase-js/2.22.0:
-    resolution: {integrity: sha512-omkgSWL1HwnpXZZy+yshFLx/qqxwk9kx9jbRM6IHNEylKrH/sz6JX7rGyIOmN9niDxMRjsCu1nwuBhD6IiF2xg==}
+  /@supabase/supabase-js/2.23.0:
+    resolution: {integrity: sha512-mlkzAQ3aLmcyJtlEdrkLNeq4MbnWcr/W+PjWZwBfxnrakoQqT97eRt/XZ1bXcWbmA9NKG8wHsLiTEOJmWW6CcQ==}
     dependencies:
       '@supabase/functions-js': 2.1.1
-      '@supabase/gotrue-js': 2.27.0
-      '@supabase/postgrest-js': 1.6.1
+      '@supabase/gotrue-js': 2.27.2
+      '@supabase/postgrest-js': 1.7.0
       '@supabase/realtime-js': 2.7.2
       '@supabase/storage-js': 2.5.1
       cross-fetch: 3.1.6
@@ -477,8 +477,8 @@ packages:
       '@types/estree': 1.0.1
     dev: true
 
-  /@types/debug/4.1.7:
-    resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
+  /@types/debug/4.1.8:
+    resolution: {integrity: sha512-/vPO1EPOs306Cvhwv7KfVfYvOJqA/S/AXjaHQiJboCZzcNDb+TIJFN9/2C9DZ//ijSKWioNyUxD792QmDJ+HKQ==}
     dependencies:
       '@types/ms': 0.7.31
     dev: true
@@ -487,7 +487,7 @@ packages:
     resolution: {integrity: sha512-Piet7dG2JBuDIfohBngQ3rCt7MgO9xCO4xIMKxBThCq5PNRB91IjlJ10eJVwfoNtvTErmxLzwBZ7rHZtbOMmFQ==}
     dependencies:
       '@types/estree': 1.0.1
-      '@types/json-schema': 7.0.11
+      '@types/json-schema': 7.0.12
     dev: true
 
   /@types/estree-jsx/1.0.0:
@@ -506,8 +506,8 @@ packages:
       '@types/unist': 2.0.6
     dev: true
 
-  /@types/json-schema/7.0.11:
-    resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
+  /@types/json-schema/7.0.12:
+    resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
     dev: true
 
   /@types/mdast/3.0.11:
@@ -524,8 +524,8 @@ packages:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
     dev: true
 
-  /@types/node/20.2.3:
-    resolution: {integrity: sha512-pg9d0yC4rVNWQzX8U7xb4olIOFuuVL9za3bzMT2pu2SU0SNEi66i2qrvhE2qt0HvkhuCaWJu7pLNOt/Pj8BIrw==}
+  /@types/node/20.2.5:
+    resolution: {integrity: sha512-JJulVEQXmiY9Px5axXHeYGLSjhkZEnD+MDPDGbCbIAbMslkKwmygtZFy1X6s/075Yo94sf8GuSlFfPzysQrWZQ==}
 
   /@types/phoenix/1.5.6:
     resolution: {integrity: sha512-e7jZ6I9uyRGsg7MNwQcarmBvRlbGb9DibbocE9crVnxqsy6C23RMxLWbJ2CQ3vgCW7taoL1L+F02EcjA6ld7XA==}
@@ -542,7 +542,7 @@ packages:
   /@types/websocket/1.0.5:
     resolution: {integrity: sha512-NbsqiNX9CnEfC1Z0Vf4mE1SgAJ07JnRYcNex7AJ9zAVzmiGHmjKFEk7O4TJIsgv2B1sLEb6owKFZrACwdYngsQ==}
     dependencies:
-      '@types/node': 20.2.3
+      '@types/node': 20.2.5
     dev: false
 
   /@typescript-eslint/eslint-plugin/5.59.5_zaj6dsh3leplki3sfxgbx2w2za:
@@ -654,7 +654,7 @@ packages:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0_eslint@8.40.0
-      '@types/json-schema': 7.0.11
+      '@types/json-schema': 7.0.12
       '@types/semver': 7.5.0
       '@typescript-eslint/scope-manager': 5.59.5
       '@typescript-eslint/types': 5.59.5
@@ -812,8 +812,8 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001489
-      electron-to-chromium: 1.4.402
-      node-releases: 2.0.11
+      electron-to-chromium: 1.4.411
+      node-releases: 2.0.12
       update-browserslist-db: 1.0.11_browserslist@4.21.5
     dev: true
 
@@ -1023,8 +1023,8 @@ packages:
       esutils: 2.0.3
     dev: true
 
-  /electron-to-chromium/1.4.402:
-    resolution: {integrity: sha512-gWYvJSkohOiBE6ecVYXkrDgNaUjo47QEKK0kQzmWyhkH+yoYiG44bwuicTGNSIQRG3WDMsWVZJLRnJnLNkbWvA==}
+  /electron-to-chromium/1.4.411:
+    resolution: {integrity: sha512-5VXLW4Qw89vM2WTICHua/y8v7fKGDRVa2VPOtBB9IpLvW316B+xd8yD1wTmLPY2ot/00P/qt87xdolj4aG/Lzg==}
     dev: true
 
   /es-abstract/1.21.2:
@@ -2239,7 +2239,7 @@ packages:
   /micromark/3.1.0:
     resolution: {integrity: sha512-6Mj0yHLdUZjHnOPgr5xfWIMqMWS12zDN6iws9SLuSz76W8jTtAv24MN4/CL7gJrl5vtxGInkkqDv/JIoRsQOvA==}
     dependencies:
-      '@types/debug': 4.1.7
+      '@types/debug': 4.1.8
       debug: 4.3.4
       decode-named-character-reference: 1.0.2
       micromark-core-commonmark: 1.0.6
@@ -2330,8 +2330,8 @@ packages:
     hasBin: true
     dev: false
 
-  /node-releases/2.0.11:
-    resolution: {integrity: sha512-+M0PwXeU80kRohZ3aT4J/OnR+l9/KD2nVLNNoRgFtnf+umQVFdGBAO2N8+nCnEi0xlh/Wk3zOGC+vNNx+uM79Q==}
+  /node-releases/2.0.12:
+    resolution: {integrity: sha512-QzsYKWhXTWx8h1kIvqfnC++o0pEmpRQA/aenALsL2F4pqNVr7YzcdMlDij5WBnwftRbJCNJL/O7zdKaxKPHqgQ==}
     dev: true
 
   /normalize-path/3.0.0:
@@ -2512,7 +2512,7 @@ packages:
     dependencies:
       lilconfig: 2.1.0
       postcss: 8.4.23
-      yaml: 2.2.2
+      yaml: 2.3.1
     dev: true
 
   /postcss-nested/6.0.1_postcss@8.4.23:
@@ -2791,13 +2791,13 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supabase-auth-helpers-qwik/0.0.3_r3gkvssv2zdfxym6k2bu33pzk4:
+  /supabase-auth-helpers-qwik/0.0.3_paqa2vxp4xzsw3jurctqppoxge:
     resolution: {integrity: sha512-qZrg+yj0vq9Lhp3ygop6Ul7LUARBZKzsEuObMvBSWr91rEyxSpoJkH0SyyTX0ou7+Y8aJtt2Vr+ONd7ZeagUnA==}
     peerDependencies:
       '@supabase/supabase-js': ^2.0.4
     dependencies:
-      '@supabase/auth-helpers-shared': 0.3.4_r3gkvssv2zdfxym6k2bu33pzk4
-      '@supabase/supabase-js': 2.22.0
+      '@supabase/auth-helpers-shared': 0.3.4_paqa2vxp4xzsw3jurctqppoxge
+      '@supabase/supabase-js': 2.23.0
     dev: false
 
   /supports-color/7.2.0:
@@ -3096,13 +3096,13 @@ packages:
       debug: 4.3.4
       globrex: 0.1.2
       tsconfck: 2.1.1_typescript@5.0.4
-      vite: 4.3.5_@types+node@20.2.3
+      vite: 4.3.5_@types+node@20.2.5
     transitivePeerDependencies:
       - supports-color
       - typescript
     dev: true
 
-  /vite/4.3.5_@types+node@20.2.3:
+  /vite/4.3.5_@types+node@20.2.5:
     resolution: {integrity: sha512-0gEnL9wiRFxgz40o/i/eTBwm+NEbpUeTWhzKrZDSdKm6nplj+z4lKz8ANDgildxHm47Vg8EUia0aicKbawUVVA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -3127,7 +3127,7 @@ packages:
       terser:
         optional: true
     dependencies:
-      '@types/node': 20.2.3
+      '@types/node': 20.2.5
       esbuild: 0.17.19
       postcss: 8.4.23
       rollup: 3.23.0
@@ -3208,8 +3208,8 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
 
-  /yaml/2.2.2:
-    resolution: {integrity: sha512-CBKFWExMn46Foo4cldiChEzn7S7SRV+wqiluAb6xmueD/fGyRHIhX8m14vVGgeFWjN540nKCNVj6P21eQjgTuA==}
+  /yaml/2.3.1:
+    resolution: {integrity: sha512-2eHWfjaoXgTBC2jNM1LRef62VQa0umtvRiDSk6HSzW7RvS5YtkabJrwYLLEKWBc8a5U2PTSCs+dJjUTJdlHsWQ==}
     engines: {node: '>= 14'}
     dev: true
 

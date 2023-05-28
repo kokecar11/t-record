@@ -5,7 +5,9 @@ export interface NavItemsMenuI {
   route: string;
   icon?: string;
 }
-
+export interface NavMenuI {
+  navs: NavItemsMenuI[]
+}
 export interface MenuDropdownOptios {
     name: string;
     route?: string;
