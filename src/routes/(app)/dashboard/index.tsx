@@ -150,7 +150,7 @@ export default component$(() => {
     })
 
     return (
-        <div class={"flex"}>
+        <div class={"flex h-screen"}>
             <div class="w-full md:w-4/5 px-8 py-4">
 
               <div class="md:hidden">

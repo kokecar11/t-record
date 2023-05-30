@@ -128,7 +128,7 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
 
             <Button class="btn btn-slate text-sm" 
                 onClick$={async () => { 
-                    const t_m = await setMarkerInStream(false, marker.id, marker.start_title)
+                    const t_m = await setMarkerInStream(false, marker.id, marker.end_title)
                     if (t_m.data.error){
                         streamOfStatus.type = 'offline'
                         streamOfStatus.title= 'Stream not live'

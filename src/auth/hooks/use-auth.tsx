@@ -11,12 +11,13 @@ const options: CookieOptions = {
     path: "/",
     sameSite: "strict",
   };
-  
+
+export const LOCAL_STORAGE_NAME = import.meta.env.VITE_LOCAL_STORAGE
 export const useAuth = () => {
     const nav = useNavigate();
 
     const getAuthSession = $(() => {
-        const data = JSON.parse(localStorage.getItem('sb-lsncoytitkdmnhvkbtrg-auth-token')!)
+        const data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME)!)
         return data;
     });
     

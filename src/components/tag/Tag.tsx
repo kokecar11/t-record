@@ -9,12 +9,6 @@ export type TagProps = {
 export type TagSizes = 'xs' | 'sm' | 'md' | 'lg';
 export type TagVariants = 'danger' | 'warning' | 'info' | 'success' | 'primary' | 'secondary';
 
-export const STATUS_MARKER = Object.freeze({
-    RECORDED: 'RECORDED',
-    RECORDING:'RECORDING',
-    UNRECORDED:'UNRECORDED'
-});
-
 
 export const Tag = component$(({text, size, variant}:TagProps) => {
     const {sizes, variants} ={
