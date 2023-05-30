@@ -78,7 +78,7 @@ export default component$(() => {
             <div q:slot='avatar-options'>
             </div>
           </AvatarNavbar>
-        :<Button class={"btn-violet"} onClick$={()=> nav('/login')}>Comenzar</Button>}
+        :<Button class={"btn-violet"} onClick$={()=> nav('/login')}>Get started</Button>}
 
         <button class={"mx-2"} onClick$={handleTheme}>
           <span class="p-2">

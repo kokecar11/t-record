@@ -1,13 +1,12 @@
-import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { type DocumentHead, Form, routeAction$, server$, z, zod$, routeLoader$ } from '@builder.io/qwik-city';
 
-import { useAuth } from '~/auth/hooks/use-auth';
 import { supabase } from '~/core/supabase/supabase';
-import { validateInitMarker } from '~/marker/helper/validators';
+import { useAuth } from '~/auth/hooks/use-auth';
 
 import type { User } from 'supabase-auth-helpers-qwik';
 import type { MarkerStateI } from '~/marker/interfaces/marker';
-import Card from '~/components/card/Card';
+
 import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
 import MiniDashboard from '~/components/mini-dashboard/Mini-dashboard';
@@ -16,9 +15,12 @@ import { FeLoop, FePlus, FeTimeline } from '~/components/icons/icons';
 import { Indicator } from '~/components/mini-dashboard/indicator/Indicator';
 import { Input } from '~/components/input/Input';
 import { useModal } from '~/core/hooks/use-modal';
+import { Marker } from '~/components/marker/Marker';
+import { Toast } from '~/components/toast/Toast';
 
 export const useCheckAuth = routeLoader$(({cookie, redirect}) => {
   const authCookie = cookie.get('_session');
+  //TODO: Check cookies and new session by user
   if (authCookie){
     return;
   }
@@ -32,7 +34,7 @@ export const taskForm = zod$({
   }).nonempty({
     message: "El titulo del marcador de inicio es requerido",
   }),
-  end_title: z.string(),
+  end_title: z.string().optional(),
   stream_date:z.string().nonempty({
     message:"La fecha del stream es requerida"
   }).transform(str => new Date(str)),
@@ -67,6 +69,13 @@ export const getMarkers = server$(
       }
 });
 
+export const deleteMarker = server$(
+  async (idMarker) => {
+    const { data, error } = await supabase.from('MarkerTest')
+    .delete()
+    .eq('id', idMarker)
+});
+
 export const getIndicatorsMarkers = server$(async function() {
   
   const user:User = this.cookie.get('_user')!.json();
@@ -88,45 +97,6 @@ export const getIndicatorsMarkers = server$(async function() {
   return indicators
 });
 
-export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, markerId:number, markerTitle:string) {
-    const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
-    const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
-   
-    const userProviderToken:string | undefined = this.cookie.get('user_provider_token')?.value;
-    const twitchUserId:string | undefined = this.cookie.get('t_user')?.value;
-    
-    const fkUser = this.cookie.get('fk_user')?.value;
-    const headers = {
-        'Authorization':"Bearer " + userProviderToken,
-        'Client-Id': TWITCH_CLIENT_ID
-    };
-  
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${twitchUserId}&description=${markerTitle}`, {
-        method:'POST',
-        headers
-    });
-    
-    const data = await respStream.json();
-    const live = data.status;
-    
-    if (live !== 404){
-      if(isStartMarker){
-        const { data } = await supabase.from('MarkerTest')
-        .update({ status: 'RECORDING' })
-        .eq('fk_user', fkUser)
-        .eq('id', markerId).select()
-        return { data }
-      }else{
-        const { data } = await supabase.from('MarkerTest')
-        .update({ status: 'RECORDED' })
-        .eq('fk_user', fkUser)
-        .eq('id', markerId).select()
-        return { data }
-      }
-    }
-    return {data}
-});
-
 export const getStatusStream = server$( async function(){
   const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
   const urlApiTwitch = 'https://api.twitch.tv/helix/streams';
@@ -145,16 +115,11 @@ export const getStatusStream = server$( async function(){
   }
 
   return [{
+    type: 'offline',
     title:'Stream not live',
-    type: 'offline'
   }];
 });
   
-const STATUS_MARKER = Object.freeze({
-    RECORDED: 'success',
-    RECORDING:'warning',
-    UNRECORDED:'danger'
-}); 
 
 export default component$(() => {
     const markerList = useStore<MarkerStateI>({
@@ -163,10 +128,10 @@ export default component$(() => {
         isLoading: false,
         indicators: []
     })
-
-    const statusOfStream = useStore({
+    const streamOfStatus = useStore({
         type: 'offline',
-        title: 'Stream not live'
+        title: 'Stream not live',
+        isLoading: false,
     });
     const createMarker = useCreateMarker();
     const { getAuthSession } = useAuth();
@@ -175,12 +140,13 @@ export default component$(() => {
     useVisibleTask$(async ({track}) => {
       const auth = await getAuthSession();
       const stream = await getStatusStream()
-      track(()=> [markerList.isLoading])
-      markerList.isLoading = false
+      track(()=> [markerList.isLoading, streamOfStatus.isLoading])
+      markerList.isLoading = false;
+      streamOfStatus.isLoading = false;
       markerList.markers = await getMarkers(auth.user.id);
       markerList.indicators = await getIndicatorsMarkers();
-      statusOfStream.type = stream[0].type
-      statusOfStream.title = stream[0].title
+      streamOfStatus.type = stream[0].type
+      streamOfStatus.title = stream[0].title
     })
 
     return (
@@ -200,58 +166,34 @@ export default component$(() => {
                 </div>
               </div>
 
-              <div class={"mx-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4"}>
+                {
+                  markerList.markers.length > 0 ? (
+                  <div class={"mx-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4"}>
                     {
                       markerList.markers.map((m) => (
-                          <Card key={m.id} streamDate={m.stream_date}>
-                            <div q:slot='card-tag' class="flex-1">
-                              <Tag text={m.status} size='xs' variant={STATUS_MARKER[m.status]} />
-                            </div>
-                            <div q:slot='card-content'>
-                              <div class="mt-4">
-                                <h4 class="flex text-sm font-medium text-slate-900 dark:text-white"><FeTimeline class="text-xl mr-1 text-green-500" />Initial marker:</h4>
-                                <p class="text-slate-900 dark:text-white capitalize ml-1 line-clamp-3">{m.start_title}</p>
-                              </div>
-                
-                              <div class="mt-4">
-                                <h4 class="flex text-sm font-medium text-slate-900 dark:text-white"><FeTimeline class="text-xl mr-1 text-red-500" />Final marker:</h4>
-                                <p class="text-slate-900 dark:text-white capitalize ml-1 line-clamp-3">{m.end_title ? m.end_title : `End -> ${m.start_title}`}</p>
-                              </div>
-                            </div>
-                            <div q:slot='card-actions'>
-                              <Button class="btn btn-violet text-sm" 
-                                onClick$={async () => { 
-                                  const t_m = await setMarkerInStream(true,m.id ,m.start_title)
-                                  if (t_m.data.error){
-                                    statusOfStream.type = 'offline'
-                                    statusOfStream.title= 'Stream not live'
-                                  }
-                                  markerList.isLoading = true
-                                  m.status = t_m.data[0].status
-                                }}
-                              disabled={validateInitMarker(m.status, statusOfStream.type, m.stream_date, true)}
-                                >
-                                  Start
-                              </Button>
-                              <Button class="btn btn-slate text-sm" 
-                                onClick$={async () => { 
-                                  const t_m = await setMarkerInStream(false,m.id ,m.start_title)
-                                  if (t_m.data.error){
-                                    statusOfStream.type = 'offline'
-                                    statusOfStream.title= 'Stream not live'
-                                  }
-                                  markerList.isLoading = true
-                                  m.status = t_m.data[0].status
-                                }}
-                              disabled={validateInitMarker(m.status, statusOfStream.type, m.stream_date, false)}
-                              >Finish</Button>
-                            </div>
-                          </Card>
+                        <Marker key={m.id} marker={m} onDelete={$(() => {
+                          deleteMarker(m.id)
+    
+                          streamOfStatus.isLoading = true;
+                        })} streamOfStatus={streamOfStatus} />
                       ))
-                    } 
-              </div>
+                    }
+
+                  </div>
+                  )
+                  :
+                  (
+                    <div class="grid place-items-center gap-y-2">
+                        <h1 class="text-3xl font-bold text-violet-900 dark:text-white">You don't have any markers for your stream yet, create a marker.</h1>
+                        <Button class="btn-violet flex items-center justify-center" onClick$={showModal}>
+                            <FePlus class="text-xl mr-1" /> Create your first marker
+                        </Button>
+                    </div>
+                  )
+                }
 
             </div>
+              {/* <Toast variant='info' message='Marcador creado en el Stream' title='Excelente!'/> */}
             <MiniDashboard>
                 <div q:slot='dashboard-actions-top'>
                   <Button class="btn-violet flex items-center justify-center mx-auto w-full" onClick$={showModal} >
@@ -265,15 +207,15 @@ export default component$(() => {
                   </div>
                   
                   <div class="grid place-items-center space-y-1">
-                    { statusOfStream.title &&(<span class="text-violet-900 dark:text-white text-sm font-semibold">{statusOfStream.title}</span>)}
-                    {statusOfStream.type && statusOfStream.type === 'live' ? 
+                    { streamOfStatus.title &&(<span class="text-violet-900 dark:text-white text-sm font-semibold">{streamOfStatus.title}</span>)}
+                    {streamOfStatus.type && streamOfStatus.type === 'live' ? 
                       (<Tag text='Live' variant='danger'/>) : 
                       (<Tag text='Offline' variant='secondary'/>) 
                     }
                     <Button class="btn-violet btn-xs flex items-center justify-center mx-auto" onClick$={async () => {
                       const stream = await getStatusStream()
-                      statusOfStream.type = stream[0].type
-                      statusOfStream.title = stream[0].title
+                      streamOfStatus.type = stream[0].type
+                      streamOfStatus.title = stream[0].title
                       }}>
                       <FeLoop class="text-xl" />
                     </Button>
@@ -287,29 +229,29 @@ export default component$(() => {
                     ))} 
                   </div>
                 </div>
-              </MiniDashboard>
-          <Modal isVisible={isVisibleModal.value} onClose={showModal}>
-            <h2 q:slot='modal-title' class="text-violet-900 dark:text-white font-bold text-2xl flex place-items-center">
-              <FeTimeline class="mr-2"/> New markers
-            </h2>
-            <div q:slot="modal-content" class={"mx-5"}>
-              <Form action={createMarker} onSubmitCompleted$={() => {
-                markerList.isLoading = true
-                if (!createMarker.value?.failed) showModal();
-              }}>
-                <Input label='Starting marker title' name='start_title' type='text' placeholder='Starting marker title' value={createMarker.formData?.get('start_title')} />
-                {createMarker.value?.fieldErrors?.start_title && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.start_title}</p>}
-                
-                <Input label='Ending marker title' name='end_title' type='text' placeholder='Ending marker title' value={createMarker.formData?.get('end_title')} />
-                {createMarker.value?.fieldErrors?.end_title && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.end_title}</p>}
-                <Input name='stream_date' label='Stream date' placeholder='Stream date' type='datetime-local' value={createMarker.formData?.get('stream_date')}></Input>
-                {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
-                <div class={"mt-4"}>
-                  <button class={"bg-violet-900 p-3 rounded-lg text-white w-full"} type='submit'>Save</button>
-                </div>
-              </Form>
-            </div>
-          </Modal>
+            </MiniDashboard>
+            <Modal isVisible={isVisibleModal.value} onClose={showModal}>
+              <h2 q:slot='modal-title' class="text-violet-900 dark:text-white font-bold text-2xl flex place-items-center">
+                <FeTimeline class="mr-2"/> New markers
+              </h2>
+              <div q:slot="modal-content" class={"mx-5"}>
+                <Form action={createMarker} onSubmitCompleted$={() => {
+                  markerList.isLoading = true
+                  if (!createMarker.value?.failed) showModal();
+                }}>
+                  <Input label='Starting marker title' name='start_title' type='text' placeholder='Starting marker title' value={createMarker.formData?.get('start_title')} />
+                  {createMarker.value?.fieldErrors?.start_title && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.start_title}</p>}
+                  
+                  <Input label='Ending marker title' name='end_title' type='text' placeholder='Ending marker title' value={createMarker.formData?.get('end_title')} />
+                  {createMarker.value?.fieldErrors?.end_title && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.end_title}</p>}
+                  <Input name='stream_date' label='Stream date' placeholder='Stream date' type='datetime-local' value={createMarker.formData?.get('stream_date')}></Input>
+                  {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
+                  <div class={"mt-4"}>
+                    <button class={"bg-violet-900 p-3 rounded-lg text-white w-full"} type='submit'>Save</button>
+                  </div>
+                </Form>
+              </div>
+            </Modal>
       </div>
     )
 });

@@ -1,9 +1,14 @@
 import { type QwikIntrinsicElements, Slot, component$, useStyles$, $} from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
+
+import { supabase } from "~/core/supabase/supabase";
 import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
+
 import { type MenuDropdownOptios } from "~/core/interfaces/menu";
+
 import { FeCalendar, FeElipsisH } from '../icons/icons';
 import { MenuDropdown } from "../menu-dropdown/Menu-dropdown";
+
 import stylesCard from './Card.css?inline'
 
 export type CardProps = QwikIntrinsicElements['div'] & {
@@ -11,16 +16,22 @@ export type CardProps = QwikIntrinsicElements['div'] & {
     content?: string;
     newItem?: boolean;
     streamDate: string | Date;
+    idMarker ?: number;
 }
 
 
-export default component$(({title, content, streamDate, ...props}: CardProps) => {
+export default component$(({title, content, streamDate, idMarker, ...props}: CardProps) => {
     useStyles$(stylesCard);
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
-    const testActionMenu =  $(()=> alert('Editando el marcador'))
+    const deletMarker =  $( async()=> {
+        const { data } = await supabase.from('MarkerTest')
+        .delete()
+        .eq('id', idMarker)
+        console.log(data)
+    })
     const menuOptions: MenuDropdownOptios[] = [
-        {name: 'Edit marker', action: testActionMenu},
-        {name: 'Delete marker', action: testActionMenu}
+        // {name: 'Edit marker', action: testActionMenu},
+        {name: 'Delete marker', action: deletMarker}
     ]
     const stream = new Date(streamDate).toLocaleString().slice(0,9)
     

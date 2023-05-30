@@ -1,4 +1,4 @@
-import { Slot, component$} from '@builder.io/qwik';
+import { component$ } from '@builder.io/qwik';
 
 export type TagProps = {
     text?: string;

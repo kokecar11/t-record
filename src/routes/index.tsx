@@ -1,20 +1,21 @@
 import { component$ } from '@builder.io/qwik';
-import { type DocumentHead } from '@builder.io/qwik-city';
-import { useAuth } from '~/auth/hooks/use-auth';
+import { type DocumentHead, useNavigate } from '@builder.io/qwik-city';
 import Button from '~/components/button/Button';
 
 
 
 export default component$(() => {
-  // const { deleteAuthCookies } = useAuth();
-  // const d = deleteAuthCookies();
+  // const { getAuthSession } = useAuth();
+  const nav = useNavigate();
   return (
       <div class="grid h-screen place-items-center">
           <h1 class="text-2xl font-bold text-violet-900 dark:text-white">
-            Crea marcadores fácilmente, controla tus clips y potencia tu contenido como nunca antes
-
+            Easily create markers, control your clips, and elevate your content like never before.
           </h1>
-          <Button class="btn-violet" >out</Button>
+          {
+            <Button class={"btn-violet"} onClick$={()=> nav('/dashboard/')}>Go to Dashboard</Button>
+          }
+
       </div>
   );
 });
