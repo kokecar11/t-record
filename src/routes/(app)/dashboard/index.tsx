@@ -1,7 +1,7 @@
 import { $, component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { type DocumentHead, Form, routeAction$, server$, z, zod$, routeLoader$ } from '@builder.io/qwik-city';
 
-import { supabase } from '~/core/supabase/supabase';
+import { type MarkerType, supabase } from '~/core/supabase/supabase';
 import { useAuth } from '~/auth/hooks/use-auth';
 
 import type { User } from 'supabase-auth-helpers-qwik';
@@ -16,7 +16,7 @@ import { Indicator } from '~/components/mini-dashboard/indicator/Indicator';
 import { Input } from '~/components/input/Input';
 import { useModal } from '~/core/hooks/use-modal';
 import { Marker } from '~/components/marker/Marker';
-import { Toast } from '~/components/toast/Toast';
+
 
 export const useCheckAuth = routeLoader$(({cookie, redirect}) => {
   const authCookie = cookie.get('_session');
@@ -65,13 +65,13 @@ export const getMarkers = server$(
       if (error){
         return [];
       }else{
-        return [ ...data ];
+        return [ ...data  ] as MarkerType[];
       }
 });
 
 export const deleteMarker = server$(
   async (idMarker) => {
-    const { data, error } = await supabase.from('MarkerTest')
+    await supabase.from('MarkerTest')
     .delete()
     .eq('id', idMarker)
 });

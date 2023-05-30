@@ -64,12 +64,6 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     return {data}
 });
 
-const STATUS_MARKER = Object.freeze({
-    RECORDED: 'success',
-    RECORDING:'warning',
-    UNRECORDED:'danger'
-}); 
-
 export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProps) => {
     const streamDate = new Date(marker.stream_date).toLocaleString().slice(0,9);
 
@@ -78,12 +72,18 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
         {name: 'Delete marker', action: onDelete}
     ]
 
+    const status: { [key: string]: any } = {
+        RECORDED: 'success',
+        RECORDING: 'warning',
+        UNRECORDED: 'danger'
+    }
+
   return (
     <div class={`max-w-lg bg-slate-500 bg-opacity-30 dark:bg-slate-800 shadow-md rounded-lg overflow-hidden`}>
         <div class="p-4 relative">
             <div class="flex">
                 <div class="flex-1">
-                    <Tag text={marker.status} size='xs' variant={STATUS_MARKER[marker.status]} />
+                    <Tag text={marker.status} size='xs' variant={status[marker.status]} />
                 </div>
                 <p class="flex-none text-xs text-slate-900 text-opacity-90 dark:text-white mr-1 flex items-center align-middle">
                     <FeCalendar class="text-xl mr-1"/> {streamDate}

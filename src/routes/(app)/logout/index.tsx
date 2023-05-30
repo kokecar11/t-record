@@ -1,7 +1,6 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead, RequestEvent } from "@builder.io/qwik-city";
 import { removeAuthCookies } from "~/auth/auth";
-import { supabase } from "~/core/supabase/supabase";
 
 
 
