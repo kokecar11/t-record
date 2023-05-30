@@ -1,12 +1,14 @@
-import { component$, Slot, useContext, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation, useNavigate } from '@builder.io/qwik-city';
 
-import type { NavItemsMenuI } from '~/core/interfaces/menu';
+import { type NavMenuI } from '~/core/interfaces/menu';
+
 import { supabase } from '~/core/supabase/supabase';
 import { GlobalStore } from '~/core/context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
 import { useAuth } from '~/auth/hooks/use-auth';
 import { getColorPreference, useToggleTheme } from '~/toggle-theme/hooks/use-toggle-theme';
+
 import { Navbar } from '~/components/navbar/Navbar';
 import Button from '~/components/button/Button';
 import { Footer } from '~/components/footer/Footer';
@@ -23,23 +25,23 @@ export default component$(() => {
   const state = useContext(GlobalStore);
 
   const { setPreference, handleTheme } = useToggleTheme();
-  const { testSetCookiesServer, getAuthSession } = useAuth();
+  const { updateAuthCookies } = useAuth();
+  const navItems = useStore<NavMenuI>({
+    navs:[]
+  }) ;
+
 
   useVisibleTask$ (async () => {
-    authSession.value = await getAuthSession();
     state.theme = getColorPreference();
     setPreference(state.theme);
     supabase.auth.getSession().then(({ data : { session } }) => {
-        authSession.value = session ?? null;
+      authSession.value = session ?? null;
     });
     const {
       data: { subscription: authListener },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if(event === 'SIGNED_IN'){
-        authSession.value = session ?? null;
-      }else{
-        authSession.value = null;
-      }
+    } = supabase.auth.onAuthStateChange((_, session) => {
+      const currentUser = session;
+      authSession.value = currentUser ?? null;
     });
 
     return () => {
@@ -47,17 +49,15 @@ export default component$(() => {
     };
   });
 
+
   useVisibleTask$(async({track}) => {
     track( () => [state.theme, authSession.value])
+    await updateAuthCookies(authSession.value)
     setPreference(state.theme);
-    await testSetCookiesServer(authSession.value);
   });
 
-  const navItems: NavItemsMenuI[] = [
-    {name:'Pricing', route:'/pricing/'},
-    {name: 'Roadmap', route:'/roadmap/'},
-    {name: 'Markers', route:'/markers/'},
-  ]
+
+
 
   return(     
   <div class="bg-white dark:bg-slate-900">
@@ -67,7 +67,7 @@ export default component$(() => {
       </div>
       <div q:slot='navItemsStart' class={"flex flex-none items-center justify-center"}>
           {
-            navItems.map( (navItem) => 
+            navItems.navs.map( (navItem) => 
             <Link key={navItem.route} href={navItem.route} class={{'nav-link':true, 'active-nav-item': pathname.startsWith(navItem.route)}}>{navItem.name}</Link>
             )
           }
@@ -78,7 +78,7 @@ export default component$(() => {
             <div q:slot='avatar-options'>
             </div>
           </AvatarNavbar>
-        :<Button class={"btn-violet"} onClick$={()=> nav('/login')}>Comenzar</Button>}
+        :<Button class={"btn-violet"} onClick$={()=> nav('/login')}>Get started</Button>}
 
         <button class={"mx-2"} onClick$={handleTheme}>
           <span class="p-2">
