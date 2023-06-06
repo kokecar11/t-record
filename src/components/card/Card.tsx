@@ -23,11 +23,10 @@ export type CardProps = QwikIntrinsicElements['div'] & {
 export default component$(({title, content, streamDate, idMarker, ...props}: CardProps) => {
     useStyles$(stylesCard);
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
-    const deletMarker =  $( async()=> {
-        const { data } = await supabase.from('MarkerTest')
+    const deletMarker =  $( async () => {
+        await supabase.from('MarkerTest')
         .delete()
         .eq('id', idMarker)
-        console.log(data)
     })
     const menuOptions: MenuDropdownOptios[] = [
         // {name: 'Edit marker', action: testActionMenu},

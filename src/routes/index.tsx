@@ -9,7 +9,7 @@ export default component$(() => {
   return (
       <div class="h-screen">
           <div class="grid items-center justify-items-center h-screen mx-10">
-            <div class="shadow-md rounded-lg p-6 mx-2 text-center">
+            <div class="p-6 mx-2 text-center">
               <h1 class="text-6xl text-white">
                 <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-900 to-violet-500">Organize your markers on Twitch.</span>
               </h1>
