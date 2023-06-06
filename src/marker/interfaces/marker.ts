@@ -8,7 +8,7 @@ export interface MarkerI {
     status: string;
     created_at:Date;
     updated_at: Date | null;
-    stream_date: Date | string;
+    stream_date: Date;
 }
   
 export interface MarkerStateI {

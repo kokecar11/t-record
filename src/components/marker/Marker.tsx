@@ -1,8 +1,8 @@
-import {type PropFunction, component$ } from "@builder.io/qwik";
+import {type PropFunction, component$, useStore, useVisibleTask$ } from "@builder.io/qwik";
 import { Link, server$ } from "@builder.io/qwik-city";
 
 import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
-import { validateInitMarker } from "~/marker/helper/validators";
+import { validateMarker } from "~/marker/helper/validators";
 
 import { supabase, type MarkerType } from "~/core/supabase/supabase";
 import { type User } from "supabase-auth-helpers-qwik";
@@ -64,8 +64,17 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     return {data}
 });
 
+interface BtnMarkerI {
+    title: 'Start' | 'Finish'
+    isInit: boolean
+}
+
 export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProps) => {
-    const streamDate = new Date(marker.stream_date).toLocaleString().slice(0,9);
+    const btnMarker = useStore<BtnMarkerI>({
+        title: 'Start',
+        isInit: true
+    })
+    const streamDate = new Date(marker.stream_date).toISOString().slice(0,10)
 
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
     const menuOptions: MenuDropdownOptios[] = [
@@ -77,6 +86,13 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
         RECORDING: 'warning',
         UNRECORDED: 'danger'
     }
+    useVisibleTask$(({track})=>{
+        track(()=>[btnMarker.isInit, btnMarker.title])
+        if (marker.status === 'RECORDING'){ 
+            btnMarker.title = 'Finish';
+            btnMarker.isInit = false;
+        }
+    })
 
   return (
     <div class={`max-w-lg bg-slate-500 bg-opacity-30 dark:bg-slate-800 shadow-md rounded-lg overflow-hidden`}>
@@ -110,39 +126,26 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
         </div>
 
         <div class="flex place-content-center px-4 pb-3">
-            <Button class="btn btn-violet text-sm" 
+            <Button class={`btn text-sm w-full btn-violet`}
                     onClick$={async () => { 
-                        const t_m = await setMarkerInStream(true, marker.id ,marker.start_title)
-                        if (t_m.data.error){
+                        const desc = btnMarker.isInit ? marker.start_title : marker.end_title;
+                        const response = await setMarkerInStream(btnMarker.isInit, marker.id, desc);
+                        if (response.data.error){
                             streamOfStatus.type = 'offline'
                             streamOfStatus.title= 'Stream not live'
                         }
                         streamOfStatus.isLoading = true;
-                        marker.status = t_m.data[0].status;
-
+                        marker.status = response.data[0].status;
+                        if (marker.status === 'RECORDING'){ 
+                            btnMarker.title = 'Finish';
+                            btnMarker.isInit = false;
+                        }
                     }}
-                  disabled={validateInitMarker(marker.status, streamOfStatus.type, marker.stream_date, true)}
+                  disabled={validateMarker(marker.status, streamOfStatus.type, marker.stream_date, btnMarker.isInit)}
                 >
-                    Start
-            </Button>
-
-            <Button class="btn btn-slate text-sm" 
-                onClick$={async () => { 
-                    const t_m = await setMarkerInStream(false, marker.id, marker.end_title)
-                    if (t_m.data.error){
-                        streamOfStatus.type = 'offline'
-                        streamOfStatus.title= 'Stream not live'
-                    }
-                    streamOfStatus.isLoading = true;
-                    marker.status = t_m.data[0].status;
-                }}
-                disabled={validateInitMarker(marker.status, streamOfStatus.type, marker.stream_date, false)}
-                >
-                    Finish
+                    {btnMarker.title}
             </Button>
         </div>
-        
-
     </div>
   );
 });
