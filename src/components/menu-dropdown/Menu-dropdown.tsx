@@ -19,7 +19,7 @@ export const MenuDropdown = component$( ({options, isVisible, onClose}:MenuDropd
     }));
 
     return (
-        <div class={`menu ${isVisible ? 'block':'hidden'}`} id='wrapper-menu-dropdown' onClick$={onClose} >
+        <div class={`menu ${isVisible ? 'block':'hidden'} transition duration-300 ease-in-out`} id='wrapper-menu-dropdown' onClick$={onClose} >
             {options.map(( opt ) => (
                 opt.action ? 
                 <Link class="menu-option" key={opt.name} onClick$={opt.action}>{opt.name}</Link> : 
