@@ -1,8 +1,7 @@
-import { $, component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { type DocumentHead, Form, routeAction$, server$, z, zod$, routeLoader$ } from '@builder.io/qwik-city';
+import { $, component$, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
+import { type DocumentHead, Form, routeAction$, server$, z, zod$ } from '@builder.io/qwik-city';
 
 import { type MarkerType, supabase } from '~/core/supabase/supabase';
-import { useAuth } from '~/auth/hooks/use-auth';
 
 import type { User } from 'supabase-auth-helpers-qwik';
 import type { MarkerStateI } from '~/marker/interfaces/marker';
@@ -17,17 +16,11 @@ import { Input } from '~/components/input/Input';
 import { useModal } from '~/core/hooks/use-modal';
 import { Marker } from '~/components/marker/Marker';
 import { markerStream } from '~/marker/marker';
-import { ProviderI } from '~/core/interfaces/provider';
+import {type ProviderI } from '~/core/interfaces/provider';
+import { AuthSessionContext } from '~/auth/context/auth.context';
+import { useToast } from '~/components/toast/hooks/use-toast';
 
 
-export const useCheckAuth = routeLoader$(({cookie, redirect}) => {
-  const authCookie = cookie.get('_session');
-  //TODO: Check cookies and new session by user
-  if (authCookie){
-    return;
-  }
-  redirect(302,'/login')
-})
 
 export const taskForm = zod$({
   start_title: z.string({
@@ -37,9 +30,6 @@ export const taskForm = zod$({
     message: "El titulo del marcador de inicio es requerido",
   }),
   end_title: z.string().optional(),
-  // stream_date:z.string().nonempty({
-  //   message:"La fecha del stream es requerida"
-  // }),
   stream_date: z.string().nonempty({
     message:"La fecha del stream es requerida"
   }).transform(str => new Date(str))
@@ -61,10 +51,16 @@ export const useCreateMarker = routeAction$(
       fk_user: user.id,
       ...dataForm
     }
-    await supabase.from('MarkerTest').insert(insertData)
+    const { error } = await supabase.from('MarkerTest').insert(insertData)
+    if(error){
+      return {
+        success: false,
+        msg: 'T-Marker could not be saved'
+      }  
+    }
     return {
       success: true,
-      msg: 'Marcador guardado con exito!.'
+      msg: 'T-Marker successfully saved!'
     };
 
 },  taskForm);
@@ -73,10 +69,17 @@ export const useCreateInstantMarker = routeAction$(
   async (dataForm, {cookie}) => {
     const provider:ProviderI = cookie.get('_provider')!.json();
     const user:User =  cookie.get('_user')!.json()
-    await markerStream(provider,user, dataForm.desc_marker);
+    const responseStream = await markerStream(provider,user, dataForm.desc_marker);
+    
+    if(responseStream.status === 404){
+      return {
+        success: false,
+        msg: 'Marker could not be created in the stream.'
+      };
+    }
     return {
       success: true,
-      msg: 'Marcador creado con exito!.'
+      msg: 'Marker successfully created in the stream!'
     };
 
 },  instantMarkerForm);
@@ -152,7 +155,12 @@ export default component$(() => {
         currentPage: 0,
         markers: [],
         isLoading: false,
-        indicators: []
+        indicators: [
+          {title: 'Total',counter: 0},
+          {title: 'Recording',counter: 0},
+          {title: 'Unrecorded',counter: 0},
+          {title: 'Recorded',counter: 0}
+        ]
     })
     const streamOfStatus = useStore({
         type: 'offline',
@@ -161,23 +169,26 @@ export default component$(() => {
     });
     const createMarker = useCreateMarker();
     const createInstantMarker = useCreateInstantMarker();
-    const { getAuthSession } = useAuth();
+    // const { getAuthSession } = useAuth();
     const { isVisibleModal, showModal } = useModal();
+    const {setToast, Toasts} = useToast();
+
+    const authSession = useContext(AuthSessionContext);
 
     useVisibleTask$(async ({track}) => {
-      const auth = await getAuthSession();
+      // const auth = await getAuthSession();
       const stream = await getStatusStream();
       track(()=> [markerList.isLoading, streamOfStatus.isLoading])
       markerList.isLoading = false;
       streamOfStatus.isLoading = false;
-      markerList.markers = await getMarkers(auth.user.id);
+      markerList.markers = await getMarkers(authSession.value?.user.id);
       markerList.indicators = await getIndicatorsMarkers();
       streamOfStatus.type = stream[0].type;
       streamOfStatus.title = stream[0].title;
     })
 
     return (
-        <div class={"flex h-screen"}>
+        <div class={"flex"}>
             <div class="w-full md:w-4/5 px-8 py-4">
 
               <div class="md:hidden">
@@ -199,12 +210,20 @@ export default component$(() => {
                   <h3 class="mx-2 font-bold text-violet-900 dark:text-white">Instant Marker</h3>
                   <hr class="flex-grow border-violet-900"></hr>
                 </div>
-                <Form action={createInstantMarker}>
+                <Form action={createInstantMarker} onSubmitCompleted$={() => {
+                  if (!createInstantMarker.value?.success){
+                    setToast({message:createInstantMarker.value?.msg, variant:'danger'})
+                  }
+                  else{
+                    setToast({message:createInstantMarker.value?.msg, variant:'success'})
+                  }
+                    
+                }}>
                   <Input label='Description of marker' name='desc_marker' type='text' placeholder='Description of marker' value={createInstantMarker.formData?.get('start_title')} />
-                  {createInstantMarker.value?.fieldErrors?.desc_marker && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createInstantMarker.value.fieldErrors?.desc_marker}</p>}
+                  {createInstantMarker.value?.fieldErrors?.desc_marker && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createInstantMarker.value.fieldErrors?.desc_marker}</p>}
                   <div class={"mt-4"}>
                     <Button class="flex items-center justify-center mx-auto w-full" type='submit' >
-                      <FeBolt class="text-xl mr-1" /> Send
+                      <FeBolt class="text-xl mr-1" /> Create
                     </Button>
                   </div>
                 </Form>
@@ -230,17 +249,21 @@ export default component$(() => {
                   )
                   :
                   (
-                    <div class="grid place-items-center gap-y-2">
-                        <h1 class="text-3xl font-bold text-violet-900 dark:text-white">You don't have any markers for your stream yet, create a marker.</h1>
-                        <Button class="btn-violet flex items-center justify-center" onClick$={showModal}>
-                            <FePlus class="text-xl mr-1" /> Create your first marker
+                    <div class="grid items-center justify-items-center h-screen">
+                      <div class="space-y-4"> 
+                        <h1 class="text-3xl font-bold text-violet-900 dark:text-white">
+                          You don't have any T-markers for your stream yet, create a marker.
+                        </h1>
+                        <Button class="btn-violet flex items-center justify-center mx-auto" onClick$={showModal}>
+                            <FePlus class="text-xl mr-1" /> Create your first T-marker
                         </Button>
+                      </div>
                     </div>
                   )
                 }
 
             </div>
-              {/* <Toast variant='info' message='Marcador creado en el Stream' title='Excelente!'/> */}
+            <Toasts></Toasts>
             <MiniDashboard>
                 <div q:slot='dashboard-actions-top' class="space-y-3">
                   <Button class="btn-violet flex items-center justify-center mx-auto w-full" onClick$={showModal} >
@@ -251,12 +274,20 @@ export default component$(() => {
                     <h3 class="mx-2 font-bold text-violet-900 dark:text-white">Instant Marker</h3>
                     <hr class="flex-grow border-violet-900"></hr>
                   </div>
-                  <Form action={createInstantMarker}>
+                  <Form action={createInstantMarker} onSubmitCompleted$={() => {
+                  if (!createInstantMarker.value?.success){
+                    setToast({message:createInstantMarker.value?.msg, variant:'danger'})
+                  }
+                  else{
+                    setToast({message:createInstantMarker.value?.msg, variant:'success'})
+                  }
+                    
+                }}>
                     <Input label='Description of marker' name='desc_marker' type='text' placeholder='Description of marker' value={createInstantMarker.formData?.get('start_title')} />
                     {createInstantMarker.value?.fieldErrors?.desc_marker && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createInstantMarker.value.fieldErrors?.desc_marker}</p>}
                     <div class={"mt-4"}>
                       <Button class="btn-violet flex items-center justify-center mx-auto w-full" type='submit' >
-                        <FeBolt class="text-xl mr-1" /> Send
+                        <FeBolt class="text-xl mr-1" /> Create instant marker
                       </Button>
                     </div>
                   </Form>
@@ -277,6 +308,7 @@ export default component$(() => {
                       const stream = await getStatusStream()
                       streamOfStatus.type = stream[0].type
                       streamOfStatus.title = stream[0].title
+                        setToast({message:'Stream status has been refreshed'})
                       }}>
                       <FeLoop class="text-xl mr-1" /> Refresh status
                     </Button>
@@ -285,8 +317,8 @@ export default component$(() => {
                 </div>
                 <div q:slot='dashboard-indicators'>
                   <div  class={"grid grid-cols-2 gap-4 mb-4"}>
-                    {markerList.indicators.map((indicator) => (
-                      <Indicator key={indicator.title} indicator={indicator}/>
+                    {markerList.indicators.map((indicator, index) => (
+                      <Indicator key={index} indicator={indicator}/>
                     ))} 
                   </div>
                 </div>
@@ -296,17 +328,27 @@ export default component$(() => {
                 <FeTimeline class="mr-2"/> New markers
               </h2>
               <div q:slot="modal-content" class={"mx-5"}>
-                <Form action={createMarker} onSubmitCompleted$={() => {
-                  markerList.isLoading = true
-                  if (!createMarker.value?.failed) showModal();
-                }}>
+                <Form action={createMarker} 
+                onSubmit$={() => {
+                 
+                }} 
+                onSubmitCompleted$={() => {
+                   if (!createMarker.value?.failed){
+                     showModal();
+                     markerList.isLoading = true
+                     setToast({message:createMarker.value?.msg})
+                  } 
+                    
+                }}
+                spaReset
+                >
                   <Input label='Starting marker title' name='start_title' type='text' placeholder='Starting marker title' value={createMarker.formData?.get('start_title')} />
-                  {createMarker.value?.fieldErrors?.start_title && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.start_title}</p>}
+                  {createMarker.value?.fieldErrors?.start_title && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.start_title}</p>}
                   
                   <Input label='Ending marker title' name='end_title' type='text' placeholder='Ending marker title' value={createMarker.formData?.get('end_title')} />
-                  {createMarker.value?.fieldErrors?.end_title && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.end_title}</p>}
+                  {createMarker.value?.fieldErrors?.end_title && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.end_title}</p>}
                   <Input name='stream_date' label='Stream date' placeholder='Stream date' type='date' value={createMarker.formData?.get('stream_date')}></Input>
-                  {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
+                  {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
                   <div class={"mt-4"}>
                     <button class={"bg-violet-900 p-3 rounded-lg text-white w-full"} type='submit'>Save</button>
                   </div>
@@ -322,7 +364,7 @@ export const head: DocumentHead = {
   meta: [
     {
       name: 'description',
-      content: 'Qwik site description',
+      content: 'Dashboard T-Record',
     },
   ],
 };

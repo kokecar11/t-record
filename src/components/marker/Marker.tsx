@@ -104,7 +104,7 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
                 <p class="flex-none text-xs text-slate-900 text-opacity-90 dark:text-white mr-1 flex items-center align-middle">
                     <FeCalendar class="text-xl mr-1"/> {streamDate}
                 </p>
-                <Link class="flex-none rounded-sm hover:bg-slate-500 p-1 cursor-pointer" onClick$={showMenuDropdown}>
+                <Link class="flex-none rounded-sm hover:bg-slate-500 p-1 cursor-pointer transition duration-150 ease-in-out" onClick$={showMenuDropdown}>
                     <FeElipsisH class="text-slate-900 text-xl dark:text-white" />
                 </Link>
 

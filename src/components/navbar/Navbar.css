@@ -10,6 +10,8 @@
 }
   
 .navbar {
-    @apply sticky top-0 z-10 bg-white backdrop-filter backdrop-blur-lg bg-opacity-20 border-b border-violet-900 border-opacity-90
-    dark:bg-slate-900 dark:border-violet-900 dark:border-opacity-90 dark:backdrop-blur-lg dark:bg-opacity-20
+    @apply sticky top-0 z-10 bg-transparent backdrop-filter backdrop-blur-lg border-b border-violet-900 border-opacity-90
+     dark:border-violet-900 dark:border-opacity-90 dark:backdrop-blur-lg 
 }
+
+/* dark:bg-gradient-to-r dark:from-slate-900 dark:to-blue-900 dark:border-violet-900 dark:border-opacity-90 dark:backdrop-blur-lg dark:bg-opacity-20 */
