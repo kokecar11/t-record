@@ -28,7 +28,7 @@ export const useAuth = () => {
     });
     
     const handleSignInWithOAuth = $(async (provider:Provider = 'twitch') => { 
-        const redirectTo = `${path.prevUrl}dashboard/`;
+        const redirectTo = `${path.url.host}/dashboard/`;
         await supabase.auth.signInWithOAuth({
             provider,
             options: {
