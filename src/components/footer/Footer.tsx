@@ -1,11 +1,9 @@
 import { component$ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
 import { MdiGithub, MdiInstagram, MdiTwitter } from '../icons/icons';
-// import { GlobalStore } from '~/core/context';
 
 
 export const Footer = component$( () => {
-    // const state = useContext(GlobalStore);
     return ( 
         <footer class="bg-violet-900 text-center text-white">
             <div class="pt-6">

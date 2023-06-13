@@ -1,5 +1,5 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Link, useLocation } from '@builder.io/qwik-city';
+import { Link, routeLoader$, useLocation } from '@builder.io/qwik-city';
 
 import { type NavMenuI } from '~/core/interfaces/menu';
 
@@ -14,6 +14,14 @@ import { Footer } from '~/components/footer/Footer';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import { IcOutlineDarkMode, IcOutlineLightMode } from '~/components/icons/icons';
 
+export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
+  const providerCookie = cookie.get('_provider');
+  if(!providerCookie){
+    await supabase.auth.signOut();
+    redirect(302, '/');
+  }
+  return;
+})
 
 
 export default component$(() => {
@@ -23,7 +31,7 @@ export default component$(() => {
   const state = useContext(GlobalStore);
 
   const { setPreference, handleTheme } = useToggleTheme();
-  const { updateAuthCookies } = useAuth();
+  const { updateAuthCookies, handleRefreshTokenTwitch } = useAuth();
   const navItems = useStore<NavMenuI>({
     navs:[]
   }) ;
@@ -31,12 +39,18 @@ export default component$(() => {
 
   useVisibleTask$ (async () => {
     state.theme = getColorPreference();
+    setPreference(state.theme);
+    supabase.auth.getSession().then(({ data : { session } }) => {
+      authSession.value = session ?? null;
+    });
+
     const {
       data: { subscription: authListener },
     } = supabase.auth.onAuthStateChange((_, session) => {
       const currentUser = session;
       authSession.value = currentUser ?? null;
     });
+    await handleRefreshTokenTwitch(); 
 
     return () => {
       authListener?.unsubscribe();
@@ -52,7 +66,7 @@ export default component$(() => {
 
 
   return(     
-  <div class="bg-white dark:bg-slate-900">
+  <div class="bg-white dark:bg-slate-900 h-screen">
     <Navbar>
       <div q:slot='navLogo' class={""}>
         <Link href='/' class={"font-bold text-xl text-violet-900 dark:text-white"}>T-Record 🟣</Link>
@@ -78,7 +92,7 @@ export default component$(() => {
         </button>       
       </div>
     </Navbar>
-    <main class={"dark:bg-slate-900 bg-white h-screen"}>
+    <main class={"dark:bg-slate-900 bg-white"}>
       <Slot />
     </main>
     <Footer></Footer>

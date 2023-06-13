@@ -33,8 +33,8 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
           <div class="avatar-navbar">
             <button class="flex items-center text-sm" onClick$={() => isOpenDropdown.value = !isOpenDropdown.value}>
               <img
-                width="40px"
-                height="40px"
+                width="40"
+                height="40"
                 class="w-10 h-10 rounded-full md:mr-3"
                 src={imageSrc}
                 alt={altText}
