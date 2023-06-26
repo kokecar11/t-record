@@ -2,7 +2,6 @@ import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io
 import { useAuth } from '~/auth/hooks/use-auth';
 
 import { MenuDropdown } from '../menu-dropdown/Menu-dropdown';
-import { IcBaselineArrowDropDown } from '../icons/icons';
 
 import stylesAvatarNavbar from './Avatar-navbar.css?inline'
 import { type MenuDropdownOptios } from '~/core/interfaces/menu';
@@ -30,18 +29,18 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     
     return (
         <div class="relative">
-          <div class="avatar-navbar">
-            <button class="flex items-center text-sm" onClick$={() => isOpenDropdown.value = !isOpenDropdown.value}>
-              <img
+          <div class="avatar-navbar-new">
+          <img
+            onClick$={() => isOpenDropdown.value = !isOpenDropdown.value}
                 width="40"
                 height="40"
-                class="w-10 h-10 rounded-full md:mr-3"
+                class="w-10 h-10 rounded-full cursor-pointer"
                 src={imageSrc}
                 alt={altText}
               />
-              <span class="hidden md:inline-block dark:text-white font-semibold text-violet-900">{altText}</span>
-              <IcBaselineArrowDropDown class="text-xl text-violer-900 dark:text-white" />
-            </button>
+            {/* <button class="flex items-center text-sm" onClick$={() => isOpenDropdown.value = !isOpenDropdown.value}>
+
+            </button> */}
           </div>
           <MenuDropdown  onClose={showMenuDropdown} isVisible={isOpenDropdown.value} options={menuOptions}/>
         </div>

@@ -8,10 +8,7 @@ import type { MarkerStateI } from '~/marker/interfaces/marker';
 
 import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
-import MiniDashboard from '~/components/mini-dashboard/Mini-dashboard';
-import { Tag } from '~/components/tag/Tag';
-import { FeBolt, FeLoop, FePlus, FeTimeline } from '~/components/icons/icons';
-import { Indicator } from '~/components/mini-dashboard/indicator/Indicator';
+import { FeCalendar, FePlus } from '~/components/icons/icons';
 import { Input } from '~/components/input/Input';
 import { useModal } from '~/core/hooks/use-modal';
 import { Marker } from '~/components/marker/Marker';
@@ -168,15 +165,13 @@ export default component$(() => {
         isLoading: false,
     });
     const createMarker = useCreateMarker();
-    const createInstantMarker = useCreateInstantMarker();
-    // const { getAuthSession } = useAuth();
+
     const { isVisibleModal, showModal } = useModal();
-    const {setToast, Toasts} = useToast();
+    const { setToast, Toasts } = useToast();
 
     const authSession = useContext(AuthSessionContext);
 
-    useVisibleTask$(async ({track}) => {
-      // const auth = await getAuthSession();
+    useVisibleTask$(async ({track}) => {  
       const stream = await getStatusStream();
       track(()=> [markerList.isLoading, streamOfStatus.isLoading])
       markerList.isLoading = false;
@@ -188,53 +183,25 @@ export default component$(() => {
     })
 
     return (
-        <div class={"flex"}>
-            <div class="w-full md:w-4/5 px-8 py-4">
-
-              <div class="md:hidden">
-                <Button class="btn-violet flex items-center justify-center mx-auto w-full mb-2" onClick$={showModal} >
-                    <FePlus class="text-xl mr-1" /> New T-marker
-                </Button>
-                <div class="flex items-center mb-4">
-                  <hr class="flex-grow border-violet-900"></hr>
-                  <h3 class="mx-2 font-bold text-violet-900 dark:text-white">Markers Indicators</h3>
-                  <hr class="flex-grow border-violet-900"></hr>
-                </div>
-                <div  class={"grid grid-cols-2 gap-2 mb-4 max-w-lg sm:grid-cols-4 sm:gap-2 mx-2"}>
-                  {markerList.indicators.map((indicator) => (
-                    <Indicator key={indicator.title} indicator={indicator}/>
-                  ))} 
-                </div>
-                <div class="flex items-center mb-4">
-                  <hr class="flex-grow border-violet-900"></hr>
-                  <h3 class="mx-2 font-bold text-violet-900 dark:text-white">Instant Marker</h3>
-                  <hr class="flex-grow border-violet-900"></hr>
-                </div>
-                <Form action={createInstantMarker} onSubmitCompleted$={() => {
-                  if (!createInstantMarker.value?.success){
-                    setToast({message:createInstantMarker.value?.msg, variant:'danger'})
-                  }
-                  else{
-                    setToast({message:createInstantMarker.value?.msg, variant:'success'})
-                  }
-                    
-                }}>
-                  <Input label='Description of marker' name='desc_marker' type='text' placeholder='Description of marker' value={createInstantMarker.formData?.get('start_title')} />
-                  {createInstantMarker.value?.fieldErrors?.desc_marker && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createInstantMarker.value.fieldErrors?.desc_marker}</p>}
-                  <div class={"mt-4"}>
-                    <Button class="flex items-center justify-center mx-auto w-full" type='submit' >
-                      <FeBolt class="text-xl mr-1" /> Create
-                    </Button>
-                  </div>
-                </Form>
-                <div class="flex items-center my-4">
-                  <hr class="flex-grow border-violet-900"></hr>
-                </div>
-              </div>
-
+        <div class={"flex mx-2"}>
+            <div class="w-full px-8 py-4">
                 {
                   markerList.markers.length > 0 ? (
-                  <div class={"mx-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4"}>
+                    <>
+                    <div class="flex justify-center space-x-4 sm:justify-end">
+                    <Button class="btn-secondary flex items-center justify-center w-full md:w-auto" onClick$={showModal}>
+                      <FePlus class="mr-1" /> New task
+                    </Button>
+                    {/* <Button class="btn-secondary flex items-center justify-center w-full md:w-auto" onClick$={showModal}>
+                      <FePlus class="mr-1" /> Instant marker
+                    </Button> */}
+                    <Button class="btn-accent flex items-center justify-center w-full md:w-auto">
+                      <FeCalendar class="mr-1" /> Today
+                    </Button>
+                  </div>
+
+                  <div class="grid grid-cols-1 gap-2 my-4 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4">
+
                     {
                       markerList.markers.map((m) => (
                         <Marker key={m.id} marker={m} onDelete={$(() => {
@@ -246,16 +213,17 @@ export default component$(() => {
                     }
 
                   </div>
+                  </>
                   )
                   :
                   (
-                    <div class="grid items-center justify-items-center h-screen">
+                    <div class="flex items-center justify-center h-full">
                       <div class="space-y-4"> 
                         <h1 class="text-3xl font-bold text-violet-900 dark:text-white">
-                          You don't have any T-markers for your stream yet, create a marker.
+                          You don't have any task for your stream yet, create a task.
                         </h1>
-                        <Button class="btn-violet flex items-center justify-center mx-auto" onClick$={showModal}>
-                            <FePlus class="text-xl mr-1" /> Create your first T-marker
+                        <Button class="btn-secondary flex items-center justify-center mx-auto" onClick$={showModal}>
+                            <FePlus class="text-xl mr-1" /> Create your first task
                         </Button>
                       </div>
                     </div>
@@ -264,74 +232,12 @@ export default component$(() => {
 
             </div>
             <Toasts></Toasts>
-            <MiniDashboard>
-                <div q:slot='dashboard-actions-top' class="space-y-3">
-                  <Button class="btn-violet flex items-center justify-center mx-auto w-full" onClick$={showModal} >
-                    <FePlus class="text-xl mr-1" /> New T-marker
-                  </Button>
-                  <div class="flex items-center mt-4 mb-2">
-                    <hr class="flex-grow border-violet-900"></hr>
-                    <h3 class="mx-2 font-bold text-violet-900 dark:text-white">Instant Marker</h3>
-                    <hr class="flex-grow border-violet-900"></hr>
-                  </div>
-                  <Form action={createInstantMarker} onSubmitCompleted$={() => {
-                  if (!createInstantMarker.value?.success){
-                    setToast({message:createInstantMarker.value?.msg, variant:'danger'})
-                  }
-                  else{
-                    setToast({message:createInstantMarker.value?.msg, variant:'success'})
-                  }
-                    
-                }}>
-                    <Input label='Description of marker' name='desc_marker' type='text' placeholder='Description of marker' value={createInstantMarker.formData?.get('start_title')} />
-                    {createInstantMarker.value?.fieldErrors?.desc_marker && <p class={"mt-2 p-2 rounded-sm bg-red-100 text-red-500"}>{createInstantMarker.value.fieldErrors?.desc_marker}</p>}
-                    <div class={"mt-4"}>
-                      <Button class="btn-violet flex items-center justify-center mx-auto w-full" type='submit' >
-                        <FeBolt class="text-xl mr-1" /> Create instant marker
-                      </Button>
-                    </div>
-                  </Form>
-
-                  <div class="flex items-center mt-4 mb-2">
-                    <hr class="flex-grow border-violet-900"></hr>
-                    <h3 class="mx-2 font-bold text-violet-900 dark:text-white">Status Stream</h3>
-                    <hr class="flex-grow border-violet-900"></hr>
-                  </div>
-                  
-                  <div class="grid place-items-center space-y-3">
-                    { streamOfStatus.title &&(<span class="text-violet-900 dark:text-white text-sm font-semibold">{streamOfStatus.title}</span>)}
-                    {streamOfStatus.type && streamOfStatus.type === 'live' ? 
-                      (<Tag text='Live' variant='danger'/>) : 
-                      (<Tag text='Offline' variant='secondary'/>) 
-                    }
-                    <Button class="btn-violet flex items-center justify-center mx-auto w-full" onClick$={async () => {
-                      const stream = await getStatusStream()
-                      streamOfStatus.type = stream[0].type
-                      streamOfStatus.title = stream[0].title
-                        setToast({message:'Stream status has been refreshed'})
-                      }}>
-                      <FeLoop class="text-xl mr-1" /> Refresh status
-                    </Button>
-                  </div>
-                  
-                </div>
-                <div q:slot='dashboard-indicators'>
-                  <div  class={"grid grid-cols-2 gap-4 mb-4"}>
-                    {markerList.indicators.map((indicator, index) => (
-                      <Indicator key={index} indicator={indicator}/>
-                    ))} 
-                  </div>
-                </div>
-            </MiniDashboard>
             <Modal isVisible={isVisibleModal.value} onClose={showModal}>
               <h2 q:slot='modal-title' class="text-violet-900 dark:text-white font-bold text-2xl flex place-items-center">
-                <FeTimeline class="mr-2"/> New markers
+                New task
               </h2>
               <div q:slot="modal-content" class={"mx-5"}>
                 <Form action={createMarker} 
-                onSubmit$={() => {
-                 
-                }} 
                 onSubmitCompleted$={() => {
                    if (!createMarker.value?.failed){
                      showModal();
@@ -349,8 +255,9 @@ export default component$(() => {
                   {createMarker.value?.fieldErrors?.end_title && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.end_title}</p>}
                   <Input name='stream_date' label='Stream date' placeholder='Stream date' type='date' value={createMarker.formData?.get('stream_date')}></Input>
                   {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
-                  <div class={"mt-4"}>
-                    <button class={"bg-violet-900 p-3 rounded-lg text-white w-full"} type='submit'>Save</button>
+                  <div class={"mt-4 flex space-x-3"}>
+                    {/* <Button class="btn-outlined-secondary w-full" onClick$={showModal}>Cancel</Button> */}
+                    <Button class="btn-secondary w-full">Create</Button>
                   </div>
                 </Form>
               </div>

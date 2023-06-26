@@ -1,5 +1,5 @@
 .btn {
-    @apply px-6 py-2.5 font-semibold transition duration-300 ease-in-out focus:bg-opacity-80 rounded-lg hover:bg-opacity-90 text-white
+    @apply px-6 py-1.5 font-semibold transition duration-300 ease-in-out focus:bg-opacity-80 rounded-lg hover:bg-opacity-90 text-white
 }
 .btn-outlined {
     @apply btn bg-transparent border-solid border
@@ -39,4 +39,21 @@ button[type='submit']{
 .btn-outlined-ghost{
     @apply font-semibold mx-2 bg-transparent border border-gray-900 text-gray-900 rounded-lg px-6 py-2 
     hover:bg-opacity-90 transition-all focus:bg-opacity-80
+}
+
+
+.btn-primary{
+    @apply btn bg-primary
+}
+
+.btn-accent{
+    @apply btn bg-accent
+}
+
+.btn-secondary{
+    @apply btn bg-secondary
+}
+
+.btn-outlined-secondary {
+    @apply btn-outlined border-secondary 
 }

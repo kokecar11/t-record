@@ -1,4 +1,4 @@
-import {type PropFunction, component$, useStore, useVisibleTask$ } from "@builder.io/qwik";
+import { type PropFunction, component$, useStore, useVisibleTask$, $ } from '@builder.io/qwik';
 import { Link, server$ } from "@builder.io/qwik-city";
 
 import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
@@ -64,6 +64,33 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     return {data}
 });
 
+export const setNotifyFinishMarkerInStream = server$(async function() {
+    const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
+    const text = 'Probando las notificaciones';
+    const extensionId = 'y86gonk0jk1yyvi8oda72xxzueqohx';
+    const extensionVersion = '0.0.1';
+    const provider:ProviderI = this.cookie.get('_provider')!.json();
+    const user:User = this.cookie.get('_user')!.json();
+    const urlApiTwitch = `https://api.twitch.tv/helix/extensions/chat?broadcaster_id=${user.user_metadata.provider_id}`;
+    
+
+    console.log(`${urlApiTwitch}&extension_id=${extensionId}&extension_version=${extensionVersion}&text=${text}`)
+    const headers = {
+        'Authorization':"Bearer " + provider.provider_token,
+        'Client-Id': TWITCH_CLIENT_ID,
+        'Content-Type': 'application/json' 
+    };
+    console.log(headers)
+  
+    const respStream = await fetch(`${urlApiTwitch}&extension_id=${extensionId}&extension_version=${extensionVersion}&text=${text}`, {
+        method:'POST',
+        headers
+    });
+    
+    const data = await respStream.json();
+    console.log(data)
+})
+
 interface BtnMarkerI {
     title: 'Start' | 'Finish'
     isInit: boolean
@@ -74,11 +101,11 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
         title: 'Start',
         isInit: true
     })
-    const streamDate = new Date(marker.stream_date).toISOString().slice(0,10)
-
+    const streamDate = new Date(marker.stream_date).toISOString().slice(0,10);
+    
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
     const menuOptions: MenuDropdownOptios[] = [
-        {name: 'Delete marker', action: onDelete}
+        {name: 'Delete marker', action: onDelete},
     ]
 
     const status: { [key: string]: any } = {
@@ -144,6 +171,14 @@ export const Marker = component$(({onDelete, marker, streamOfStatus}: MarkerProp
                   disabled={validateMarker(marker.status, streamOfStatus.type, marker.stream_date, btnMarker.isInit)}
                 >
                     {btnMarker.title}
+            </Button>
+
+            <Button class={`btn text-sm w-full btn-violet`}
+                    onClick$={async () => { 
+                        await setNotifyFinishMarkerInStream()
+                    }}
+                >
+                    notify
             </Button>
         </div>
     </div>

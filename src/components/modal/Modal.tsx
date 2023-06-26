@@ -24,8 +24,8 @@ export default component$( ({title, content, isVisible, onClose, ...props}:Modal
     return (
         <div class={`fixed flex modal ${isVisible ? 'block': 'hidden'}`} id='wrapper-modal' {...props}>
              <div class={"w-[600px]"}>
-                <div class={"bg-white dark:bg-slate-900 p-6 rounded-lg relative"}>
-                    <button class={"absolute right-0 origin-top-right mb-10 mr-5 btn-secondary text-violet-900 dark:text-white font-bold text-xl"} onClick$={onClose}> <FeClose/> </button>
+                <div class={"bg-accent p-6 rounded-lg relative"}>
+                    <button class={"absolute right-0 origin-top-right mb-10 mr-5 text-violet-900 dark:text-white font-bold text-xl"} onClick$={onClose}> <FeClose/> </button>
                     {title ? <h1 class={"text-xl text-violet-900 dark:text-white font-bold"}>{title}</h1>:<Slot name="modal-title"/>}
                     {content ? <p>{content}</p>:<Slot name="modal-content"/>}
                 </div>
