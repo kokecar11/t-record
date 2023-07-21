@@ -11,7 +11,7 @@ export const Live = component$(() => {
     track( () => [live.status])
     const stream  = await getStatusStream();
     live.status = stream.status;
-  })
+  });
   return (
     <div class="flex place-items-center space-x-2">
         <span class="text-accent font-semibold dark:text-white capitalize">{live.status}</span> 

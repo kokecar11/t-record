@@ -17,8 +17,8 @@ export const Tag = component$(({text, size, variant}:TagProps) => {
             warning: 'bg-yellow-500',
             success: 'bg-green-500',
             info: 'bg-blue-500',
-            primary: 'bg-violet-500',
-            secondary: 'bg-slate-500',
+            primary: 'bg-primary',
+            secondary: 'bg-secondary',
         },
         sizes:{
             xs: 'text-xs',

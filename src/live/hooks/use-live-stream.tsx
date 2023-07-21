@@ -3,7 +3,6 @@ import { server$ } from "@builder.io/qwik-city";
 import { type User } from "supabase-auth-helpers-qwik";
 import { type StatusLive } from "../context/live.context";
 
-// const PUBLIC_TWITCH_CLIENT_ID = import.meta.env.PUBLIC_TWITCH_CLIENT_ID;
 
 export const useLiveStream = () => {
     const userProviderToken = useSignal('');

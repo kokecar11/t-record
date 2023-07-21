@@ -1,5 +1,5 @@
 .btn {
-    @apply px-6 py-1.5 font-semibold transition duration-300 ease-in-out focus:bg-opacity-80 rounded-lg hover:bg-opacity-90 text-white
+    @apply px-6 py-1.5 font-semibold transition duration-300 ease-in-out focus:bg-opacity-80 rounded-lg hover:bg-opacity-90 text-white cursor-pointer
 }
 .btn-outlined {
     @apply btn bg-transparent border-solid border
@@ -54,6 +54,14 @@ button[type='submit']{
     @apply btn bg-secondary
 }
 
+.btn-live{
+    @apply btn bg-live
+}
+
 .btn-outlined-secondary {
     @apply btn-outlined border-secondary 
+}
+
+.btn-live:disabled , .btn-primary:disabled , .btn-secondary:disabled, .btn-accent:disabled{
+    @apply bg-opacity-30 text-opacity-30 cursor-auto
 }

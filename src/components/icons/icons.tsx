@@ -78,12 +78,6 @@ export function FeElipsisH(props: QwikIntrinsicElements['svg'], key: string) {
 }
 
 
-export function FeLogout(props: QwikIntrinsicElements['svg'], key: string) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feLogout0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feLogout1" fill="currentColor"><path id="feLogout2" d="M3 5c0-1.1.9-2 2-2h8v2H5v14h8v2H5c-1.1 0-2-.9-2-2V5Zm14.176 6L14.64 8.464l1.414-1.414l4.95 4.95l-4.95 4.95l-1.414-1.414L17.176 13H10.59v-2h6.586Z"></path></g></g></svg>
-  )
-}
-
 
 export function FeClock(props: QwikIntrinsicElements['svg'], key: string) {
   return (
@@ -148,43 +142,15 @@ export function FeEdit(props: QwikIntrinsicElements['svg'], key: string) {
 }
 
 
-export function FeTrash(props: QwikIntrinsicElements['svg'], key: string) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feTrash0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feTrash1" fill="currentColor" fillRule="nonzero"><path id="feTrash2" d="M4 5h3V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1h3a1 1 0 0 1 0 2h-1v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4a1 1 0 1 1 0-2Zm3 2v13h10V7H7Zm2-2h6V4H9v1Zm0 4h2v9H9V9Zm4 0h2v9h-2V9Z"></path></g></g></svg>
-  )
-}
-
-
-export function FeLoop(props: QwikIntrinsicElements['svg'], key: string) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feLoop0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feLoop1" fill="currentColor"><path id="feLoop2" d="M6.876 15.124A6.002 6.002 0 0 0 17.658 14h2.09a8.003 8.003 0 0 1-14.316 2.568L3 19v-6h6l-2.124 2.124Zm10.249-6.249A6.004 6.004 0 0 0 6.34 10H4.25a8.005 8.005 0 0 1 14.32-2.57L21 5v6h-6l2.125-2.125Z"></path></g></g></svg>
-  )
-}
-
-
-export function FeCheck(props: QwikIntrinsicElements['svg'], key: string) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feCheck0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feCheck1" fill="currentColor"><path id="feCheck2" d="m6 10l-2 2l6 6L20 8l-2-2l-8 8z"></path></g></g></svg>
-  )
-}
-
-
-export function FeWarning(props: QwikIntrinsicElements['svg'], key: string) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feWarning0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feWarning1" fill="currentColor" fillRule="nonzero"><path id="feWarning2" d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16Zm0 2C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10Zm-1-6h2v2h-2v-2Zm0-10h2v8h-2V6Z"></path></g></g></svg>
-  )
-}
-
-
-export function FeInfo(props: QwikIntrinsicElements['svg'], key: string) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feInfo0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feInfo1" fill="currentColor" fillRule="nonzero"><path id="feInfo2" d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16Zm0 2C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10Zm-1-11v6h2v-6h-2Zm0-4h2v2h-2V7Z"></path></g></g></svg>
-  )
-}
-
-
 export function FeBolt(props: QwikIntrinsicElements['svg'], key: string) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feBolt0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feBolt1" fill="currentColor"><path id="feBolt2" d="M18 2h-8L6 13h4l-2 9l9-13h-4.995z"></path></g></g></svg>
+  )
+}
+
+
+export function FePencil(props: QwikIntrinsicElements['svg'], key: string) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="fePencil0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="fePencil1" fill="currentColor"><path id="fePencil2" d="M3 18L15 6l3 3L6 21H3v-3ZM16 5l2-2l3 3l-2.001 2.001L16 5Z"></path></g></g></svg>
   )
 }

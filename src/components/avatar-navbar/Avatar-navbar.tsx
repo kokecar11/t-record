@@ -6,6 +6,7 @@ import { MenuDropdown } from '../menu-dropdown/Menu-dropdown';
 import stylesAvatarNavbar from './Avatar-navbar.css?inline'
 import { type MenuDropdownOptios } from '~/core/interfaces/menu';
 import { useMenuDropdown } from '~/core/hooks/use-menu-dropdown';
+import { IconCatalog } from '../icon/icon';
 
 export type ToggleAvatarProps = {
     imageSrc?: string;
@@ -20,7 +21,9 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const { handleSignOut }= useAuth();
     const { showMenuDropdown } = useMenuDropdown()
     const menuOptions: MenuDropdownOptios[] = [
-      {name: 'Sign Out', action: handleSignOut},
+      {name: 'Feature Request', icon: IconCatalog.feMagic},
+      {name: 'RoadMap', icon: IconCatalog.feMagic},
+      {name: 'Sign Out', icon:IconCatalog.feLogout, action: handleSignOut},
   ]
     useOnDocument('keyup', $((event)=>{
       const key = event as KeyboardEvent
