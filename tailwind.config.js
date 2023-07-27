@@ -20,5 +20,5 @@ module.exports = {
       border: ['disabled'],
     }
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animated')],
 };

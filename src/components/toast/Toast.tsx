@@ -24,7 +24,7 @@ export const Toast = component$(({message, variant}:ToastProps) => {
     }
   }
   return (
-    <div class="flex fixed ml-4 right-4 items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-white dark:bg-accent z-50 transition-all" role="alert">
+    <div class="flex fixed ml-4 right-4 items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-white dark:bg-accent z-50 animate-fade-left animate-duration-300 animate-delay-75" role="alert">
       <div class={`inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg ${variant ? variants[variant] : variants.success}`}>
         <Icon name={variant ? icons[variant] : icons.success} class="text-lg" />
       </div>

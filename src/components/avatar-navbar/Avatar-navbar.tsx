@@ -21,8 +21,8 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const { handleSignOut }= useAuth();
     const { showMenuDropdown } = useMenuDropdown()
     const menuOptions: MenuDropdownOptios[] = [
-      {name: 'Feature Request', icon: IconCatalog.feMagic},
-      {name: 'RoadMap', icon: IconCatalog.feMagic},
+      {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests'},
+      {name: 'RoadMap', icon: IconCatalog.feSiteMap, route: 'https://t-record.canny.io/'},
       {name: 'Sign Out', icon:IconCatalog.feLogout, action: handleSignOut},
   ]
     useOnDocument('keyup', $((event)=>{
@@ -41,9 +41,6 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
                 src={imageSrc}
                 alt={altText}
               />
-            {/* <button class="flex items-center text-sm" onClick$={() => isOpenDropdown.value = !isOpenDropdown.value}>
-
-            </button> */}
           </div>
           <MenuDropdown  onClose={showMenuDropdown} isVisible={isOpenDropdown.value} options={menuOptions}/>
         </div>

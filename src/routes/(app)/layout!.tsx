@@ -10,10 +10,7 @@ import { useAuth } from '~/auth/hooks/use-auth';
 import { getColorPreference, useToggleTheme } from '~/toggle-theme/hooks/use-toggle-theme';
 
 import { Navbar } from '~/components/navbar/Navbar';
-import { Footer } from '~/components/footer/Footer';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
-import { FePlus, IcOutlineDarkMode, IcOutlineLightMode } from '~/components/icons/icons';
-import Button from '~/components/button/Button';
 import { FooterTag } from '~/components/footer-tag/Footer-tag';
 import { Live } from '~/components/live/Live';
 
@@ -21,11 +18,10 @@ export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
   const providerCookie = cookie.get('_provider');
   if(!providerCookie){
     await supabase.auth.signOut();
-    redirect(302, '/');
+    throw redirect(302, '/');
   }
   return;
-})
-
+});
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
@@ -33,7 +29,7 @@ export default component$(() => {
   const authSession = useContext(AuthSessionContext);
   const state = useContext(GlobalStore);
 
-  const { setPreference, handleTheme } = useToggleTheme();
+  const { setPreference } = useToggleTheme();
   const { updateAuthCookies, handleRefreshTokenTwitch } = useAuth();
   const navItems = useStore<NavMenuI>({
     navs:[]
@@ -69,7 +65,7 @@ export default component$(() => {
 
 
   return(     
-  <div class="bg-white dark:bg-primary h-screen">
+  <div class="bg-back dark:bg-back">
     <Navbar>
       <div q:slot='navLogo'>
         <Link href='/' class={"font-bold text-xl text-accent dark:text-white flex place-items-center space-x-2"}>
@@ -92,27 +88,14 @@ export default component$(() => {
       </div>
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
         <Live />
-        {/* <div class="flex place-items-center space-x-2">
-          <span class="text-white">Live</span> 
-          <div class="rounded-full bg-red-500 animate-pulse w-3 h-3"></div>
-        </div> */}
         {authSession.value !== null && 
           <AvatarNavbar altText={authSession.value?.user.user_metadata.nickname} imageSrc={authSession.value?.user.user_metadata.avatar_url}>
           </AvatarNavbar> }
-
-        <button class={"mx-2"} onClick$={handleTheme}>
-          <span class="p-2">
-            {
-              state.theme === 'light' ? <IcOutlineDarkMode class="text-primary text-2xl" /> : <IcOutlineLightMode class="text-white text-2xl" />
-            }
-          </span>
-        </button>       
       </div>
     </Navbar>
-    <main>
+    <main class="flex items-stretch min-h-screen">
       <Slot />
     </main>
-    {/* <Footer></Footer> */}
     <FooterTag/>
     </div>);
 });

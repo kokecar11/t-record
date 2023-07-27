@@ -16,7 +16,7 @@ export default component$(() => {
    */
   const authSessionSignal = useSignal<Session | null>();
   const siteStore = useStore<SiteStore>({
-    theme: 'auto',
+    theme: 'dark',
   });
   // const liveStreamSignal = useSignal<Live>('offline');
   const liveStreamStore = useStore<Live>({

@@ -1,12 +1,11 @@
 import { type PropFunction, $, component$, useOnDocument, useStyles$ } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
-import type { MenuDropdownOptios } from "~/core/interfaces/menu";
+import type { MenuDropdownOptions } from "~/core/interfaces/menu";
 import styleMenuDropdown from "./Menu-dropdown.css?inline"
 import { Icon } from "../icon/icon";
-// import { FeLogout, FeMagic, FeMoon, FeSunnyO } from "../icons/icons";
 
 export interface MenuDropdownProps {
-    options: MenuDropdownOptios[],
+    options: MenuDropdownOptions[],
     isVisible: boolean,
     onClose: PropFunction<() => boolean >
 }

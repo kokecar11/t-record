@@ -4,9 +4,8 @@ import { Link } from "@builder.io/qwik-city";
 import { supabase } from "~/core/supabase/supabase";
 import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
 
-import { type MenuDropdownOptios } from "~/core/interfaces/menu";
+import { type MenuDropdownOptions } from "~/core/interfaces/menu";
 
-import { FeCalendar, FeElipsisH } from '../icons/icons';
 import { MenuDropdown } from "../menu-dropdown/Menu-dropdown";
 
 import stylesCard from './Card.css?inline'
@@ -28,7 +27,7 @@ export default component$(({title, content, streamDate, idMarker, ...props}: Car
         .delete()
         .eq('id', idMarker)
     })
-    const menuOptions: MenuDropdownOptios[] = [
+    const menuOptions: MenuDropdownOptions[] = [
         // {name: 'Edit marker', action: testActionMenu},
         {name: 'Delete marker', action: deletMarker}
     ]
@@ -39,12 +38,12 @@ export default component$(({title, content, streamDate, idMarker, ...props}: Car
             <div class="p-4 relative">
                 <div class="flex">
                     <Slot name="card-tag" />
-                    <p class="flex-none text-xs text-slate-900 text-opacity-90 dark:text-white mr-1 flex items-center align-middle">
+                    {/* <p class="flex-none text-xs text-slate-900 text-opacity-90 dark:text-white mr-1 flex items-center align-middle">
                         <FeCalendar class="text-xl mr-1"/> {stream}
                     </p>
                     <Link class="flex-none rounded-sm hover:bg-slate-500 p-1 cursor-pointer" onClick$={showMenuDropdown}>
                         <FeElipsisH class="text-slate-900 text-xl dark:text-white" />
-                    </Link>
+                    </Link> */}
                 </div>
                 <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={menuOptions}/>
                 <div class="mt-2">

@@ -59,7 +59,7 @@ button[type='submit']{
 }
 
 .btn-outlined-secondary {
-    @apply btn-outlined border-secondary 
+    @apply btn-outlined border-secondary
 }
 
 .btn-live:disabled , .btn-primary:disabled , .btn-secondary:disabled, .btn-accent:disabled{

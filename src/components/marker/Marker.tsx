@@ -11,6 +11,7 @@ import { Tag } from "../tag/Tag";
 import Button from "../button/Button";
 import { type Live } from '~/live/context/live.context';
 import { Icon, IconCatalog } from '../icon/icon';
+import { MenuDropdown } from '../menu-dropdown/Menu-dropdown';
 
 
 
@@ -40,16 +41,17 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     const data = await respStream.json();
     const live = data.status;
     
+    const position_seconds = data.data[0].position_seconds;
     if (live !== 404){
       if(isStartMarker){
-        const { data } = await supabase.from('MarkerTest')
-        .update({ status: 'RECORDING' })
+        const { data } = await supabase.from('task')
+        .update({ status: 'RECORDING', starts_at: position_seconds })
         .eq('fk_user', user.id)
         .eq('id', markerId).select()
         return { data }
       }else{
-        const { data } = await supabase.from('MarkerTest')
-        .update({ status: 'RECORDED' })
+        const { data } = await supabase.from('task')
+        .update({ status: 'RECORDED', ends_at: position_seconds })
         .eq('fk_user', user.id)
         .eq('id', markerId).select()
         return { data }
@@ -70,7 +72,11 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
         isInit: true
     })
     const streamDate = new Date(marker.stream_date).toISOString().slice(0,10);
-    
+
+    const toTimeString = (totalSeconds:number) => {
+        const totalMs = totalSeconds * 1000;
+        return new Date(totalMs).toISOString().slice(11, 19);
+    }
 
     const status: { [key: string]: any } = {
         RECORDED: 'success',
@@ -89,9 +95,9 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
     <div class={`max-w-2xl bg-white bg-opacity-20 dark:bg-accent shadow-lg rounded-lg overflow-hidden`}>
         <div class="p-4 relative">
             <div class="flex mb-2">
-                <div class="flex-1 space-x-1">
+                <div class="flex-1 space-x-2">
                     <Tag text={marker.status} size='xs' variant={status[marker.status]} />
-                    <Tag text={streamDate} size='xs' variant='primary'/>
+                    <Tag text={streamDate} size='xs' variant='secondary'/>
                 </div>
                 
                 {/* <Link class="flex-none rounded-sm hover:bg-slate-500 p-1 cursor-pointer transition duration-150 ease-in-out" onClick$={showMenuDropdown}>
@@ -100,22 +106,19 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
                 <Link class="flex-none rounded-lg hover:bg-primary p-1 cursor-pointer transition duration-150 ease-in-out" onClick$={onDelete}>
                     <Icon name={IconCatalog.feTrash} class="text-accent text-xl dark:text-white" />
                 </Link>
-
             </div>
             {/* <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={menuOptions}/> */}
             
-            <h2 class="text-accent dark:text-white capitalize font-bold text-lg">{marker.start_title}</h2>
+            <h2 class="text-accent dark:text-white capitalize font-bold text-lg">{marker.title}</h2>
 
             
             <div class="my-2 text-accent text-sm dark:text-white dark:text-opacity-90">
                 <div class="mt-4">
-                    <span class="flex text-sm text-accent dark:text-white dark:text-opacity-70">Starts at 00:00</span>
-                    {/* <p class="text-accent dark:text-white capitalize ml-1 line-clamp-3">{marker.start_title}</p> */}
+                    <span class="flex text-sm text-accent dark:text-white dark:text-opacity-70">{`Starts at ${toTimeString(marker.starts_at)}`}</span>
                 </div>
 
                 <div class="mt-4">
-                    <h4 class="flex text-sm text-accent dark:text-white dark:text-opacity-70">Ends at 00:00</h4>
-                    {/* <p class="text-accent dark:text-white capitalize ml-1 line-clamp-3">{marker.end_title ? marker.end_title : `End -> ${marker.start_title}`}</p> */}
+                    <span class="flex text-sm text-accent dark:text-white dark:text-opacity-70">{`Ends at ${toTimeString(marker.ends_at)}`}</span>
                 </div>                            
             </div>
             
@@ -124,7 +127,7 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
         <div class="flex place-content-center px-4 pb-3">
             <Button class={`w-full text-sm ${btnMarker.isInit ? 'btn-primary': 'btn-live'}`}
                     onClick$={async () => { 
-                        const desc = marker.start_title;
+                        const desc = marker.title;
                         const response = await setMarkerInStream(btnMarker.isInit, marker.id, desc);
                         if (response.data.error){
                             live.status = 'offline'
