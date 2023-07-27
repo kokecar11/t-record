@@ -4,7 +4,7 @@ import { useAuth } from '~/auth/hooks/use-auth';
 import { MenuDropdown } from '../menu-dropdown/Menu-dropdown';
 
 import stylesAvatarNavbar from './Avatar-navbar.css?inline'
-import { type MenuDropdownOptios } from '~/core/interfaces/menu';
+import { type MenuDropdownOptions } from '~/core/interfaces/menu';
 import { useMenuDropdown } from '~/core/hooks/use-menu-dropdown';
 import { IconCatalog } from '../icon/icon';
 
@@ -20,7 +20,7 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const onCloseDropdown = $( () => !isOpenDropdown.value)
     const { handleSignOut }= useAuth();
     const { showMenuDropdown } = useMenuDropdown()
-    const menuOptions: MenuDropdownOptios[] = [
+    const menuOptions: MenuDropdownOptions[] = [
       {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests'},
       {name: 'RoadMap', icon: IconCatalog.feSiteMap, route: 'https://t-record.canny.io/'},
       {name: 'Sign Out', icon:IconCatalog.feLogout, action: handleSignOut},
