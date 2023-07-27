@@ -1,5 +1,5 @@
 import { type QwikIntrinsicElements, Slot, component$, useStyles$, $} from "@builder.io/qwik";
-import { Link } from "@builder.io/qwik-city";
+// import { Link } from "@builder.io/qwik-city";
 
 import { supabase } from "~/core/supabase/supabase";
 import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
@@ -19,7 +19,7 @@ export type CardProps = QwikIntrinsicElements['div'] & {
 }
 
 
-export default component$(({title, content, streamDate, idMarker, ...props}: CardProps) => {
+export default component$(({title, content, idMarker, ...props}: CardProps) => {
     useStyles$(stylesCard);
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
     const deletMarker =  $( async () => {
@@ -31,7 +31,7 @@ export default component$(({title, content, streamDate, idMarker, ...props}: Car
         // {name: 'Edit marker', action: testActionMenu},
         {name: 'Delete marker', action: deletMarker}
     ]
-    const stream = new Date(streamDate).toLocaleString().slice(0,9)
+    // const stream = new Date(streamDate).toLocaleString().slice(0,9)
     
     return(
         <div class={`max-w-lg bg-slate-500 bg-opacity-30 dark:bg-slate-800 shadow-md rounded-lg overflow-hidden`}{...props}>
