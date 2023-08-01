@@ -43,7 +43,7 @@ export default component$(() => {
           <Collapse title='Streamlined Content Creation' description="Spend less time editing and post-processing your streams with T-Record's ability to mark and save highlights during your live broadcasts, streamlining your content creation process."/>
           <Collapse title='Download and Share' description="Once you've finished your stream, you can easily download the video with all the created markers. You can also share the links to these markers with your followers, so they can relive the most thrilling moments of your streams."/>
         </div>
-        <div class="pt-8 flex items-center animate-fade-left w-full md:w-3/5">
+        <div class="flex items-center animate-fade-left w-full md:w-3/5">
           <video class="rounded-lg border border-secondary border-opacity-30" autoPlay loop src='https://res.cloudinary.com/dlcx4lubg/video/upload/f_auto:video,q_auto/s8uqnjezzoudl3b3euss'></video>
         </div>
       </div>  
