@@ -28,12 +28,12 @@ export const useAuth = () => {
     });
     
     const handleSignInWithOAuth = $(async (provider:Provider = 'twitch') => { 
-        const redirectTo = `${path.url.host}/dashboard/`;
+        const redirectTo = `${path.url.href}dashboard/`;
         await supabase.auth.signInWithOAuth({
             provider,
             options: {
                 scopes:'channel:manage:broadcast user:read:broadcast channel_read',
-                redirectTo:redirectTo
+                redirectTo
             }
         });
     });
@@ -60,9 +60,10 @@ export const useAuth = () => {
                     'provider_refresh_token':session.provider_refresh_token ? session.provider_refresh_token : null,
                 }
                 this.cookie.set(cookieProvider, providerCookie, options);    
-    
             }
-        }
+        }else{
+            await supabase.auth.signOut();
+        }        
 
     });
 

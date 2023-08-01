@@ -4,6 +4,7 @@ import { RouterHead } from './components/router-head/router-head';
 import type { Session } from 'supabase-auth-helpers-qwik';
 import { AuthSessionContext } from './auth/context/auth.context';
 import { GlobalStore, type SiteStore } from './core/context';
+import { type Live, LiveStreamContext } from './live/context/live.context';
 import './global.css';
 
 export default component$(() => {
@@ -15,12 +16,17 @@ export default component$(() => {
    */
   const authSessionSignal = useSignal<Session | null>();
   const siteStore = useStore<SiteStore>({
-    theme: 'auto',
+    theme: 'dark',
   });
+  // const liveStreamSignal = useSignal<Live>('offline');
+  const liveStreamStore = useStore<Live>({
+    status: 'offline'
+  })
   
-  useContextProvider(AuthSessionContext, authSessionSignal)
-
+  useContextProvider(AuthSessionContext, authSessionSignal);
   useContextProvider(GlobalStore, siteStore);
+  useContextProvider(LiveStreamContext, liveStreamStore);
+
   return (
     <QwikCityProvider>
       <head>

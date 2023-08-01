@@ -10,3 +10,8 @@
     dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10
     hover:border-b-2 hover:border-violet-900 dark:hover:border-b-2 dark:hover:border-white
 }
+
+
+.avatar-navbar-new{
+    @apply relative border-2 border-transparent hover:border-2 hover:border-violet-900 rounded-full ease-in-out transition-all delay-100
+}
