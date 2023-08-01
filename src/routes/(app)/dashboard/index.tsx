@@ -7,9 +7,10 @@ import { type MarkerType, supabase } from '~/core/supabase/supabase';
 import type { MarkerStateI } from '~/marker/interfaces/marker';
 import {type ProviderI } from '~/core/interfaces/provider';
 
-import { useModal } from '~/core/hooks/use-modal';
+import { useModal } from '~/components/modal/hooks/use-modal';
 import { useToast } from '~/components/toast/hooks/use-toast';
 import { useLiveStream } from '~/live/hooks/use-live-stream';
+import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown';
 
 import { LiveStreamContext } from '~/live/context/live.context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
@@ -21,7 +22,6 @@ import { Marker } from '~/components/marker/Marker';
 import { markerStream } from '~/marker/marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
 import { MenuDropdown } from '~/components/menu-dropdown/Menu-dropdown';
-import { useMenuDropdown } from '~/core/hooks/use-menu-dropdown';
 
 
 
@@ -133,7 +133,7 @@ export default component$(() => {
     const createMarker = useCreateMarker();
 
     const { getStatusStream } = useLiveStream();
-    const { isVisibleModal, showModal } = useModal();
+    const { isVisibleModal ,showModal } = useModal();
     const { setToast, Toasts } = useToast();
 
     const authSession = useContext(AuthSessionContext);
@@ -175,26 +175,27 @@ export default component$(() => {
                   <>
                     <div class="gap-y-4 sm:flex sm:space-x-4">
                       <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
-                        <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg">
+                        {/* <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg">
                           <Icon name={IconCatalog.feCalendar} class="mr-1" /> Today
-                        </Button>
+                        </Button> */}
                         <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showModal}>
                           <Icon name={IconCatalog.fePlus} class="mr-1" /> New task
                         </Button>
-                        
-                      </div>
-                      <div class="flex-none space-x-4 mt-4 sm:m-0">
-                        {/* <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showMenuDropdown}>
-                          <Icon name={IconCatalog.feArrowDown} class="mr-1" /> Order by
-                        </Button> */}
-                        <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
+                        <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
                           const stream = await getStatusStream()
                           live.status = stream.status;
-                            setToast({message:'Stream status has been refreshed'})
+                            setToast({message:'Live status has been refreshed.'})
                           }}>
-                          <Icon class="mr-1" name={IconCatalog.feLoop} /> Refresh
+                          <Icon class="mr-1" name={IconCatalog.feLoop} /> Refresh Live
                         </Button>
+                        
                       </div>
+                      {/* <div class="flex-none space-x-4 mt-4 sm:m-0">
+                        <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showMenuDropdown}>
+                          <Icon name={IconCatalog.feArrowDown} class="mr-1" /> Order by
+                        </Button>
+
+                      </div> */}
                     </div>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderOptions}/>
 

@@ -1,5 +1,5 @@
 import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
-import { type DocumentHead, routeLoader$ } from '@builder.io/qwik-city';
+import { type DocumentHead, routeLoader$, useNavigate } from '@builder.io/qwik-city';
 import { AuthSessionContext } from '~/auth/context/auth.context';
 import { useAuth } from '~/auth/hooks/use-auth';
 import { Collapse } from '~/components/collapse/Collapse';
@@ -15,22 +15,27 @@ export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
 
 export default component$(() => {
   const authSession = useContext(AuthSessionContext);
+  const nav = useNavigate();
 
   const { updateAuthCookies } = useAuth();
 
-  useVisibleTask$ (async () => {
+  useVisibleTask$ (async ({track}) => {
     supabase.auth.getSession().then(({ data : { session } }) => {
       authSession.value = session ?? null;
-    });
-    await updateAuthCookies(authSession.value)
+  });
+
+    await updateAuthCookies(authSession.value);
+    track(() => authSession.value)
+    //TODO: Provisional redirect
+    setTimeout(() => nav('/dashboard/') , 100)
   });
 
   return (
-    <div class="grid mx-10">
-      <h1 class="lg:mx-40 text-7xl font-bold mt-6 text-center p-4 animate-fade-down ">
+    <div class="flex flex-col m-10">
+      <h1 class="text-5xl lg:mx-40 md:text-7xl font-bold text-center p-4 animate-fade-down ">
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-secondary">Discover the power of organization on Twitch</span> 
       </h1>
-      <p class="text-lg lg:mx-80 lg:text-2xl font-light text-accent dark:text-white my-6 text-center animate-fade-down">We optimize your markers and turn them into chapters, allowing you to explore your most exciting moments with ease and speed.</p>
+      <p class="text-lg lg:mx-80 lg:text-lg font-light text-accent dark:text-white my-6 text-center animate-fade-down">We optimize your markers and turn them into chapters, allowing you to explore your most exciting moments with ease and speed.</p>
       <div class="grid md:flex mb-10 gap-8">
         <div class=" pt-8 space-y-4 animate-fade-right w-full md:w-2/5">
           <Collapse title='Organize Your Content' description='The web application offers an intuitive TODO-style interface that allows you to organize your markers and give them descriptive titles. This way, you can quickly access specific moments from your broadcasts.' isOpen />

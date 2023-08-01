@@ -1,5 +1,5 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Link, routeLoader$, useLocation } from '@builder.io/qwik-city';
+import { Link, routeLoader$, useLocation, useNavigate } from '@builder.io/qwik-city';
 
 import { type NavMenuI } from '~/core/interfaces/menu';
 
@@ -13,6 +13,8 @@ import { Navbar } from '~/components/navbar/Navbar';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import { FooterTag } from '~/components/footer-tag/Footer-tag';
 import { Live } from '~/components/live/Live';
+import Button from '~/components/button/Button';
+import { Icon, IconCatalog } from '~/components/icon/icon';
 
 export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
   const providerCookie = cookie.get('_provider');
@@ -25,6 +27,7 @@ export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
+  const nav = useNavigate()
 
   const authSession = useContext(AuthSessionContext);
   const state = useContext(GlobalStore);
@@ -87,6 +90,7 @@ export default component$(() => {
           }
       </div>
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
+        <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button>
         <Live />
         {authSession.value !== null && 
           <AvatarNavbar altText={authSession.value?.user.user_metadata.nickname} imageSrc={authSession.value?.user.user_metadata.avatar_url}>

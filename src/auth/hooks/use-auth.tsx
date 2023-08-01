@@ -32,7 +32,7 @@ export const useAuth = () => {
         await supabase.auth.signInWithOAuth({
             provider,
             options: {
-                scopes:'channel:manage:broadcast user:read:broadcast channel_read channel:manage:extensions',
+                scopes:'channel:manage:broadcast user:read:broadcast channel_read',
                 redirectTo
             }
         });

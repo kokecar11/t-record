@@ -1,5 +1,5 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Link, useLocation, useNavigate } from '@builder.io/qwik-city';
+import { Link, useLocation } from '@builder.io/qwik-city';
 
 import { type NavMenuI } from '~/core/interfaces/menu';
 
@@ -17,8 +17,6 @@ import Button from '~/components/button/Button';
 
 
 export default component$(() => {
-  const nav = useNavigate();
-
   const pathname = useLocation().url.pathname;
 
   const authSession = useContext(AuthSessionContext);
@@ -28,7 +26,7 @@ export default component$(() => {
   const { updateAuthCookies, handleSignInWithOAuth, handleRefreshTokenTwitch } = useAuth();
   const navItems = useStore<NavMenuI>({
     navs:[
-      {name:'Pricing', route:'pricing'},
+      {name:'Pricing', route:'/pricing'},
     ]
   }) ;
 
@@ -73,13 +71,13 @@ export default component$(() => {
       </div>
       <div q:slot='navItemsStart' class={"flex flex-none items-center justify-center"}>
           {
-            navItems.navs.map( (navItem) => 
+            navItems.navs.map((navItem) => 
             <Link key={navItem.route} href={navItem.route} class={{'nav-link':true, 'active-nav-item': pathname.startsWith(navItem.route)}}>{navItem.name}</Link>
             )
           }
       </div>
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-2"}>            
-        { authSession.value && <Button class={"btn-outlined-secondary"} onClick$={()=> nav('/dashboard/')}>Go to Dashboard</Button> }
+
         {
           authSession.value !== null ? 
           <AvatarNavbar 
