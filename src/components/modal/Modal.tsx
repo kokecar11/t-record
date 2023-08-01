@@ -1,6 +1,7 @@
-import { type PropFunction,type QwikIntrinsicElements, $, Slot, component$, useStyles$, useOnDocument } from '@builder.io/qwik';
-import styles from "./Modal.css?inline";
+import { type QwikIntrinsicElements, type PropFunction, $, Slot, component$, useStyles$, useOnDocument } from '@builder.io/qwik';
+import { Link } from '@builder.io/qwik-city';
 import { Icon, IconCatalog } from '../icon/icon';
+import styles from "./Modal.css?inline";
 
 export type ModalProps = QwikIntrinsicElements['div'] & {
     title?:string;
@@ -22,11 +23,11 @@ export default component$( ({title, content, isVisible, onClose, ...props}:Modal
     }));
 
     return (
-        <div class={`fixed flex modal ${isVisible ? 'block': 'hidden'} animate-fade animate-duration-300` } id='wrapper-modal' {...props}>
+        <div class={`fixed flex modal ${isVisible ? 'block': 'hidden'} animate-fade animate-duration-150` } id='wrapper-modal' {...props}>
              <div class={"w-[600px]"}>
                 <div class={"bg-accent p-6 rounded-lg relative"}>
-                    <button class={"absolute right-0 origin-top-right mb-10 mr-5 text-violet-900 dark:text-white font-bold text-xl"} onClick$={onClose}> <Icon name={IconCatalog.feClose} /> </button>
-                    {title ? <h1 class={"text-xl text-violet-900 dark:text-white font-bold"}>{title}</h1>:<Slot name="modal-title"/>}
+                    <Link class={"absolute right-0 origin-top-right mb-10 mr-5 text-secondary dark:text-white font-bold text-xl cursor-pointer"} onClick$={onClose}> <Icon name={IconCatalog.feClose} /> </Link>
+                    {title ? <h1 class={"text-xl text-secondary dark:text-white font-bold"}>{title}</h1>:<Slot name="modal-title"/>}
                     {content ? <p>{content}</p>:<Slot name="modal-content"/>}
                 </div>
             </div>
