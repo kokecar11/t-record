@@ -2,13 +2,12 @@ import { type QwikIntrinsicElements, Slot, component$, useStyles$, $} from "@bui
 // import { Link } from "@builder.io/qwik-city";
 
 import { supabase } from "~/core/supabase/supabase";
-import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
 
-import { type MenuDropdownOptions } from "~/core/interfaces/menu";
 
-import { MenuDropdown } from "../menu-dropdown/Menu-dropdown";
+import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown';
 
 import stylesCard from './Card.css?inline'
+import { useMenuDropdown } from "../menu-dropdown/hooks/use-menu-dropdown";
 
 export type CardProps = QwikIntrinsicElements['div'] & {
     title?:string;
