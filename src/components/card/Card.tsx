@@ -1,15 +1,13 @@
 import { type QwikIntrinsicElements, Slot, component$, useStyles$, $} from "@builder.io/qwik";
-import { Link } from "@builder.io/qwik-city";
+// import { Link } from "@builder.io/qwik-city";
 
 import { supabase } from "~/core/supabase/supabase";
-import { useMenuDropdown } from "~/core/hooks/use-menu-dropdown";
 
-import { type MenuDropdownOptios } from "~/core/interfaces/menu";
 
-import { FeCalendar, FeElipsisH } from '../icons/icons';
-import { MenuDropdown } from "../menu-dropdown/Menu-dropdown";
+import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown';
 
 import stylesCard from './Card.css?inline'
+import { useMenuDropdown } from "../menu-dropdown/hooks/use-menu-dropdown";
 
 export type CardProps = QwikIntrinsicElements['div'] & {
     title?:string;
@@ -20,7 +18,7 @@ export type CardProps = QwikIntrinsicElements['div'] & {
 }
 
 
-export default component$(({title, content, streamDate, idMarker, ...props}: CardProps) => {
+export default component$(({title, content, idMarker, ...props}: CardProps) => {
     useStyles$(stylesCard);
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
     const deletMarker =  $( async () => {
@@ -28,23 +26,23 @@ export default component$(({title, content, streamDate, idMarker, ...props}: Car
         .delete()
         .eq('id', idMarker)
     })
-    const menuOptions: MenuDropdownOptios[] = [
+    const menuOptions: MenuDropdownOptions[] = [
         // {name: 'Edit marker', action: testActionMenu},
         {name: 'Delete marker', action: deletMarker}
     ]
-    const stream = new Date(streamDate).toLocaleString().slice(0,9)
+    // const stream = new Date(streamDate).toLocaleString().slice(0,9)
     
     return(
         <div class={`max-w-lg bg-slate-500 bg-opacity-30 dark:bg-slate-800 shadow-md rounded-lg overflow-hidden`}{...props}>
             <div class="p-4 relative">
                 <div class="flex">
                     <Slot name="card-tag" />
-                    <p class="flex-none text-xs text-slate-900 text-opacity-90 dark:text-white mr-1 flex items-center align-middle">
+                    {/* <p class="flex-none text-xs text-slate-900 text-opacity-90 dark:text-white mr-1 flex items-center align-middle">
                         <FeCalendar class="text-xl mr-1"/> {stream}
                     </p>
                     <Link class="flex-none rounded-sm hover:bg-slate-500 p-1 cursor-pointer" onClick$={showMenuDropdown}>
                         <FeElipsisH class="text-slate-900 text-xl dark:text-white" />
-                    </Link>
+                    </Link> */}
                 </div>
                 <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={menuOptions}/>
                 <div class="mt-2">

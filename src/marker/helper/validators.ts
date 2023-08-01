@@ -1,4 +1,6 @@
-export const validateMarker = (status:string, streamStatus:string, streamDate:Date, isInit:boolean) => {
+import type { Live } from "~/live/context/live.context";
+
+export const validateMarker = (status:string, live:Live, streamDate:Date, isInit:boolean) => {
     const stream = new Date(streamDate).toISOString();
     const now = new Date(Date.now()).toISOString();
 
@@ -10,14 +12,14 @@ export const validateMarker = (status:string, streamStatus:string, streamDate:Da
         return true;
     }
 
-    if (status === 'RECORDING' || status === 'RECORDED' || streamStatus === 'offline' ){
+    if (status === 'RECORDING' || status === 'RECORDED' || live.status === 'offline' ){
         if (isInit) return true;
     }
 
-    if (status === 'UNRECORDED' && streamStatus === 'live' ){
+    if (status === 'UNRECORDED' && live.status === 'live' ){
         return false;
     }
 
-    if (streamStatus === 'offline') return true;
+    if (live.status === 'offline') return true;
 }
 

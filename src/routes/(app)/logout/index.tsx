@@ -4,5 +4,5 @@ import { removeAuthCookies } from "~/auth/auth";
 
 export const onGet = async (event: RequestEvent) => {
   removeAuthCookies(event);
-  throw event.redirect(302, '/login/');
+  throw event.redirect(302, '/');
 };
