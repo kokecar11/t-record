@@ -26,6 +26,21 @@ export interface Database {
         Update: {
 
         }
+      },
+      plan: {
+        Row: {
+          id: string;
+          fk_user: string;
+          active: boolean;
+          type: string;
+          created_at:Date;
+        }
+        Insert: {
+
+        }
+        Update: {
+
+        }
       }
     }
   }
@@ -36,3 +51,4 @@ export const supabase = createClient<Database>(
     SUPABASE_ANON_KEY
 );
 export type MarkerType = Database['public']['Tables']['task']['Row'];
+export type PlanType = Database['public']['Tables']['plan']['Row'];

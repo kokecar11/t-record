@@ -1,5 +1,5 @@
 .nav-link {
-    @apply text-secondary p-5 font-semibold transition duration-300 ease-in-out
+    @apply text-white p-5 font-semibold transition duration-300 ease-in-out
     hover:bg-secondary hover:bg-opacity-10 hover:border-secondary hover:border-b
     dark:hover:bg-white dark:hover:bg-opacity-10 dark:hover:border-white dark:hover:border-b dark:text-white
 }

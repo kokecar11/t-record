@@ -1,12 +1,14 @@
 import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik';
-import { useAuth } from '~/auth/hooks/use-auth';
 
-import { MenuDropdown } from '../menu-dropdown/Menu-dropdown';
+import { useAuth } from '~/auth/hooks/use-auth';
+import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown';
+
+import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown';
+import { IconCatalog } from '../icon/icon';
+
+
 
 import stylesAvatarNavbar from './Avatar-navbar.css?inline'
-import { type MenuDropdownOptions } from '~/core/interfaces/menu';
-import { useMenuDropdown } from '~/core/hooks/use-menu-dropdown';
-import { IconCatalog } from '../icon/icon';
 
 export type ToggleAvatarProps = {
     imageSrc?: string;
@@ -21,8 +23,9 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const { handleSignOut }= useAuth();
     const { showMenuDropdown } = useMenuDropdown()
     const menuOptions: MenuDropdownOptions[] = [
-      {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests'},
-      {name: 'RoadMap', icon: IconCatalog.feSiteMap, route: 'https://t-record.canny.io/'},
+      {name: 'Dashboard', icon: IconCatalog.feBarChart, route: '/dashboard'},
+      {name: 'Pricing', icon: IconCatalog.feMoney, route: '/pricing'},
+      {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests', target:'_blank'},
       {name: 'Sign Out', icon:IconCatalog.feLogout, action: handleSignOut},
   ]
     useOnDocument('keyup', $((event)=>{
