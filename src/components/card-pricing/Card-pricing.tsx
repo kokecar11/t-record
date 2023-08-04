@@ -87,7 +87,7 @@ export const CardPricing = component$(
                 Get started
               </Button>
             ) : (
-              <Button class={`w-full btn-secondary`} onClick$={() => nav(link)}>
+              <Button class={`w-full btn-secondary`} id={`${plan}-${type_subs}`} onClick$={() => nav(link)}>
                 Get started
               </Button>
             )}
