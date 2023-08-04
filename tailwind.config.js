@@ -11,7 +11,12 @@ module.exports = {
         'offline': '#D9D9D9',
         'live': '#EF233C',
         'back': '#121212'
-      }
+      },
+       fontSize: {
+        'fluid-lg': 'clamp(2rem, calc(1.15rem + 1.50vw), 2.50rem)',
+        'fluid-base': 'clamp(2rem, 8vw, 4rem)',
+        'fluid-sm': 'clamp(0.7rem, 1.5vw, 1rem)',
+      },
     },
   },
   variants: {
