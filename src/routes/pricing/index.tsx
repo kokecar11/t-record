@@ -1,20 +1,21 @@
 import { component$, useContextProvider, useTask$} from '@builder.io/qwik';
 import { type DocumentHead } from '@builder.io/qwik-city';
 
-import { getPlansSubscriptions } from '~/services/pricing-list/pricing-list.service';
+import { TypeSubscriptionContext } from '~/context';
+import { getSubscriptionsPlan } from '~/services';
+import { useTogglePricing } from '~/hooks';
 
 import { CardPricing } from '~/components/card-pricing/Card-pricing'
 import { TogglePricing } from '~/components/toggle-pricing/Toggle-pricing'
-import { TypeSubsContext } from '~/components/toggle-pricing/context/toggle-pricing.context';
-import { useTogglePricing } from '~/components/toggle-pricing/hooks/use-toggle-pricing'
+
 
 export default component$(() => {
-  const { typeSubscription, plansSubscription } = useTogglePricing();
-  useContextProvider(TypeSubsContext, typeSubscription);  
+  const { typeSubscription, SubscriptionPlanStore } = useTogglePricing();
+  useContextProvider(TypeSubscriptionContext, typeSubscription);  
   
   useTask$(async ({track}) => {
-    track(() => plansSubscription.plans)
-    plansSubscription.plans.push(...await getPlansSubscriptions());
+    track(() => SubscriptionPlanStore.plans)
+    SubscriptionPlanStore.plans.push(...await getSubscriptionsPlan());
   });
 
 
@@ -37,10 +38,10 @@ export default component$(() => {
 
       <div class="gap-6 flex flex-wrap items-start justify-center mt-10 animate-fade-up delay-300 animate-duration-1000 md:items-stretch">
           {
-                plansSubscription.plans
+                SubscriptionPlanStore.plans
                 .filter((plan) => plan.type === typeSubscription.value)
                 .map((plan) => (
-                  <CardPricing key={plan.id}  {...plan} />  
+                  <CardPricing key={plan.id} {...plan} />  
                 ))
           }
       </div>

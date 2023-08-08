@@ -1,13 +1,11 @@
 import { useSignal, useContextProvider, useStore } from '@builder.io/qwik';
-import type { PlansSubscription, TypeSubscription } from '../models/toggle-pricing.model';
-import { TypeSubsContext } from '../context/toggle-pricing.context';
 
-
-
+import { TypeSubscriptionContext } from '~/context';
+import type { SubscriptionPlan, TypeSubscriptionPlan } from "~/models";
 
 export const useTogglePricing = () => {
-    const typeSubscription = useSignal<TypeSubscription>('monthly');
-    const plansSubscription = useStore<{plans: PlansSubscription[]}>(
+    const typeSubscription = useSignal<TypeSubscriptionPlan>('monthly');
+    const SubscriptionPlanStore= useStore<{plans: SubscriptionPlan[]}>(
         { 
           plans:[{
             id: 'starter',
@@ -31,10 +29,10 @@ export const useTogglePricing = () => {
           }],
         }
     );
-    useContextProvider(TypeSubsContext, typeSubscription);
+    useContextProvider(TypeSubscriptionContext, typeSubscription);
 
     return {
         typeSubscription,
-        plansSubscription
+        SubscriptionPlanStore
     }
 };

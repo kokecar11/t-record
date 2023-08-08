@@ -1,11 +1,14 @@
 import { component$, useContext } from '@builder.io/qwik'
 import { useNavigate } from '@builder.io/qwik-city'
-import { Icon, IconCatalog } from '../icon/icon'
-import Button from '../button/Button'
+
 import { useAuth } from '~/auth/hooks/use-auth'
 import { AuthSessionContext } from '~/auth/context/auth.context'
+
+import { capitalizeFirstLetter } from '~/utilities'
+
+import Button from '../button/Button'
 import { Tag } from '../tag/Tag'
-import { capitalizeFirstLetter } from '~/utilities/utilities'
+import { Icon, IconCatalog } from '../icon/icon'
 
 export interface CardPricingProps {
   type: 'monthly' | 'yearly'
@@ -77,6 +80,7 @@ export const CardPricing = component$(
             {plan === 'STARTER' ? (
               <Button
                 class={`sticky bottom-0 btn-secondary`}
+                id={`${capitalizeFirstLetter(plan)}-${capitalizeFirstLetter(type)}`} 
                 onClick$={() => {
                   if (authSession.value) {
                     nav(link)
@@ -88,7 +92,16 @@ export const CardPricing = component$(
                 Get started
               </Button>
             ) : (
-              <Button class={`w-full btn-secondary`} id={`${capitalizeFirstLetter(plan)}-${capitalizeFirstLetter(type)}`} onClick$={() => nav(link)}>
+              <Button 
+                class={`w-full btn-secondary`} 
+                id={`${capitalizeFirstLetter(plan)}-${capitalizeFirstLetter(type)}`} 
+                onClick$={() => {
+                  if(authSession.value){
+                    nav(`${link}${authSession.value?.user.email}`)
+                  } else {
+                    handleSignInWithOAuth('twitch')
+                  }
+                }}>
                 Get started
               </Button>
             )}
