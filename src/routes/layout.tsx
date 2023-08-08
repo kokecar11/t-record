@@ -58,7 +58,7 @@ export default component$(() => {
   <div class="bg-back dark:bg-back">
     <Navbar>
       <div q:slot='navLogo'>
-      <Link href='/' class={"font-bold text-xl text-secondary dark:text-white flex place-items-center space-x-2"}>
+      <Link href='/' class={"font-bold text-xl text-white flex place-items-center space-x-2"}>
           <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9.25534 5.04837L12.9014 0H26.2235V11.7795H35.619V30.0097L31.4121 35.3386H0V17.1084L4.20697 11.7795H9.25534V5.04837Z" fill="#9147FF"/>
             <path d="M15.1451 1.6828H24.494V14.8647L19.8196 20.8946L15.1451 14.8647V1.6828Z" fill="white"/>
