@@ -1,19 +1,22 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
 
-import { type NavMenuI } from '~/core/interfaces/menu';
-
 import { supabase } from '~/core/supabase/supabase';
+
 import { GlobalStore } from '~/core/context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
+import { setSubscriptionByUser } from '~/services';
 import { useAuth } from '~/auth/hooks/use-auth';
 import { getColorPreference, useToggleTheme } from '~/toggle-theme/hooks/use-toggle-theme';
+
+
+
+import { type NavMenuI } from '~/core/interfaces/menu';
 
 import { Navbar } from '~/components/navbar/Navbar';
 import { Footer } from '~/components/footer/Footer';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import Button from '~/components/button/Button';
-
 
 
 export default component$(() => {
@@ -32,15 +35,17 @@ export default component$(() => {
 
 
   useVisibleTask$ (async () => {
-    state.theme = getColorPreference();
     const {
       data: { subscription: authListener },
-    } = supabase.auth.onAuthStateChange((_, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if(event === 'SIGNED_IN'){
+        if (session) {
+          setSubscriptionByUser(session.user.id)
+        }
+      }
       const currentUser = session;
       authSession.value = currentUser ?? null;
     });
-    await handleRefreshTokenTwitch();
-    await updateAuthCookies(authSession.value)
     return () => {
       authListener?.unsubscribe();
     };
@@ -48,10 +53,14 @@ export default component$(() => {
 
 
   useVisibleTask$(async({track}) => {
+    state.theme = getColorPreference();
     track( () => [state.theme, authSession.value])
-    await updateAuthCookies(authSession.value)
+    await updateAuthCookies(authSession.value);
+    await handleRefreshTokenTwitch();
     setPreference(state.theme);
   });
+
+  
 
 
   return(     

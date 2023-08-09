@@ -1,4 +1,4 @@
 import { type Signal, createContextId } from "@builder.io/qwik";
-import type { TypeSubscription } from "~/models";
+import type { TypeSubscriptionPlan } from "~/models";
 
-export const TypeSubscriptionContext = createContextId<Signal<TypeSubscription>>('yearly');
+export const TypeSubscriptionContext = createContextId<Signal<TypeSubscriptionPlan>>('yearly');

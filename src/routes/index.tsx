@@ -1,13 +1,13 @@
-import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik'
+import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
 import {
   type DocumentHead,
   routeLoader$,
   useNavigate,
-} from '@builder.io/qwik-city'
-import { AuthSessionContext } from '~/auth/context/auth.context'
-import { useAuth } from '~/auth/hooks/use-auth'
-import { Collapse } from '~/components/collapse/Collapse'
-import { supabase } from '~/core/supabase/supabase'
+} from '@builder.io/qwik-city';
+import { AuthSessionContext } from '~/auth/context/auth.context';
+
+import { Collapse } from '~/components/collapse/Collapse';
+
 
 export const useCheckAuth = routeLoader$(async ({ cookie, redirect }) => {
   const providerCookie = cookie.get('_provider')
@@ -21,16 +21,9 @@ export default component$(() => {
   const authSession = useContext(AuthSessionContext)
   const nav = useNavigate()
 
-  const { updateAuthCookies } = useAuth()
 
   useVisibleTask$(async ({ track }) => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      authSession.value = session ?? null
-    })
-
-    await updateAuthCookies(authSession.value)
     track(() => authSession.value)
-    //TODO: Provisional redirect
     setTimeout(() => nav('/dashboard/'), 100)
   })
 

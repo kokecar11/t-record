@@ -1,14 +1,14 @@
-import { component$, useContext } from '@builder.io/qwik'
-import { useNavigate } from '@builder.io/qwik-city'
+import { component$, useContext } from '@builder.io/qwik';
+import { useNavigate } from '@builder.io/qwik-city';
 
-import { useAuth } from '~/auth/hooks/use-auth'
-import { AuthSessionContext } from '~/auth/context/auth.context'
+import { AuthSessionContext } from '~/auth/context/auth.context';
+import { useAuth } from '~/auth/hooks/use-auth';
 
-import { capitalizeFirstLetter } from '~/utilities'
+import { capitalizeFirstLetter } from '~/utilities';
 
-import Button from '../button/Button'
-import { Tag } from '../tag/Tag'
-import { Icon, IconCatalog } from '../icon/icon'
+import Button from '../button/Button';
+import { Tag } from '../tag/Tag';
+import { Icon, IconCatalog } from '../icon/icon';
 
 export interface CardPricingProps {
   type: 'monthly' | 'yearly'
@@ -80,7 +80,7 @@ export const CardPricing = component$(
             {plan === 'STARTER' ? (
               <Button
                 class={`sticky bottom-0 btn-secondary`}
-                id={`${capitalizeFirstLetter(plan)}-${capitalizeFirstLetter(type)}`} 
+                id={`${capitalizeFirstLetter(plan.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
                   if (authSession.value) {
                     nav(link)
@@ -94,7 +94,7 @@ export const CardPricing = component$(
             ) : (
               <Button 
                 class={`w-full btn-secondary`} 
-                id={`${capitalizeFirstLetter(plan)}-${capitalizeFirstLetter(type)}`} 
+                id={`${capitalizeFirstLetter(plan.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
                   if(authSession.value){
                     nav(`${link}${authSession.value?.user.email}`)
