@@ -5,11 +5,8 @@ import { supabase } from '~/core/supabase/supabase';
 
 import { GlobalStore } from '~/core/context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
-import { setSubscriptionByUser } from '~/services';
 import { useAuth } from '~/auth/hooks/use-auth';
 import { getColorPreference, useToggleTheme } from '~/toggle-theme/hooks/use-toggle-theme';
-
-
 
 import { type NavMenuI } from '~/core/interfaces/menu';
 
@@ -38,14 +35,10 @@ export default component$(() => {
     const {
       data: { subscription: authListener },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if(event === 'SIGNED_IN'){
-        if (session) {
-          setSubscriptionByUser(session.user.id)
-        }
-      }
       const currentUser = session;
       authSession.value = currentUser ?? null;
     });
+    await handleRefreshTokenTwitch();
     return () => {
       authListener?.unsubscribe();
     };

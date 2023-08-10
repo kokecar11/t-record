@@ -22,6 +22,7 @@ import { Marker } from '~/components/marker/Marker';
 import { markerStream } from '~/marker/marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
 import { MenuDropdown } from '~/components/menu-dropdown/Menu-dropdown';
+import { setSubscriptionByUser } from '~/services';
 
 
 
@@ -106,26 +107,6 @@ export const deleteMarker = server$(
     .eq('id', idMarker)
 });
 
-export const getIndicatorsMarkers = server$(async function() {
-  
-  const user:User = this.cookie.get('_user')!.json();
-
-  const { data } = await supabase.from('countstatusperuser').select('*').eq('fk_user',user.id);
-
-  const recordingCount = data?.find(marker => marker.status === 'RECORDING')?.statuscount | 0;
-  const recordedCount = data?.find(marker => marker.status === 'RECORDED')?.statuscount | 0;
-  const unRecordedCount = data?.find(marker => marker.status === 'UNRECORDED')?.statuscount | 0;
-  const totalMarkers = recordingCount + recordedCount + unRecordedCount;
-  
-  const indicators = [
-      {title: 'Total', counter: totalMarkers},
-      {title: 'Recording', counter: recordingCount},
-      {title: 'Unrecorded', counter: unRecordedCount},
-      {title: 'Recorded', counter: recordedCount},
-  ];
-  
-  return indicators
-});  
 
 export default component$(() => {
 
@@ -157,12 +138,14 @@ export default component$(() => {
       {name: 'Order by date', icon: IconCatalog.feArrowUp},
     ];
 
-    useVisibleTask$(async ({track}) => {  
+    useVisibleTask$(async ({track}) => { 
       const stream = await getStatusStream();
+      if(authSession.value){
+        await setSubscriptionByUser(authSession.value.user.id)
+      }
       track(()=> [markerList.isLoading, live.status, live.isLoading])
       markerList.isLoading = false;
       markerList.markers = await getMarkers(authSession.value?.user.id);
-      markerList.indicators = await getIndicatorsMarkers();
       live.isLoading = false;
       live.status = stream.status;
     })
