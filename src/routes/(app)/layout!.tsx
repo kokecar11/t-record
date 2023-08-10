@@ -15,6 +15,8 @@ import { FooterTag } from '~/components/footer-tag/Footer-tag';
 import { Live } from '~/components/live/Live';
 import Button from '~/components/button/Button';
 import { Icon, IconCatalog } from '~/components/icon/icon';
+import { getSubscriptionByUser } from '~/services';
+import { SubscriptionUserContext } from '~/context/subscription-user.context';
 
 export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
   const providerCookie = cookie.get('_provider');
@@ -30,6 +32,7 @@ export default component$(() => {
   const nav = useNavigate()
 
   const authSession = useContext(AuthSessionContext);
+  const subscriptionUser = useContext(SubscriptionUserContext);
   const state = useContext(GlobalStore);
 
   const { setPreference } = useToggleTheme();
@@ -37,11 +40,13 @@ export default component$(() => {
   const navItems = useStore<NavMenuI>({
     navs:[]
   }) ;
+  
+  
 
-
-  useVisibleTask$ (async () => {
+  useVisibleTask$( async () => {
     state.theme = getColorPreference();
     setPreference(state.theme);
+
     supabase.auth.getSession().then(({ data : { session } }) => {
       authSession.value = session ?? null;
     });
@@ -52,6 +57,7 @@ export default component$(() => {
       const currentUser = session;
       authSession.value = currentUser ?? null;
     });
+
     await handleRefreshTokenTwitch(); 
 
     return () => {
@@ -61,8 +67,12 @@ export default component$(() => {
 
 
   useVisibleTask$(async({track}) => {
-    track( () => [state.theme, authSession.value])
+    const syb = await getSubscriptionByUser(authSession.value?.user.id)
+    if (syb){
+      subscriptionUser.value = syb
+    }
     await updateAuthCookies(authSession.value)
+    track(() => [state.theme, authSession.value])
     setPreference(state.theme);
   });
 
@@ -90,7 +100,10 @@ export default component$(() => {
           }
       </div>
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
-        <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button>
+        {
+          //TODO:Modificar el ocultamiento de botón
+          subscriptionUser.value?.status === 'on_trial' && <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button>
+        }
         <Live />
         {authSession.value !== null && 
           <AvatarNavbar altText={authSession.value?.user.user_metadata.nickname} imageSrc={authSession.value?.user.user_metadata.avatar_url}>

@@ -8,4 +8,4 @@ export interface SubscriptionUser {
     subscription: Subscription
 }
 
-export const AuthSessionContext = createContextId<SubscriptionUser | null | any>('auth.session-context');
+export const AuthSessionContext = createContextId<Session | null | any>('auth.session-context');
