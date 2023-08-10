@@ -15,8 +15,8 @@ import { FooterTag } from '~/components/footer-tag/Footer-tag';
 import { Live } from '~/components/live/Live';
 import Button from '~/components/button/Button';
 import { Icon, IconCatalog } from '~/components/icon/icon';
+import { SubscriptionUserContext } from '~/context';
 import { getSubscriptionByUser } from '~/services';
-import { SubscriptionUserContext } from '~/context/subscription-user.context';
 
 export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
   const providerCookie = cookie.get('_provider');
@@ -59,7 +59,6 @@ export default component$(() => {
     });
 
     await handleRefreshTokenTwitch(); 
-
     return () => {
       authListener?.unsubscribe();
     };
@@ -67,12 +66,12 @@ export default component$(() => {
 
 
   useVisibleTask$(async({track}) => {
-    const syb = await getSubscriptionByUser(authSession.value?.user.id)
+    const syb = await getSubscriptionByUser(authSession.value?.user.id);
     if (syb){
-      subscriptionUser.value = syb
+      subscriptionUser.status = syb.status
     }
-    await updateAuthCookies(authSession.value)
-    track(() => [state.theme, authSession.value])
+    track(() => [state.theme, authSession.value]);
+    await updateAuthCookies(authSession.value);
     setPreference(state.theme);
   });
 
@@ -102,7 +101,7 @@ export default component$(() => {
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
         {
           //TODO:Modificar el ocultamiento de botón
-          subscriptionUser.value?.status === 'on_trial' && <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button>
+          subscriptionUser.status === 'on_trial' && <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button>
         }
         <Live />
         {authSession.value !== null && 
