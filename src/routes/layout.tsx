@@ -1,19 +1,22 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
 
-import { type NavMenuI } from '~/core/interfaces/menu';
-
 import { supabase } from '~/core/supabase/supabase';
+
 import { GlobalStore } from '~/core/context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
+import { setSubscriptionByUser } from '~/services';
 import { useAuth } from '~/auth/hooks/use-auth';
 import { getColorPreference, useToggleTheme } from '~/toggle-theme/hooks/use-toggle-theme';
+
+
+
+import { type NavMenuI } from '~/core/interfaces/menu';
 
 import { Navbar } from '~/components/navbar/Navbar';
 import { Footer } from '~/components/footer/Footer';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import Button from '~/components/button/Button';
-
 
 
 export default component$(() => {
@@ -32,15 +35,17 @@ export default component$(() => {
 
 
   useVisibleTask$ (async () => {
-    state.theme = getColorPreference();
     const {
       data: { subscription: authListener },
-    } = supabase.auth.onAuthStateChange((_, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if(event === 'SIGNED_IN'){
+        if (session) {
+          setSubscriptionByUser(session.user.id)
+        }
+      }
       const currentUser = session;
       authSession.value = currentUser ?? null;
     });
-    await handleRefreshTokenTwitch();
-    await updateAuthCookies(authSession.value)
     return () => {
       authListener?.unsubscribe();
     };
@@ -48,17 +53,21 @@ export default component$(() => {
 
 
   useVisibleTask$(async({track}) => {
+    state.theme = getColorPreference();
     track( () => [state.theme, authSession.value])
-    await updateAuthCookies(authSession.value)
+    await updateAuthCookies(authSession.value);
+    await handleRefreshTokenTwitch();
     setPreference(state.theme);
   });
+
+  
 
 
   return(     
   <div class="bg-back dark:bg-back">
     <Navbar>
       <div q:slot='navLogo'>
-      <Link href='/' class={"font-bold text-xl text-secondary dark:text-white flex place-items-center space-x-2"}>
+      <Link href='/' class={"font-bold text-xl text-white flex place-items-center space-x-2"}>
           <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9.25534 5.04837L12.9014 0H26.2235V11.7795H35.619V30.0097L31.4121 35.3386H0V17.1084L4.20697 11.7795H9.25534V5.04837Z" fill="#9147FF"/>
             <path d="M15.1451 1.6828H24.494V14.8647L19.8196 20.8946L15.1451 14.8647V1.6828Z" fill="white"/>

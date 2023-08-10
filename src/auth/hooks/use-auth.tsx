@@ -1,18 +1,18 @@
-import { $ } from "@builder.io/qwik";
-import { type CookieOptions, server$, useNavigate, useLocation } from "@builder.io/qwik-city";
-import type { Session, Provider } from "@supabase/supabase-js";
-import { supabase } from "~/core/supabase/supabase";
+import { $ } from '@builder.io/qwik';
+import { type CookieOptions, server$, useNavigate } from '@builder.io/qwik-city';
+import type { Session, Provider } from '@supabase/supabase-js';
+import { supabase } from '~/core/supabase/supabase';
 
 
-const cookieSession = "_session";
-const cookieUser = "_user";
-const cookieProvider = "_provider";
+const cookieSession = '_session';
+const cookieUser = '_user';
+const cookieProvider = '_provider';
 
 const options: CookieOptions = {
     httpOnly: true,
     maxAge: 610000,
-    path: "/",
-    sameSite: "strict",
+    path: '/',
+    sameSite: 'strict',
 };
 
 export const LOCAL_STORAGE_NAME = import.meta.env.VITE_LOCAL_STORAGE
@@ -20,7 +20,6 @@ const TWITCH_CLIENT_SECRET = import.meta.env.VITE_TWITCH_CLIENT_SECRET
 const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID
 export const useAuth = () => {
     const nav = useNavigate();
-    const path = useLocation();
 
     const getAuthSession = $(() => {
         const data = JSON.parse(localStorage.getItem(LOCAL_STORAGE_NAME)!)
@@ -28,12 +27,10 @@ export const useAuth = () => {
     });
     
     const handleSignInWithOAuth = $(async (provider:Provider = 'twitch') => { 
-        const redirectTo = `${path.url.href}dashboard/`;
         await supabase.auth.signInWithOAuth({
             provider,
             options: {
                 scopes:'channel:manage:broadcast user:read:broadcast channel_read',
-                redirectTo
             }
         });
     });

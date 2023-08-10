@@ -1,18 +1,22 @@
-import { component$, useContext } from '@builder.io/qwik'
-import { useNavigate } from '@builder.io/qwik-city'
-import { Icon, IconCatalog } from '../icon/icon'
-import Button from '../button/Button'
-import { useAuth } from '~/auth/hooks/use-auth'
-import { AuthSessionContext } from '~/auth/context/auth.context'
-import { Tag } from '../tag/Tag'
+import { component$, useContext } from '@builder.io/qwik';
+import { useNavigate } from '@builder.io/qwik-city';
+
+import { AuthSessionContext } from '~/auth/context/auth.context';
+import { useAuth } from '~/auth/hooks/use-auth';
+
+import { capitalizeFirstLetter } from '~/utilities';
+
+import Button from '../button/Button';
+import { Tag } from '../tag/Tag';
+import { Icon, IconCatalog } from '../icon/icon';
 
 export interface CardPricingProps {
-  type_subs: 'Monthly' | 'Yearly'
-  plan: 'Starter' | 'Plus' | 'Pro'
+  type: 'monthly' | 'yearly'
+  plan: 'STARTER' | 'PLUS' | 'PRO'
   price: number
   title: string
   popular: boolean
-  features: string[]
+  features?: string[]
   link?: string
 }
 
@@ -23,7 +27,7 @@ export const CardPricing = component$(
     popular,
     features,
     link,
-    type_subs,
+    type,
     plan,
   }: CardPricingProps) => {
     const authSession = useContext(AuthSessionContext)
@@ -55,7 +59,7 @@ export const CardPricing = component$(
 
           <div class="flex items-baseline text-white">
             <span class="text-5xl font-extrabold tracking-tight">${price}</span>
-            <span class="ml-1 text-gray-400">/ {type_subs}</span>
+            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(type)}</span>
           </div>
           <hr class="mt-8 border-white opacity-10"></hr>
           <ul role="list" class="space-y-5 my-7">
@@ -73,9 +77,10 @@ export const CardPricing = component$(
           </ul>
 
           <div class="flex flex-col mt-auto">
-            {plan === 'Starter' ? (
+            {plan === 'STARTER' ? (
               <Button
                 class={`sticky bottom-0 btn-secondary`}
+                id={`${capitalizeFirstLetter(plan.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
                   if (authSession.value) {
                     nav(link)
@@ -87,7 +92,16 @@ export const CardPricing = component$(
                 Get started
               </Button>
             ) : (
-              <Button class={`w-full btn-secondary`} id={`${plan}-${type_subs}`} onClick$={() => nav(link)}>
+              <Button 
+                class={`w-full btn-secondary`} 
+                id={`${capitalizeFirstLetter(plan.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                onClick$={() => {
+                  if(authSession.value){
+                    nav(`${link}${authSession.value?.user.email}`)
+                  } else {
+                    handleSignInWithOAuth('twitch')
+                  }
+                }}>
                 Get started
               </Button>
             )}
