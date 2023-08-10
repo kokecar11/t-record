@@ -1,5 +1,6 @@
 
 import { createClient } from "@supabase/supabase-js";
+import type { Subscription } from "~/models";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -35,12 +36,20 @@ export interface Database {
           type: string;
           created_at:Date;
         }
-        Insert: {
-
+      },
+      subscription_plan:{
+        Row: {
+          id: string,
+          plan: string,
+          price: number,
+          title: string,
+          popular: boolean,
+          link: string,
+          type: string
         }
-        Update: {
-
-        }
+      },
+      subscription:{
+        Row: Subscription
       }
     }
   }

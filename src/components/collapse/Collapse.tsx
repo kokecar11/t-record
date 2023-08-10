@@ -26,7 +26,7 @@ export const Collapse = component$(
 
     return (
       <div
-        class="cursor-pointer border group border-secondary border-opacity-30bg-accent p-4 rounded-lg hover:bg-opacity-50 focus:bg-opacity-50"
+        class="cursor-pointer border group border-secondary border-opacity-30 bg-accent p-4 rounded-lg hover:bg-opacity-50 focus:bg-opacity-50"
         onClick$={showCollapse}
       >
         <div class="text-left text-2xl font-bold flex items-start justify-between">

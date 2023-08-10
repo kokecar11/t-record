@@ -169,7 +169,7 @@ export default component$(() => {
 
     return (
         <>
-            <div class="w-full px-10 py-6 h-full">
+            <div class="w-full container mx-auto px-4 py-6 h-full">
                 {
                   markerList.markers.length > 0 ? (
                   <>
@@ -199,7 +199,7 @@ export default component$(() => {
                     </div>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderOptions}/>
 
-                    <div class="grid grid-cols-1 gap-4 mt-4 md:my-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+                    <div class="grid grid-cols-1 gap-4 mt-4 md:my-6 sm:grid-cols-2 md:gap-6 lg:grid-cols-4">
 
                       {
                         markerList.markers.map((m) => (

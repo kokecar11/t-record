@@ -6,6 +6,8 @@ import type { Session } from 'supabase-auth-helpers-qwik';
 import { AuthSessionContext } from './auth/context/auth.context';
 import { GlobalStore, type SiteStore } from './core/context';
 import { type Live, LiveStreamContext } from './live/context/live.context';
+import { SubscriptionUserContext } from './context/subscription-user.context';
+import type { Subscription } from './models';
 import './global.css';
 
 export default component$(() => {
@@ -16,6 +18,7 @@ export default component$(() => {
    * Dont remove the `<head>` and `<body>` elements.
    */
   const authSessionSignal = useSignal<Session | null>();
+  const subscriptionUserSignal = useSignal<Subscription | null>();
   const siteStore = useStore<SiteStore>({
     theme: 'dark',
   });
@@ -26,6 +29,7 @@ export default component$(() => {
   useContextProvider(AuthSessionContext, authSessionSignal);
   useContextProvider(GlobalStore, siteStore);
   useContextProvider(LiveStreamContext, liveStreamStore);
+  useContextProvider(SubscriptionUserContext, subscriptionUserSignal);
 
   const analyticsScript = `
     window.dataLayer = window.dataLayer || [];
