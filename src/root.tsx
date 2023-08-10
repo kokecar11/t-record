@@ -18,7 +18,9 @@ export default component$(() => {
    * Dont remove the `<head>` and `<body>` elements.
    */
   const authSessionSignal = useSignal<Session | null>();
-  const subscriptionUserSignal = useSignal<Subscription | null>();
+  const subscriptionUserStore = useStore<Subscription>({
+    status: 'on_trial',
+  })
   const siteStore = useStore<SiteStore>({
     theme: 'dark',
   });
@@ -29,7 +31,7 @@ export default component$(() => {
   useContextProvider(AuthSessionContext, authSessionSignal);
   useContextProvider(GlobalStore, siteStore);
   useContextProvider(LiveStreamContext, liveStreamStore);
-  useContextProvider(SubscriptionUserContext, subscriptionUserSignal);
+  useContextProvider(SubscriptionUserContext, subscriptionUserStore);
 
   const analyticsScript = `
     window.dataLayer = window.dataLayer || [];
