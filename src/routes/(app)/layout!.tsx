@@ -17,6 +17,7 @@ import Button from '~/components/button/Button';
 import { Icon, IconCatalog } from '~/components/icon/icon';
 import { SubscriptionUserContext } from '~/context';
 import { getSubscriptionByUser } from '~/services';
+import { Tag } from '~/components/tag/Tag';
 
 export const useCheckAuth = routeLoader$(async ({cookie, redirect}) => {
   const providerCookie = cookie.get('_provider');
@@ -69,6 +70,7 @@ export default component$(() => {
     const syb = await getSubscriptionByUser(authSession.value?.user.id);
     if (syb){
       subscriptionUser.status = syb.status
+      subscriptionUser.plan = syb.plan
     }
     track(() => [state.theme, authSession.value]);
     await updateAuthCookies(authSession.value);
@@ -101,7 +103,9 @@ export default component$(() => {
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
         {
           //TODO:Modificar el ocultamiento de botón
-          subscriptionUser.status === 'on_trial' && <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button>
+          subscriptionUser.plan === 'STARTER' ? <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
+          //  <span class="text-white mx-2 capitalize px-2 py-1 border  border-rose-600 rounded-lg font-bold">{subscriptionUser.plan.toLowerCase()}</span>
+          <Tag variant='secondary' size='sm' text={subscriptionUser.plan} />
         }
         <Live />
         {authSession.value !== null && 

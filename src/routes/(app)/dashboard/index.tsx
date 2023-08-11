@@ -1,8 +1,8 @@
 import { $, component$, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { type DocumentHead, Form, routeAction$, server$, z, zod$ } from '@builder.io/qwik-city';
+import { type DocumentHead, Form, routeAction$, z, zod$ } from '@builder.io/qwik-city';
 import type { User } from 'supabase-auth-helpers-qwik';
 
-import { type MarkerType, supabase } from '~/core/supabase/supabase';
+import { supabase } from '~/core/supabase/supabase';
 
 import type { MarkerStateI } from '~/marker/interfaces/marker';
 import {type ProviderI } from '~/core/interfaces/provider';
@@ -22,7 +22,7 @@ import { Marker } from '~/components/marker/Marker';
 import { markerStream } from '~/marker/marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
 import { MenuDropdown } from '~/components/menu-dropdown/Menu-dropdown';
-import { setSubscriptionByUser } from '~/services';
+import { deleteMarker, getMarkers, setSubscriptionByUser } from '~/services';
 
 
 
@@ -86,27 +86,6 @@ export const useCreateInstantMarker = routeAction$(
 
 },  instantMarkerForm);
 
-export const getMarkers = server$(
-    async (fkUser) => {
-      const { data, error } = await supabase.from('task')
-      .select('*')
-      .eq('fk_user', fkUser)
-      .order('stream_date',{ ascending: true });
-      
-      if (error){
-        return [];
-      }else{
-        return [ ...data  ] as MarkerType[];
-      }
-});
-
-export const deleteMarker = server$(
-  async (idMarker) => {
-    await supabase.from('task')
-    .delete()
-    .eq('id', idMarker)
-});
-
 
 export default component$(() => {
 
@@ -140,14 +119,12 @@ export default component$(() => {
 
     useVisibleTask$(async ({track}) => { 
       const stream = await getStatusStream();
-      if(authSession.value){
-        await setSubscriptionByUser(authSession.value.user.id)
-      }
-      track(()=> [markerList.isLoading, live.status, live.isLoading])
-      markerList.isLoading = false;
       markerList.markers = await getMarkers(authSession.value?.user.id);
-      live.isLoading = false;
       live.status = stream.status;
+      live.isLoading = false;
+      markerList.isLoading = false;
+      track(()=> [markerList.isLoading, live.status, live.isLoading])
+      await setSubscriptionByUser(authSession.value.user.id)
     })
 
     return (

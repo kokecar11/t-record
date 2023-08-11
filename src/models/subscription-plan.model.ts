@@ -10,5 +10,5 @@ export interface SubscriptionPlan {
     link: string
     type: TypeSubscriptionPlan
     features: string[]
-  }
+}
   

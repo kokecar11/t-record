@@ -1,4 +1,4 @@
 import { createContextId } from "@builder.io/qwik";
-import type { Subscription } from "~/models";
+import type { SubscriptionUser } from "~/models";
 
-export const SubscriptionUserContext = createContextId<Subscription>('user.subscription-context');
+export const SubscriptionUserContext = createContextId<SubscriptionUser>('user.subscription-context');

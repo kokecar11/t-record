@@ -7,7 +7,7 @@ import { AuthSessionContext } from './auth/context/auth.context';
 import { GlobalStore, type SiteStore } from './core/context';
 import { type Live, LiveStreamContext } from './live/context/live.context';
 import { SubscriptionUserContext } from './context/subscription-user.context';
-import type { Subscription } from './models';
+import type { SubscriptionUser } from './models';
 import './global.css';
 
 export default component$(() => {
@@ -18,8 +18,9 @@ export default component$(() => {
    * Dont remove the `<head>` and `<body>` elements.
    */
   const authSessionSignal = useSignal<Session | null>();
-  const subscriptionUserStore = useStore<Subscription>({
+  const subscriptionUserStore = useStore<SubscriptionUser>({
     status: 'on_trial',
+    plan: 'STARTER'
   })
   const siteStore = useStore<SiteStore>({
     theme: 'dark',
