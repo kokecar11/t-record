@@ -8,7 +8,7 @@ import type { Subscription } from '~/models';
 
 export const getSubscriptionByUser = server$(async (fkUser:string) => {
   const { data } = await supabase.from('subscription')
-  .select(`start_date, expiration_date, status, fk_plan (plan)`)
+  .select(`start_date, expiration_date, status, fk_plan (name)`)
   .eq('fk_user', fkUser);
   if (data){
     if (data.length === 0){
