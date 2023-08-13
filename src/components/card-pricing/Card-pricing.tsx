@@ -4,21 +4,15 @@ import { useNavigate } from '@builder.io/qwik-city';
 import { AuthSessionContext } from '~/auth/context/auth.context';
 import { useAuth } from '~/auth/hooks/use-auth';
 
+import type { Plan } from '~/models';
+
 import { capitalizeFirstLetter } from '~/utilities';
 
 import Button from '../button/Button';
 import { Tag } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon';
 
-export interface CardPricingProps {
-  type: 'monthly' | 'yearly'
-  plan: 'STARTER' | 'PLUS' | 'PRO'
-  price: number
-  title: string
-  popular: boolean
-  features?: string[]
-  link?: string
-}
+export type CardPricingProps = Plan;
 
 export const CardPricing = component$(
   ({
@@ -28,7 +22,7 @@ export const CardPricing = component$(
     features,
     link,
     type,
-    plan,
+    name,
   }: CardPricingProps) => {
     const authSession = useContext(AuthSessionContext)
     const nav = useNavigate()
@@ -77,10 +71,10 @@ export const CardPricing = component$(
           </ul>
 
           <div class="flex flex-col mt-auto">
-            {plan === 'STARTER' ? (
+            {name === 'STARTER' ? (
               <Button
                 class={`sticky bottom-0 btn-secondary`}
-                id={`${capitalizeFirstLetter(plan.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
                   if (authSession.value) {
                     nav(link)
@@ -94,7 +88,7 @@ export const CardPricing = component$(
             ) : (
               <Button 
                 class={`w-full btn-secondary`} 
-                id={`${capitalizeFirstLetter(plan.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
                   if(authSession.value){
                     nav(`${link}${authSession.value?.user.email}`)

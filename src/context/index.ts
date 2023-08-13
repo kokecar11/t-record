@@ -1,2 +1,2 @@
-export * from './subscription-plan.context';
-export * from './subscription-user.context';
+export * from './plan.context';
+export * from './subscription.context';
