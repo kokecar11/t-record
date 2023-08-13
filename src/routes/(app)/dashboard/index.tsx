@@ -4,25 +4,25 @@ import type { User } from 'supabase-auth-helpers-qwik';
 
 import { supabase } from '~/core/supabase/supabase';
 
-import type { MarkerStateI } from '~/marker/interfaces/marker';
 import {type ProviderI } from '~/core/interfaces/provider';
 
 import { useModal } from '~/components/modal/hooks/use-modal';
 import { useToast } from '~/components/toast/hooks/use-toast';
 import { useLiveStream } from '~/live/hooks/use-live-stream';
 import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown';
+import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
 
 import { LiveStreamContext } from '~/live/context/live.context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
+
+import type { MarkerState } from '~/models';
 
 import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
 import { Input } from '~/components/input/Input';
 import { Marker } from '~/components/marker/Marker';
-import { markerStream } from '~/marker/marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
 import { MenuDropdown } from '~/components/menu-dropdown/Menu-dropdown';
-import { deleteMarker, getMarkers, setSubscriptionByUser } from '~/services';
 
 
 
@@ -71,7 +71,7 @@ export const useCreateInstantMarker = routeAction$(
   async (dataForm, {cookie}) => {
     const provider:ProviderI = cookie.get('_provider')!.json();
     const user:User =  cookie.get('_user')!.json()
-    const responseStream = await markerStream(provider,user, dataForm.desc_marker);
+    const responseStream = await markerInStream(provider,user, dataForm.desc_marker);
     
     if(responseStream.status === 404){
       return {
@@ -99,7 +99,7 @@ export default component$(() => {
     const authSession = useContext(AuthSessionContext);
     const live = useContext(LiveStreamContext);
     
-    const markerList = useStore<MarkerStateI>({
+    const markerList = useStore<MarkerState>({
         currentPage: 0,
         markers: [],
         isLoading: false,
