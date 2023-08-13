@@ -2,7 +2,7 @@ import { component$, useContextProvider, useTask$} from '@builder.io/qwik';
 import { type DocumentHead } from '@builder.io/qwik-city';
 
 import { TypeSubscriptionContext } from '~/context';
-import { getSubscriptionsPlan } from '~/services';
+import { getPlans } from '~/services';
 import { useTogglePricing } from '~/hooks';
 
 import { CardPricing } from '~/components/card-pricing/Card-pricing';
@@ -10,12 +10,12 @@ import { TogglePricing } from '~/components/toggle-pricing/Toggle-pricing';
 
 
 export default component$(() => {
-  const { typeSubscription, SubscriptionPlanStore } = useTogglePricing();
+  const { typeSubscription, planStore } = useTogglePricing();
   useContextProvider(TypeSubscriptionContext, typeSubscription);  
   
   useTask$(async ({track}) => {
-    track(() => SubscriptionPlanStore.plans)
-    SubscriptionPlanStore.plans.push(...await getSubscriptionsPlan());
+    track(() => planStore.plans)
+    planStore.plans.push(...await getPlans());
   });
 
 
@@ -38,10 +38,10 @@ export default component$(() => {
 
       <div class="gap-6 flex flex-wrap items-start justify-center mt-10 animate-fade-up delay-300 animate-duration-1000 md:items-stretch">
           {
-            SubscriptionPlanStore.plans
+            planStore.plans
             .filter((plan) => plan.type === typeSubscription.value)
             .map((plan) => (
-              <CardPricing key={plan.id} {...plan} />  
+              <CardPricing key={plan.id} {...plan} /> 
             ))
           }
       </div>
@@ -54,7 +54,7 @@ export const head: DocumentHead = {
   meta: [
     {
       name: 'description',
-      content: 'Qwik site description',
+      content: 'Discover T-Record Pricing Plans: Elevate Your Content, Maximize Your Impact.',
     },
   ],
 }

@@ -28,16 +28,7 @@ export interface Database {
 
         }
       },
-      plan: {
-        Row: {
-          id: string;
-          fk_user: string;
-          active: boolean;
-          type: string;
-          created_at:Date;
-        }
-      },
-      subscription_plan:{
+      plan:{
         Row: {
           id: string,
           plan: string,
@@ -61,3 +52,4 @@ export const supabase = createClient<Database>(
 );
 export type MarkerType = Database['public']['Tables']['task']['Row'];
 export type PlanType = Database['public']['Tables']['plan']['Row'];
+export type SubscriptionType = Database['public']['Tables']['subscription']['Row'];

@@ -1,28 +1,28 @@
 import { $, component$, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { type DocumentHead, Form, routeAction$, server$, z, zod$ } from '@builder.io/qwik-city';
+import { type DocumentHead, Form, routeAction$, z, zod$ } from '@builder.io/qwik-city';
 import type { User } from 'supabase-auth-helpers-qwik';
 
-import { type MarkerType, supabase } from '~/core/supabase/supabase';
+import { supabase } from '~/core/supabase/supabase';
 
-import type { MarkerStateI } from '~/marker/interfaces/marker';
 import {type ProviderI } from '~/core/interfaces/provider';
 
 import { useModal } from '~/components/modal/hooks/use-modal';
 import { useToast } from '~/components/toast/hooks/use-toast';
 import { useLiveStream } from '~/live/hooks/use-live-stream';
 import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown';
+import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
 
 import { LiveStreamContext } from '~/live/context/live.context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
+
+import type { MarkerState } from '~/models';
 
 import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
 import { Input } from '~/components/input/Input';
 import { Marker } from '~/components/marker/Marker';
-import { markerStream } from '~/marker/marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
 import { MenuDropdown } from '~/components/menu-dropdown/Menu-dropdown';
-import { setSubscriptionByUser } from '~/services';
 
 
 
@@ -71,7 +71,7 @@ export const useCreateInstantMarker = routeAction$(
   async (dataForm, {cookie}) => {
     const provider:ProviderI = cookie.get('_provider')!.json();
     const user:User =  cookie.get('_user')!.json()
-    const responseStream = await markerStream(provider,user, dataForm.desc_marker);
+    const responseStream = await markerInStream(provider,user, dataForm.desc_marker);
     
     if(responseStream.status === 404){
       return {
@@ -86,27 +86,6 @@ export const useCreateInstantMarker = routeAction$(
 
 },  instantMarkerForm);
 
-export const getMarkers = server$(
-    async (fkUser) => {
-      const { data, error } = await supabase.from('task')
-      .select('*')
-      .eq('fk_user', fkUser)
-      .order('stream_date',{ ascending: true });
-      
-      if (error){
-        return [];
-      }else{
-        return [ ...data  ] as MarkerType[];
-      }
-});
-
-export const deleteMarker = server$(
-  async (idMarker) => {
-    await supabase.from('task')
-    .delete()
-    .eq('id', idMarker)
-});
-
 
 export default component$(() => {
 
@@ -120,7 +99,7 @@ export default component$(() => {
     const authSession = useContext(AuthSessionContext);
     const live = useContext(LiveStreamContext);
     
-    const markerList = useStore<MarkerStateI>({
+    const markerList = useStore<MarkerState>({
         currentPage: 0,
         markers: [],
         isLoading: false,
@@ -140,14 +119,12 @@ export default component$(() => {
 
     useVisibleTask$(async ({track}) => { 
       const stream = await getStatusStream();
-      if(authSession.value){
-        await setSubscriptionByUser(authSession.value.user.id)
-      }
-      track(()=> [markerList.isLoading, live.status, live.isLoading])
-      markerList.isLoading = false;
       markerList.markers = await getMarkers(authSession.value?.user.id);
-      live.isLoading = false;
       live.status = stream.status;
+      live.isLoading = false;
+      markerList.isLoading = false;
+      track(()=> [markerList.isLoading, live.status, live.isLoading])
+      await setSubscriptionByUser(authSession.value.user.id)
     })
 
     return (

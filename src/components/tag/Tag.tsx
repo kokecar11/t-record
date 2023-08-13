@@ -28,8 +28,8 @@ export const Tag = component$(({text, size, variant}:TagProps) => {
         }
     }
     return(
-        <span class={`inline-block px-2 py-1 rounded-lg text-white font-normal ${variant ? variants[variant] : variants.primary} ${size ? sizes[size]: sizes.sm}`}>
-            {text}
+        <span class={`inline-block px-2 py-1 rounded-lg text-white font-normal capitalize ${variant ? variants[variant] : variants.primary} ${size ? sizes[size]: sizes.sm}`}>
+            {text?.toLowerCase()}
         </span>
     );
 })
