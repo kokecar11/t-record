@@ -73,11 +73,11 @@ export default component$(() => {
 })
 
 export const head: DocumentHead = {
-  title: 'Home | T-Record',
+  title: 'Discover the power of organization on Twitch | T-Record',
   meta: [
     {
       name: 'description',
-      content: 'Qwik site description',
+      content: "Unlock the power of T-Record's real-time markers for your lives. Organize, customize, and engage like never before. Boost your Twitch presence with T-Record today!",
     },
   ],
 }

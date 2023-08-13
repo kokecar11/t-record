@@ -54,7 +54,7 @@ export const head: DocumentHead = {
   meta: [
     {
       name: 'description',
-      content: 'Qwik site description',
+      content: 'Discover T-Record Pricing Plans: Elevate Your Content, Maximize Your Impact.',
     },
   ],
 }
