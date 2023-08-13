@@ -1,9 +1,10 @@
-import type { SubscriptionPlan, TypePlan } from "./subscription-plan.model"
+import type { Plan, TypePlan } from "./plan.model"
+export type TypeSubscription = 'yearly' | 'monthly'; 
 
 export interface Subscription {
     id?: string
     fk_user?: string
-    fk_subscription_plan: SubscriptionPlan
+    fk_plan: Plan
     created_at?: Date | any
     start_date?: Date | any
     expiration_date?: Date | any

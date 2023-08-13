@@ -1,14 +1,15 @@
-export type TypeSubscriptionPlan = 'yearly' | 'monthly'; 
+import type { TypeSubscription } from "./subscription.model";
+
 export type TypePlan = 'PLUS' | 'STARTER' | 'PRO';
 
-export interface SubscriptionPlan {
+export interface Plan {
     id: string
     title: string
-    plan: TypePlan
+    name: TypePlan
     price: number
     popular: boolean
     link: string
-    type: TypeSubscriptionPlan
+    type: TypeSubscription
     features: string[]
 }
   

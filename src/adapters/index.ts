@@ -1,1 +1,1 @@
-export * from './subscription-user.adapter';
+export * from './subscription.adapter';

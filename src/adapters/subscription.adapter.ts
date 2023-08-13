@@ -4,7 +4,7 @@ import type { Subscription } from "~/models";
 export const subscriptionUserAdapter = (subs: Subscription) => ({
     start_date: subs.start_date,
     expiration_date: subs.expiration_date,
-    plan: subs.fk_subscription_plan.plan,
+    plan: subs.fk_plan.name,
     status: subs.status
 })
 

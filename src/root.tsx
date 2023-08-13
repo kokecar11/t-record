@@ -6,7 +6,7 @@ import type { Session } from 'supabase-auth-helpers-qwik';
 import { AuthSessionContext } from './auth/context/auth.context';
 import { GlobalStore, type SiteStore } from './core/context';
 import { type Live, LiveStreamContext } from './live/context/live.context';
-import { SubscriptionUserContext } from './context/subscription-user.context';
+import { SubscriptionUserContext } from './context/subscription.context';
 import type { SubscriptionUser } from './models';
 import './global.css';
 
