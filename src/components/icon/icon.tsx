@@ -30,7 +30,8 @@ export enum IconCatalog {
     feMoney = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm14 2H6a2 2 0 0 1-2 2v6a2 2 0 0 1 2 2h12a2 2 0 0 1 2-2V9a2 2 0 0 1-2-2ZM8 9h2v6H8V9Zm6 4a1 1 0 1 0 0-2a1 1 0 0 0 0 2Zm0 2a3 3 0 1 1 0-6a3 3 0 0 1 0 6Z',
     feWallet = 'M20 9c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3Zm-2 0V6H4v12h14v-3h-2c-1.1 0-2-1.1-2-2v-1.968C14 9.9 14.9 9 16 9h2Zm-2 4h2v-2h-2v2Z',
     feBolt = 'M18 2h-8L6 13h4l-2 9l9-13h-4.995z',
-    feNoticePush = 'M17 11a4 4 0 1 1 0-8a4 4 0 0 1 0 8ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z'
+    feNoticePush = 'M17 11a4 4 0 1 1 0-8a4 4 0 0 1 0 8ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
+    feEqualizer = 'M13.17 7a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2h-2.17a3.001 3.001 0 0 1-5.66 0H3a1 1 0 1 1 0-2h10.17Zm-8 8a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2H10.83a3.001 3.001 0 0 1-5.66 0H3a1 1 0 0 1 0-2h2.17ZM16 9a1 1 0 1 0 0-2a1 1 0 0 0 0 2Zm-8 8a1 1 0 1 0 0-2a1 1 0 0 0 0 2Z'
 }
 type IconProps = QwikIntrinsicElements['div'] & {
     name: IconCatalog

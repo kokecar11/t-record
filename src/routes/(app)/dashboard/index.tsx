@@ -5,6 +5,7 @@ import type { User } from 'supabase-auth-helpers-qwik';
 import { supabase } from '~/core/supabase/supabase';
 
 import {type ProviderI } from '~/core/interfaces/provider';
+import type { MarkerState } from '~/models';
 
 import { useModal } from '~/components/modal/hooks/use-modal';
 import { useToast } from '~/components/toast/hooks/use-toast';
@@ -15,13 +16,15 @@ import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from 
 import { LiveStreamContext } from '~/live/context/live.context';
 import { AuthSessionContext } from '~/auth/context/auth.context';
 
-import type { MarkerState } from '~/models';
+
+import { capitalizeFirstLetter } from '~/utilities';
 
 import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
 import { Input } from '~/components/input/Input';
 import { Marker } from '~/components/marker/Marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
+import { Loader } from '~/components/loader/Loader';
 import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdown/Menu-dropdown';
 
 
@@ -132,17 +135,20 @@ export default component$(() => {
     ]
 
     useVisibleTask$(async ({track}) => { 
+      markerList.isLoading = true;
       const stream = await getStatusStream();
       markerList.markers = await getMarkers(authSession.value?.user.id, orderBySignal.value, orderByStatusSignal.value);
       live.status = stream.status;
       live.isLoading = false;
-      markerList.isLoading = false;
-      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value])
-      await setSubscriptionByUser(authSession.value.user.id)
-    })
+      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value, authSession.value])
+      setTimeout(() => markerList.isLoading = false, 300)
+      markerList.isLoading = false
+      await setSubscriptionByUser(authSession.value.user.id);
+    });
 
     return (
         <>
+        {markerList.isLoading && <Loader />}
             <div class="w-full container mx-auto px-4 py-6 h-full">
               <div class="gap-y-4 sm:flex sm:space-x-4">
                 <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
@@ -150,13 +156,14 @@ export default component$(() => {
                     <Icon name={IconCatalog.fePlus} class="mr-1" /> New task
                   </Button>
                   <div class="relative">
-                    <Button class="btn-accent flex relative items-center justify-center w-full md:w-auto shadow-lg" onClick$={showMenuDropdown}>
-                      <Icon name={IconCatalog.feArrowDown} class="mr-1" /> Order by status
+                    <Button class="btn-accent flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
+                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> {capitalizeFirstLetter(orderByStatusSignal.value.toLowerCase())}
                     </Button>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
                   </div>
+                  
                 </div>
-                <div class="grid grid-cols-2 justify-center items-center space-x-4 mt-4 sm:m-0">
+                <div class="grid grid-cols-1 justify-center items-center space-x-4 mt-4 sm:m-0">
                   <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
                     const stream = await getStatusStream()
                     live.status = stream.status;
@@ -164,14 +171,15 @@ export default component$(() => {
                   }}>
                     <Icon class="mr-1" name={IconCatalog.feLoop} /> Refresh Live
                   </Button>
-                  <span class="text-white flex">40/40 Markers</span>
+                  {/* <span class="text-white flex">40/40 Markers</span> */}
                 </div>
               </div>
+              
                 {
                   markerList.markers.length > 0 ? (
                   <>
                     <div class="grid grid-cols-1 gap-4 mt-4 md:my-6 sm:grid-cols-2 md:gap-6 lg:grid-cols-4">
-
+                      
                       {
                         markerList.markers.map((m) => (
                           <Marker key={m.id} marker={m} onDelete={$(() => {
@@ -181,7 +189,6 @@ export default component$(() => {
                           })} live={live}/>
                         ))
                       }
-
                     </div>
                   </>
                   )
