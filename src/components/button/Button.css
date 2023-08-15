@@ -21,7 +21,7 @@
 }
 
 button[type='submit']{
-    @apply btn-violet
+    @apply btn-secondary
 }
 
 .btn-ghost {

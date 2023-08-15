@@ -1,4 +1,4 @@
-import { $, component$, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, useContext, useSignal, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { type DocumentHead, Form, routeAction$, z, zod$ } from '@builder.io/qwik-city';
 import type { User } from 'supabase-auth-helpers-qwik';
 
@@ -22,7 +22,7 @@ import Button from '~/components/button/Button';
 import { Input } from '~/components/input/Input';
 import { Marker } from '~/components/marker/Marker';
 import { Icon, IconCatalog } from '~/components/icon/icon';
-import { MenuDropdown } from '~/components/menu-dropdown/Menu-dropdown';
+import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdown/Menu-dropdown';
 
 
 
@@ -86,7 +86,8 @@ export const useCreateInstantMarker = routeAction$(
 
 },  instantMarkerForm);
 
-
+export type OrderByMarker = 'stream_date'| 'created_at' | 'status';
+export type OrderMarkerByStatus = 'RECORDING'| 'RECORDED' | 'UNRECORDED';
 export default component$(() => {
 
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
@@ -111,54 +112,64 @@ export default component$(() => {
         ]
     });
 
-    const orderOptions = [
-      {name: 'Order by date', icon: IconCatalog.feArrowUp},
-      {name: 'Order', icon: IconCatalog.feArrowUp},
-      {name: 'Order by date', icon: IconCatalog.feArrowUp},
-    ];
+    const orderBySignal = useSignal<OrderByMarker>('stream_date');
+    const orderByStatusSignal = useSignal<OrderMarkerByStatus>('UNRECORDED');
+    // const orderBy = $((order:OrderByMarker) =>{
+    //   orderBySignal.value = order
+    // })
+    const orderByStatusAction = $((status:OrderMarkerByStatus) =>{
+      orderByStatusSignal.value = status
+    })
+
+    // const orderOptions:MenuDropdownOptions[] = [
+    //   {name: 'Stream date', action:$(() => orderBy('stream_date'))},
+    // ];
+
+    const orderByStatusOptions: MenuDropdownOptions[] = [
+      {name: 'Unrecorded', action:$(() => orderByStatusAction('UNRECORDED'))},
+      {name: 'Recorded', action:$(() => orderByStatusAction('RECORDED'))},
+      {name: 'Recording', action:$(() => orderByStatusAction('RECORDING'))},
+    ]
 
     useVisibleTask$(async ({track}) => { 
       const stream = await getStatusStream();
-      markerList.markers = await getMarkers(authSession.value?.user.id);
+      markerList.markers = await getMarkers(authSession.value?.user.id, orderBySignal.value, orderByStatusSignal.value);
       live.status = stream.status;
       live.isLoading = false;
       markerList.isLoading = false;
-      track(()=> [markerList.isLoading, live.status, live.isLoading])
+      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value])
       await setSubscriptionByUser(authSession.value.user.id)
     })
 
     return (
         <>
             <div class="w-full container mx-auto px-4 py-6 h-full">
+              <div class="gap-y-4 sm:flex sm:space-x-4">
+                <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
+                  <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showModal}>
+                    <Icon name={IconCatalog.fePlus} class="mr-1" /> New task
+                  </Button>
+                  <div class="relative">
+                    <Button class="btn-accent flex relative items-center justify-center w-full md:w-auto shadow-lg" onClick$={showMenuDropdown}>
+                      <Icon name={IconCatalog.feArrowDown} class="mr-1" /> Order by status
+                    </Button>
+                    <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 justify-center items-center space-x-4 mt-4 sm:m-0">
+                  <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
+                    const stream = await getStatusStream()
+                    live.status = stream.status;
+                    setToast({message:'Live status has been refreshed.'})
+                  }}>
+                    <Icon class="mr-1" name={IconCatalog.feLoop} /> Refresh Live
+                  </Button>
+                  <span class="text-white flex">40/40 Markers</span>
+                </div>
+              </div>
                 {
                   markerList.markers.length > 0 ? (
                   <>
-                    <div class="gap-y-4 sm:flex sm:space-x-4">
-                      <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
-                        {/* <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg">
-                          <Icon name={IconCatalog.feCalendar} class="mr-1" /> Today
-                        </Button> */}
-                        <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showModal}>
-                          <Icon name={IconCatalog.fePlus} class="mr-1" /> New task
-                        </Button>
-                        <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
-                          const stream = await getStatusStream()
-                          live.status = stream.status;
-                            setToast({message:'Live status has been refreshed.'})
-                          }}>
-                          <Icon class="mr-1" name={IconCatalog.feLoop} /> Refresh Live
-                        </Button>
-                        
-                      </div>
-                      {/* <div class="flex-none space-x-4 mt-4 sm:m-0">
-                        <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showMenuDropdown}>
-                          <Icon name={IconCatalog.feArrowDown} class="mr-1" /> Order by
-                        </Button>
-
-                      </div> */}
-                    </div>
-                    <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderOptions}/>
-
                     <div class="grid grid-cols-1 gap-4 mt-4 md:my-6 sm:grid-cols-2 md:gap-6 lg:grid-cols-4">
 
                       {
@@ -176,7 +187,7 @@ export default component$(() => {
                   )
                   :
                   (
-                    <div class="flex items-center justify-center">
+                    <div class="flex items-center justify-center mt-4">
                       <div class="space-y-4"> 
                         <h1 class="text-3xl font-bold text-white">
                           You don't have any task for your stream yet, create a task.

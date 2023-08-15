@@ -73,7 +73,7 @@ export default component$(() => {
 })
 
 export const head: DocumentHead = {
-  title: 'Discover the power of organization on Twitch | T-Record',
+  title: 'T-Record',
   meta: [
     {
       name: 'description',
