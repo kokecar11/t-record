@@ -43,30 +43,14 @@ export default component$(() => {
   }) ;
   
   
-
-  useVisibleTask$( async () => {
+  useVisibleTask$(async({track}) => {
     state.theme = getColorPreference();
     setPreference(state.theme);
 
-    supabase.auth.getSession().then(({ data : { session } }) => {
+    await supabase.auth.getSession().then(({ data : { session } }) => {
       authSession.value = session ?? null;
     });
-
-    const {
-      data: { subscription: authListener },
-    } = supabase.auth.onAuthStateChange((_, session) => {
-      const currentUser = session;
-      authSession.value = currentUser ?? null;
-    });
-
     await handleRefreshTokenTwitch(); 
-    return () => {
-      authListener?.unsubscribe();
-    };
-  });
-
-
-  useVisibleTask$(async({track}) => {
     const syb = await getSubscriptionByUser(authSession.value?.user.id);
     if (syb){
       subscriptionUser.status = syb.status
@@ -74,7 +58,6 @@ export default component$(() => {
     }
     track(() => [state.theme, authSession.value]);
     await updateAuthCookies(authSession.value);
-    setPreference(state.theme);
   });
   
 
