@@ -1,17 +1,17 @@
 .avatar-navbar{
-    @apply relative p-3 hover:bg-violet-900 hover:bg-opacity-10 hover:border-violet-900 hover:border-b-2 
+    @apply relative p-3 hover:bg-secondary hover:bg-opacity-10 hover:border-secondary hover:border-b-2 
     transition duration-300 ease-in-out hover:transition hover:duration-300 hover:ease-in-out
     dark:hover:bg-white dark:hover:bg-opacity-10 dark:hover:border-white dark:hover:border-b-2 dark:text-white
     dark:transition dark:duration-300 dark:ease-in-out dark:hover:transition dark:hover:duration-300 dark:hover:ease-in-out
 }
 
 .avatar-option{
-    @apply px-4 py-2 text-sm flex items-center text-violet-900 hover:bg-violet-900 hover:bg-opacity-10 hover:text-violet-900 
+    @apply px-4 py-2 text-sm flex items-center text-secondary hover:bg-secondary hover:bg-opacity-10 hover:text-secondary 
     dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10
-    hover:border-b-2 hover:border-violet-900 dark:hover:border-b-2 dark:hover:border-white
+    hover:border-b-2 hover:border-secondary dark:hover:border-b-2 dark:hover:border-white
 }
 
 
 .avatar-navbar-new{
-    @apply relative border-2 border-transparent hover:border-2 hover:border-violet-900 rounded-full ease-in-out transition-all delay-100
+    @apply relative border-2 border-transparent hover:border-2 hover:border-secondary rounded-full ease-in-out transition-all delay-100
 }

@@ -3,8 +3,8 @@ import type { User } from "supabase-auth-helpers-qwik";
 import type { ProviderI } from "~/core/interfaces/provider";
 import { type MarkerType, supabase } from "~/core/supabase/supabase";
 
-export const getMarkers = server$(async (fkUser:string) => {
-    const { data, error } = await supabase.from('task').select('*').eq('fk_user', fkUser).order('stream_date',{ ascending: true });
+export const getMarkers = server$(async (fkUser:string, orderBy:any, orderMarkerByStatus:any) => {
+    const { data, error } = await supabase.from('task').select('*').eq('fk_user', fkUser).eq('status', orderMarkerByStatus).order(orderBy, {ascending:false});
     if (error){
         return [];
     }else{

@@ -76,7 +76,7 @@ export default component$(() => {
     await updateAuthCookies(authSession.value);
     setPreference(state.theme);
   });
-
+  
 
   return(     
   <div class="bg-back dark:bg-back">
@@ -99,8 +99,7 @@ export default component$(() => {
         {
           //TODO:Modificar el ocultamiento de botón
           subscriptionUser.plan === 'STARTER' ? <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
-          //  <span class="text-white mx-2 capitalize px-2 py-1 border  border-rose-600 rounded-lg font-bold">{subscriptionUser.plan.toLowerCase()}</span>
-          <Tag variant='secondary' size='sm' text={subscriptionUser.plan} />
+          (<Tag variant={subscriptionUser.plan === 'PRO' ? 'pro': 'plus'} size='sm' text={subscriptionUser.plan} />)
         }
         <Live />
         {authSession.value !== null && 
