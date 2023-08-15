@@ -7,7 +7,7 @@ export type TagProps = {
 }
 
 export type TagSizes = 'xs' | 'sm' | 'md' | 'lg';
-export type TagVariants = 'danger' | 'warning' | 'info' | 'success' | 'primary' | 'secondary';
+export type TagVariants = 'danger' | 'warning' | 'info' | 'success' | 'primary' | 'secondary' | 'plus' | 'pro';
 
 
 export const Tag = component$(({text, size, variant}:TagProps) => {
@@ -19,6 +19,8 @@ export const Tag = component$(({text, size, variant}:TagProps) => {
             info: 'bg-blue-500',
             primary: 'bg-primary',
             secondary: 'bg-secondary',
+            plus: 'bg-gradient-to-r from-secondary to-live',
+            pro: 'bg-gradient-to-r from-secondary to-slate-800',
         },
         sizes:{
             xs: 'text-xs',
