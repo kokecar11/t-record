@@ -1,6 +1,6 @@
 import { component$, useContext, useVisibleTask$ } from "@builder.io/qwik";
-import { LiveStreamContext } from "~/live/context/live.context";
-import { useLiveStream } from "~/live/hooks/use-live-stream";
+import { LiveStreamContext } from "~/context";
+import { useLiveStream } from "~/hooks";
 
 export const Live = component$(() => {
   

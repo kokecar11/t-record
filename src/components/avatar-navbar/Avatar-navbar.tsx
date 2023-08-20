@@ -1,6 +1,6 @@
 import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik';
 
-import { useAuth } from '~/auth/hooks/use-auth';
+// import { useAuth } from '~/auth/hooks/use-auth';
 import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown';
 
 import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown';
@@ -9,6 +9,7 @@ import { IconCatalog } from '../icon/icon';
 
 
 import stylesAvatarNavbar from './Avatar-navbar.css?inline'
+import { useAuth } from '~/auth/hooks/use-auth';
 
 export type ToggleAvatarProps = {
     imageSrc?: string;
