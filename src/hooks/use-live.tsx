@@ -1,7 +1,6 @@
 import { useSignal } from "@builder.io/qwik";
 import { server$ } from "@builder.io/qwik-city";
-import { type User } from "supabase-auth-helpers-qwik";
-import { type StatusLive } from "../context/live.context";
+import type { UserSession, StatusLive, TwitchProvider } from "~/models";
 
 
 export const useLiveStream = () => {
@@ -10,13 +9,13 @@ export const useLiveStream = () => {
     const getStatusStream = server$( async function(){
         const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
         const urlApiTwitch = 'https://api.twitch.tv/helix/streams';
-        const providerToken: { provider_token:string, provider_refresh_token:string } = this.cookie.get('_provider')!.json();
-        const user:User = this.cookie.get('_user')!.json();
+        const providerToken: TwitchProvider = this.cookie.get('_provider')!.json();
+        const userSession: UserSession = this.cookie.get('_user')!.json();
         const headers = {
-            'Authorization':"Bearer " + providerToken.provider_token,
+            'Authorization':"Bearer " + providerToken.providerToken,
             'Client-Id': TWITCH_CLIENT_ID
         };
-        const resp = await fetch(`${urlApiTwitch}?user_id=${user.user_metadata.provider_id}`, {
+        const resp = await fetch(`${urlApiTwitch}?user_id=${userSession.providerId}`, {
             headers
         });
         const { data } = (await resp.json()) as {data: {type:StatusLive}[]};

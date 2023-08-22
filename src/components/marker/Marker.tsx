@@ -4,9 +4,7 @@ import { Link } from "@builder.io/qwik-city";
 import { setMarkerInStream } from '~/services';
 import { validateMarker } from '~/utilities';
 
-
-import { type Live } from '~/live/context/live.context';
-import { type MarkerType } from "~/core/supabase/supabase";
+import type{ Live, MarkerType } from '~/models';
 
 import { Tag } from "../tag/Tag";
 import Button from "../button/Button";

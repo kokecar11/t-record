@@ -1,29 +1,27 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
 
-import { supabase } from '~/core/supabase/supabase';
+import { supabase } from '~/supabase/supabase-browser';
 
-import { GlobalStore } from '~/core/context';
-import { AuthSessionContext } from '~/auth/context/auth.context';
-import { useAuth } from '~/auth/hooks/use-auth';
-import { getColorPreference, useToggleTheme } from '~/toggle-theme/hooks/use-toggle-theme';
+import { UserSessionContext, GlobalStore } from '~/context';
+import { getColorPreference, useAuthUser, useToggleTheme } from '~/hooks';
 
-import { type NavMenuI } from '~/core/interfaces/menu';
 
 import { Navbar } from '~/components/navbar/Navbar';
 import { Footer } from '~/components/footer/Footer';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import Button from '~/components/button/Button';
 
+import type { NavMenuI } from '~/models';
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
-
-  const authSession = useContext(AuthSessionContext);
+  
+  const userSession = useContext(UserSessionContext);
   const state = useContext(GlobalStore);
 
   const { setPreference } = useToggleTheme();
-  const { updateAuthCookies, handleSignInWithOAuth, handleRefreshTokenTwitch } = useAuth();
+  const { handleSignInWithOAuth } = useAuthUser();
   const navItems = useStore<NavMenuI>({
     navs:[
       {name:'Pricing', route:'/pricing'},
@@ -31,25 +29,24 @@ export default component$(() => {
   }) ;
 
 
-  useVisibleTask$ (async () => {
-    const {
-      data: { subscription: authListener },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      const currentUser = session;
-      authSession.value = currentUser ?? null;
-    });
-    await handleRefreshTokenTwitch();
-    return () => {
-      authListener?.unsubscribe();
-    };
-  });
-
-
   useVisibleTask$(async({track}) => {
     state.theme = getColorPreference();
-    track( () => [state.theme, authSession.value])
-    await updateAuthCookies(authSession.value);
-    await handleRefreshTokenTwitch();
+    const {data , error } = await supabase.auth.getUser();
+    if(data?.user?.id && !error){
+      userSession.userId = data.user.id;
+      userSession.isLoggedIn = true;
+      userSession.providerId = data.user.user_metadata.provider_id
+      userSession.nickname = data.user.user_metadata.nickname
+      userSession.avatarUrl = data.user.user_metadata.avatar_url
+    }
+    else{
+      userSession.userId = "";
+      userSession.isLoggedIn = false;
+      userSession.avatarUrl = "";
+      userSession.nickname = "";
+      userSession.providerId = "";
+    }
+    track( () => [state.theme, userSession])
     setPreference(state.theme);
   });
 
@@ -75,10 +72,10 @@ export default component$(() => {
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-2"}>            
 
         {
-          authSession.value !== null ? 
+          userSession.isLoggedIn ? 
           <AvatarNavbar 
-          altText={authSession.value?.user.user_metadata.nickname}
-          imageSrc={authSession.value?.user.user_metadata.avatar_url} />
+          altText='avatar-user'
+          imageSrc={userSession.avatarUrl} />
           :
           <Button class={"btn-secondary"} onClick$={()=>handleSignInWithOAuth('twitch')}>Sign in with Twitch</Button> 
           }

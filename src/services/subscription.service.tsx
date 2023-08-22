@@ -1,5 +1,5 @@
 import { server$ } from '@builder.io/qwik-city';
-import { supabase } from '~/core/supabase/supabase';
+import { supabase } from '~/supabase/supabase-browser';
 
 import { getPlans } from './plan.service';
 import { subscriptionUserAdapter } from '~/adapters';
