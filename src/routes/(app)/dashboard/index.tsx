@@ -28,7 +28,7 @@ import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdo
 export const onRequest: RequestHandler = async (request) => {
   const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, request)
   const providerCookie = request.cookie.get('_provider');
-  const userCookie = request.cookie.get('_user');
+  const userCookie = request.cookie.get('_user')
   if(!providerCookie && !userCookie){
     await supabase.auth.signOut();
     throw request.redirect(302, '/')
@@ -98,6 +98,9 @@ export const useCreateInstantMarker = routeAction$(
 
 export type OrderByMarker = 'stream_date'| 'created_at' | 'status';
 export type OrderMarkerByStatus = 'RECORDING'| 'RECORDED' | 'UNRECORDED';
+interface FiltersMarkerState {
+  byStatus: OrderMarkerByStatus[]
+}
 export default component$(() => {
 
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
@@ -123,33 +126,31 @@ export default component$(() => {
           {title: 'Recorded',counter: 0}
         ]
     });
-
+    const filterMarkerList = useStore<FiltersMarkerState>({
+      byStatus: ['RECORDED', 'RECORDING', 'UNRECORDED']
+    })
     const orderBySignal = useSignal<OrderByMarker>('stream_date');
     const orderByStatusSignal = useSignal<OrderMarkerByStatus>('UNRECORDED');
-    // const orderBy = $((order:OrderByMarker) =>{
-    //   orderBySignal.value = order
-    // })
-    const orderByStatusAction = $((status:OrderMarkerByStatus) =>{
-      orderByStatusSignal.value = status
+
+    const orderByStatusAction = $((status:OrderMarkerByStatus[]) =>{
+      filterMarkerList.byStatus = []
+      filterMarkerList.byStatus.push(...status)
     })
 
-    // const orderOptions:MenuDropdownOptions[] = [
-    //   {name: 'Stream date', action:$(() => orderBy('stream_date'))},
-    // ];
-
     const orderByStatusOptions: MenuDropdownOptions[] = [
-      {name: 'Unrecorded', action:$(() => orderByStatusAction('UNRECORDED'))},
-      {name: 'Recorded', action:$(() => orderByStatusAction('RECORDED'))},
-      {name: 'Recording', action:$(() => orderByStatusAction('RECORDING'))},
+      {name: 'All Markers', action:$(() => orderByStatusAction(['UNRECORDED', 'RECORDED', 'UNRECORDED']))},
+      {name: 'Unrecorded', action:$(() => orderByStatusAction(['UNRECORDED']))},
+      {name: 'Recorded', action:$(() => orderByStatusAction(['RECORDED']))},
+      {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING']))},
     ]
 
     useVisibleTask$(async ({track}) => { 
       markerList.isLoading = true;
       const stream = await getStatusStream();
-      markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, orderByStatusSignal.value);
+      markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, filterMarkerList);
       live.status = stream.status;
       live.isLoading = false;
-      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value, markerList.markers, twitchProvider])
+      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value, markerList.markers, twitchProvider, filterMarkerList.byStatus])
       setTimeout(() => markerList.isLoading = false, 300)
       markerList.isLoading = false
       await setSubscriptionByUser(userSession.userId);
@@ -166,7 +167,7 @@ export default component$(() => {
                   </Button>
                   <div class="relative">
                     <Button class="btn-accent flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
-                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> {capitalizeFirstLetter(orderByStatusSignal.value.toLowerCase())}
+                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> By status
                     </Button>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
                   </div>

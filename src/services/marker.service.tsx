@@ -5,7 +5,13 @@ import { supabase } from "~/supabase/supabase-browser";
 
 
 export const getMarkers = server$(async (fkUser:string, orderBy:any, orderMarkerByStatus:any) => {
-    const { data, error } = await supabase.from('task').select('*').eq('fk_user', fkUser).eq('status', orderMarkerByStatus).order(orderBy, {ascending:false});
+    console.log(orderMarkerByStatus)
+    const { data, error } = await supabase.from('task')
+    .select('*')
+    .eq('fk_user', fkUser)
+    .in('status', orderMarkerByStatus.byStatus)
+    .order(orderBy, {ascending:false})
+
     if (error){
         return [];
     }else{
