@@ -1,7 +1,6 @@
 import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
 import { useNavigate } from '@builder.io/qwik-city';
 
-import { supabase } from '~/supabase/supabase-browser';
 import { useAuthUser } from '~/hooks';
 import { UserSessionContext } from '~/context';
 import { capitalizeFirstLetter } from '~/utilities';
@@ -28,9 +27,7 @@ export const CardPricing = component$(
     const { handleSignInWithOAuth } = useAuthUser()
 
     useVisibleTask$(async ({track}) => {
-      const {data} = await supabase.auth.getUser()
-      userSession.email = data.user?.email
-      track(() => userSession.email)
+      track(() => [userSession.email, userSession.isLoggedIn])
     })
     return (
       <div

@@ -38,35 +38,28 @@ export default component$(() => {
   
   
   useVisibleTask$(async({track}) => {
-    state.theme = getColorPreference();
-    setPreference(state.theme);
-    const {data , error } = await supabase.auth.getSession();
+    state.theme = getColorPreference()
+    setPreference(state.theme)
+    const {data , error } = await supabase.auth.getSession()
     if(data.session?.user?.id && !error){
-      const user = data.session?.user;
-      userSession.userId = user.id;
-      userSession.isLoggedIn = true;
-      userSession.providerId = user.user_metadata.provider_id;
-      userSession.nickname = user.user_metadata.nickname;
-      userSession.avatarUrl = user.user_metadata.avatar_url;
-      twitchProvider.providerToken = data.session?.provider_token || '';
-      twitchProvider.providerRefreshToken = data.session?.provider_refresh_token || '';
-    }else{
-      userSession.userId = "";
-      userSession.isLoggedIn = false;
-      userSession.avatarUrl = "";
-      userSession.nickname = "";
-      userSession.providerId = "";
-      twitchProvider.providerToken = '';
-      twitchProvider.providerRefreshToken = ''
+      const user = data.session?.user
+      userSession.userId = user.id
+      userSession.isLoggedIn = true
+      userSession.providerId = user.user_metadata.provider_id
+      userSession.nickname = user.user_metadata.nickname
+      userSession.avatarUrl = user.user_metadata.avatar_url
+      userSession.email = user.email
+      twitchProvider.providerToken = data.session?.provider_token || ''
+      twitchProvider.providerRefreshToken = data.session?.provider_refresh_token || ''
     }
     
     await handleRefreshTokenTwitch(); 
-    const syb = await getSubscriptionByUser(userSession.userId);
+    const syb = await getSubscriptionByUser(userSession.userId)
     if (syb){
       subscriptionUser.status = syb.status
       subscriptionUser.plan = syb.plan
     }
-    track(() => [state.theme, userSession, twitchProvider, subscriptionUser]);
+    track(() => [state.theme, userSession, twitchProvider, subscriptionUser])
   });
   
 
