@@ -1,24 +1,20 @@
 import { $, component$, useContext, useSignal, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { type DocumentHead, Form, routeAction$, z, zod$ } from '@builder.io/qwik-city';
-import type { User } from 'supabase-auth-helpers-qwik';
+import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city';
+import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city';
+import { createServerClient, type User } from 'supabase-auth-helpers-qwik';
 
-import { supabase } from '~/core/supabase/supabase';
+import { supabase } from '~/supabase/supabase-browser';
 
-import {type ProviderI } from '~/core/interfaces/provider';
-import type { MarkerState } from '~/models';
+import { useLiveStream } from '~/hooks';
+import { UserSessionContext, TwitchProviderContext, LiveStreamContext } from '~/context';
+import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
+import { SUPABASE_ANON_KEY, SUPABASE_URL, capitalizeFirstLetter } from '~/utilities';
+
+import type { Database, MarkerState, TwitchProvider, UserSession } from '~/models';
 
 import { useModal } from '~/components/modal/hooks/use-modal';
 import { useToast } from '~/components/toast/hooks/use-toast';
-import { useLiveStream } from '~/live/hooks/use-live-stream';
 import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown';
-import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
-
-import { LiveStreamContext } from '~/live/context/live.context';
-import { AuthSessionContext } from '~/auth/context/auth.context';
-
-
-import { capitalizeFirstLetter } from '~/utilities';
-
 import Modal from '~/components/modal/Modal';
 import Button from '~/components/button/Button';
 import { Input } from '~/components/input/Input';
@@ -27,6 +23,17 @@ import { Icon, IconCatalog } from '~/components/icon/icon';
 import { Loader } from '~/components/loader/Loader';
 import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdown/Menu-dropdown';
 
+
+
+export const onRequest: RequestHandler = async (request) => {
+  const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, request)
+  const providerCookie = request.cookie.get('_provider');
+  const userCookie = request.cookie.get('_user')
+  if(!providerCookie && !userCookie){
+    await supabase.auth.signOut();
+    throw request.redirect(302, '/')
+  }
+};
 
 
 export const taskForm = zod$({
@@ -51,9 +58,9 @@ export const instantMarkerForm = zod$({
 
 export const useCreateMarker = routeAction$(
   async (dataForm, {cookie}) => {
-    const user:User =  cookie.get('_user')!.json()
+    const user:UserSession =  cookie.get('_user')!.json()
     const insertData = {
-      fk_user: user.id,
+      fk_user: user.userId,
       ...dataForm
     }
     const { error } = await supabase.from('task').insert(insertData)
@@ -72,7 +79,7 @@ export const useCreateMarker = routeAction$(
 
 export const useCreateInstantMarker = routeAction$(
   async (dataForm, {cookie}) => {
-    const provider:ProviderI = cookie.get('_provider')!.json();
+    const provider: TwitchProvider = cookie.get('_provider')!.json();
     const user:User =  cookie.get('_user')!.json()
     const responseStream = await markerInStream(provider,user, dataForm.desc_marker);
     
@@ -91,6 +98,9 @@ export const useCreateInstantMarker = routeAction$(
 
 export type OrderByMarker = 'stream_date'| 'created_at' | 'status';
 export type OrderMarkerByStatus = 'RECORDING'| 'RECORDED' | 'UNRECORDED';
+interface FiltersMarkerState {
+  byStatus: OrderMarkerByStatus[]
+}
 export default component$(() => {
 
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
@@ -100,7 +110,9 @@ export default component$(() => {
     const { isVisibleModal ,showModal } = useModal();
     const { setToast, Toasts } = useToast();
 
-    const authSession = useContext(AuthSessionContext);
+    // const authSession = useContext(AuthSessionContext);
+    const userSession = useContext(UserSessionContext);
+    const twitchProvider = useContext(TwitchProviderContext);
     const live = useContext(LiveStreamContext);
     
     const markerList = useStore<MarkerState>({
@@ -114,36 +126,34 @@ export default component$(() => {
           {title: 'Recorded',counter: 0}
         ]
     });
-
+    const filterMarkerList = useStore<FiltersMarkerState>({
+      byStatus: ['RECORDED', 'RECORDING', 'UNRECORDED']
+    })
     const orderBySignal = useSignal<OrderByMarker>('stream_date');
     const orderByStatusSignal = useSignal<OrderMarkerByStatus>('UNRECORDED');
-    // const orderBy = $((order:OrderByMarker) =>{
-    //   orderBySignal.value = order
-    // })
-    const orderByStatusAction = $((status:OrderMarkerByStatus) =>{
-      orderByStatusSignal.value = status
+
+    const orderByStatusAction = $((status:OrderMarkerByStatus[]) =>{
+      filterMarkerList.byStatus = []
+      filterMarkerList.byStatus.push(...status)
     })
 
-    // const orderOptions:MenuDropdownOptions[] = [
-    //   {name: 'Stream date', action:$(() => orderBy('stream_date'))},
-    // ];
-
     const orderByStatusOptions: MenuDropdownOptions[] = [
-      {name: 'Unrecorded', action:$(() => orderByStatusAction('UNRECORDED'))},
-      {name: 'Recorded', action:$(() => orderByStatusAction('RECORDED'))},
-      {name: 'Recording', action:$(() => orderByStatusAction('RECORDING'))},
+      {name: 'All Markers', action:$(() => orderByStatusAction(['UNRECORDED', 'RECORDED', 'UNRECORDED']))},
+      {name: 'Unrecorded', action:$(() => orderByStatusAction(['UNRECORDED']))},
+      {name: 'Recorded', action:$(() => orderByStatusAction(['RECORDED']))},
+      {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING']))},
     ]
 
     useVisibleTask$(async ({track}) => { 
       markerList.isLoading = true;
       const stream = await getStatusStream();
-      markerList.markers = await getMarkers(authSession.value?.user.id, orderBySignal.value, orderByStatusSignal.value);
+      markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, filterMarkerList);
       live.status = stream.status;
       live.isLoading = false;
-      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value, authSession.value])
+      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value, markerList.markers, twitchProvider, filterMarkerList.byStatus])
       setTimeout(() => markerList.isLoading = false, 300)
       markerList.isLoading = false
-      await setSubscriptionByUser(authSession.value.user.id);
+      await setSubscriptionByUser(userSession.userId);
     });
 
     return (
@@ -157,7 +167,7 @@ export default component$(() => {
                   </Button>
                   <div class="relative">
                     <Button class="btn-accent flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
-                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> {capitalizeFirstLetter(orderByStatusSignal.value.toLowerCase())}
+                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> By status
                     </Button>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
                   </div>
@@ -165,7 +175,7 @@ export default component$(() => {
                 </div>
                 <div class="grid grid-cols-1 justify-center items-center space-x-4 mt-4 sm:m-0">
                   <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
-                    const stream = await getStatusStream()
+                    const stream = await getStatusStream();
                     live.status = stream.status;
                     setToast({message:'Live status has been refreshed.'})
                   }}>

@@ -1,10 +1,4 @@
 import { createContextId } from "@builder.io/qwik";
-
-export interface Live {
-    status: StatusLive;
-    isLoading?: boolean;
-}
-
-export type StatusLive = 'offline' | 'live';
+import type { Live } from "~/models";
 
 export const LiveStreamContext = createContextId<Live>('live.stream-context');

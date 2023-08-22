@@ -1,30 +1,35 @@
 import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
 import {
   type DocumentHead,
-  routeLoader$,
   useNavigate,
+  type RequestHandler,
 } from '@builder.io/qwik-city';
-import { AuthSessionContext } from '~/auth/context/auth.context';
 
+import { UserSessionContext } from '~/context/user.context';
 import { Collapse } from '~/components/collapse/Collapse';
+import type { Database } from '~/models';
+import { createServerClient } from 'supabase-auth-helpers-qwik';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '~/utilities';
 
 
-export const useCheckAuth = routeLoader$(async ({ cookie, redirect }) => {
-  const providerCookie = cookie.get('_provider')
-  if (providerCookie) {
-    throw redirect(302, '/dashboard/')
+export const onRequest: RequestHandler = async (request) => {
+  const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, request)
+  const { data } = await supabase.auth.getSession();
+  if(data.session?.provider_token){
+    throw request.redirect(302, '/dashboard/')
   }
-  return
-})
+};
 
 export default component$(() => {
-  const authSession = useContext(AuthSessionContext)
+  const userSession = useContext(UserSessionContext)
   const nav = useNavigate()
 
 
   useVisibleTask$(async ({ track }) => {
-    track(() => authSession.value)
-    setTimeout(() => nav('/dashboard/'), 100)
+    track(() => userSession)
+    if(userSession.isLoggedIn){
+      setTimeout(() => nav('/dashboard/'), 100)
+    }
   })
 
   return (
@@ -33,7 +38,7 @@ export default component$(() => {
         <h1 class="font-bold text-center animate-fade-down text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-secondary max-w-[20ch] text-fluid-base leading-[1.3] mx-auto">
           Discover the power of organization on Twitch
         </h1>
-        <p class="lg:text-2xl text-lg md:text-xl font-light text-accent dark:text-white my-4 text-center animate-fade-down max-w-[60ch] mx-auto">
+        <p class="lg:text-2xl text-lg md:text-xl font-light text-white my-4 text-center animate-fade-down max-w-[60ch] mx-auto">
           We optimize your markers and turn them into chapters, allowing you to
           explore your most exciting moments with ease and speed.
         </p>

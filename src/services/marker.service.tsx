@@ -1,10 +1,17 @@
 import { server$ } from "@builder.io/qwik-city";
 import type { User } from "supabase-auth-helpers-qwik";
-import type { ProviderI } from "~/core/interfaces/provider";
-import { type MarkerType, supabase } from "~/core/supabase/supabase";
+import type{ MarkerType, TwitchProvider, UserSession } from "~/models";
+import { supabase } from "~/supabase/supabase-browser";
+
 
 export const getMarkers = server$(async (fkUser:string, orderBy:any, orderMarkerByStatus:any) => {
-    const { data, error } = await supabase.from('task').select('*').eq('fk_user', fkUser).eq('status', orderMarkerByStatus).order(orderBy, {ascending:false});
+    console.log(orderMarkerByStatus)
+    const { data, error } = await supabase.from('task')
+    .select('*')
+    .eq('fk_user', fkUser)
+    .in('status', orderMarkerByStatus.byStatus)
+    .order(orderBy, {ascending:false})
+
     if (error){
         return [];
     }else{
@@ -18,12 +25,12 @@ export const deleteMarker = server$(async (idMarker:number) => {
     .eq('id', idMarker)
 });
 
-export const markerInStream = server$(async (provider:ProviderI, user:User, markerDesc: string) => {
+export const markerInStream = server$(async (provider:TwitchProvider, user:User, markerDesc: string) => {
     const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
 
     const headers = {
-        'Authorization':"Bearer " + provider.provider_token,
+        'Authorization':"Bearer " + provider.providerToken,
         'Client-Id': TWITCH_CLIENT_ID
     };
   
@@ -39,15 +46,15 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
     
-    const provider:ProviderI = this.cookie.get('_provider')!.json();
-    const user:User = this.cookie.get('_user')!.json();
+    const provider:TwitchProvider = this.cookie.get('_provider')!.json();
+    const user:UserSession = this.cookie.get('_user')!.json();
 
     const headers = {
-        'Authorization':"Bearer " + provider.provider_token,
+        'Authorization':"Bearer " + provider.providerToken,
         'Client-Id': TWITCH_CLIENT_ID
     };
   
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${user.user_metadata.provider_id}&description=${markerTitle}`, {
+    const respStream = await fetch(`${urlApiTwitch}?user_id=${user.providerId}&description=${markerTitle}`, {
         method:'POST',
         headers
     });
@@ -60,13 +67,13 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
       if(isStartMarker){
         const { data } = await supabase.from('task')
         .update({ status: 'RECORDING', starts_at: position_seconds })
-        .eq('fk_user', user.id)
+        .eq('fk_user', user.userId)
         .eq('id', markerId).select()
         return { data }
       }else{
         const { data } = await supabase.from('task')
         .update({ status: 'RECORDED', ends_at: position_seconds })
-        .eq('fk_user', user.id)
+        .eq('fk_user', user.userId)
         .eq('id', markerId).select()
         return { data }
       }

@@ -1,7 +1,7 @@
 import { $, useContext } from "@builder.io/qwik";
-import { GlobalStore } from "~/core/context";
+import { GlobalStore } from "~/context";
 
-import type { ThemePreference } from "../interfaces/toggle-theme";
+import type { ThemePreference } from "~/models";
 
 export const getColorPreference = (): ThemePreference => {
     if (localStorage.getItem('theme-preference')) {

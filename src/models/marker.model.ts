@@ -1,3 +1,4 @@
+import type { Database } from "./schema.model";
 
 export interface Marker {
     fk_user: string;
@@ -18,3 +19,5 @@ export interface MarkerState {
     isLoading: boolean;
     indicators: {title: string, counter: number}[]
 }
+
+export type MarkerType = Database['public']['Tables']['task']['Row'];

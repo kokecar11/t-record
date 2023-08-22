@@ -1,12 +1,11 @@
-import { component$, useContext } from '@builder.io/qwik';
+import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
 import { useNavigate } from '@builder.io/qwik-city';
 
-import { AuthSessionContext } from '~/auth/context/auth.context';
-import { useAuth } from '~/auth/hooks/use-auth';
-
-import type { Plan } from '~/models';
-
+import { supabase } from '~/supabase/supabase-browser';
+import { useAuthUser } from '~/hooks';
+import { UserSessionContext } from '~/context';
 import { capitalizeFirstLetter } from '~/utilities';
+import type { Plan } from '~/models';
 
 import Button from '../button/Button';
 import { Tag } from '../tag/Tag';
@@ -24,9 +23,15 @@ export const CardPricing = component$(
     type,
     name,
   }: CardPricingProps) => {
-    const authSession = useContext(AuthSessionContext)
+    const userSession = useContext(UserSessionContext)
     const nav = useNavigate()
-    const { handleSignInWithOAuth } = useAuth()
+    const { handleSignInWithOAuth } = useAuthUser()
+
+    useVisibleTask$(async ({track}) => {
+      const {data} = await supabase.auth.getUser()
+      userSession.email = data.user?.email
+      track(() => userSession.email)
+    })
     return (
       <div
         class={`w-full sm:min-w-[20rem] max-w-sm p-0.5 border border-secondary rounded-lg ${
@@ -76,7 +81,7 @@ export const CardPricing = component$(
                 class={`sticky bottom-0 btn-secondary`}
                 id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
-                  if (authSession.value) {
+                  if (userSession.isLoggedIn) {
                     nav(link)
                   } else {
                     handleSignInWithOAuth('twitch')
@@ -90,8 +95,8 @@ export const CardPricing = component$(
                 class={`w-full btn-secondary`} 
                 id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
                 onClick$={() => {
-                  if(authSession.value){
-                    nav(`${link}${authSession.value?.user.email}`)
+                  if(userSession.isLoggedIn){
+                    nav(`${link}${userSession.email}`)
                   } else {
                     handleSignInWithOAuth('twitch')
                   }
