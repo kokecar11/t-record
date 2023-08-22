@@ -1,8 +1,6 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
 
-import { supabase } from '~/supabase/supabase-browser';
-
 import { UserSessionContext, GlobalStore } from '~/context';
 import { getColorPreference, useAuthUser, useToggleTheme } from '~/hooks';
 
@@ -13,6 +11,7 @@ import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import Button from '~/components/button/Button';
 
 import type { NavMenuI } from '~/models';
+import { supabase } from '~/supabase/supabase-browser';
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
@@ -38,15 +37,9 @@ export default component$(() => {
       userSession.providerId = data.user.user_metadata.provider_id
       userSession.nickname = data.user.user_metadata.nickname
       userSession.avatarUrl = data.user.user_metadata.avatar_url
+      userSession.email = data.user.email
     }
-    else{
-      userSession.userId = "";
-      userSession.isLoggedIn = false;
-      userSession.avatarUrl = "";
-      userSession.nickname = "";
-      userSession.providerId = "";
-    }
-    track( () => [state.theme, userSession])
+    track( () => [state.theme, userSession.email, userSession.avatarUrl, userSession.userId])
     setPreference(state.theme);
   });
 

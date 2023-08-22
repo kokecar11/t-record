@@ -24,7 +24,6 @@ import { Loader } from '~/components/loader/Loader';
 import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdown/Menu-dropdown';
 
 
-
 export const onRequest: RequestHandler = async (request) => {
   const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, request)
   const providerCookie = request.cookie.get('_provider');
@@ -34,7 +33,6 @@ export const onRequest: RequestHandler = async (request) => {
     throw request.redirect(302, '/')
   }
 };
-
 
 export const taskForm = zod$({
   title: z.string({
@@ -110,7 +108,6 @@ export default component$(() => {
     const { isVisibleModal ,showModal } = useModal();
     const { setToast, Toasts } = useToast();
 
-    // const authSession = useContext(AuthSessionContext);
     const userSession = useContext(UserSessionContext);
     const twitchProvider = useContext(TwitchProviderContext);
     const live = useContext(LiveStreamContext);
@@ -130,27 +127,37 @@ export default component$(() => {
       byStatus: ['RECORDED', 'RECORDING', 'UNRECORDED']
     })
     const orderBySignal = useSignal<OrderByMarker>('stream_date');
-    const orderByStatusSignal = useSignal<OrderMarkerByStatus>('UNRECORDED');
+    const orderByStatusSignal = useSignal<number>(0);
 
-    const orderByStatusAction = $((status:OrderMarkerByStatus[]) =>{
+    const orderByStatusAction = $((status:OrderMarkerByStatus[], ord: number) =>{
       filterMarkerList.byStatus = []
       filterMarkerList.byStatus.push(...status)
+      orderByStatusSignal.value = ord
     })
 
     const orderByStatusOptions: MenuDropdownOptions[] = [
-      {name: 'All Markers', action:$(() => orderByStatusAction(['UNRECORDED', 'RECORDED', 'UNRECORDED']))},
-      {name: 'Unrecorded', action:$(() => orderByStatusAction(['UNRECORDED']))},
-      {name: 'Recorded', action:$(() => orderByStatusAction(['RECORDED']))},
-      {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING']))},
+      {name: 'All status', action:$(() => orderByStatusAction(['UNRECORDED', 'RECORDED', 'UNRECORDED'], 0))},
+      {name: 'Unrecorded', action:$(() => orderByStatusAction(['UNRECORDED'], 1))},
+      {name: 'Recorded', action:$(() => orderByStatusAction(['RECORDED'], 2))},
+      {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING'], 3))},
     ]
 
     useVisibleTask$(async ({track}) => { 
-      markerList.isLoading = true;
-      const stream = await getStatusStream();
-      markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, filterMarkerList);
-      live.status = stream.status;
-      live.isLoading = false;
-      track(()=> [markerList.isLoading, live.status, live.isLoading, orderBySignal.value, orderByStatusSignal.value, markerList.markers, twitchProvider, filterMarkerList.byStatus])
+      markerList.isLoading = true
+      const stream = await getStatusStream()
+      markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, filterMarkerList)
+      live.status = stream.status
+      live.isLoading = false
+      track(()=> [
+        markerList.markers,
+        markerList.isLoading,
+        live.status,
+        live.isLoading,
+        orderBySignal.value, 
+        orderByStatusSignal.value,
+        twitchProvider.providerRefreshToken,
+        twitchProvider.providerToken,
+        filterMarkerList.byStatus])
       setTimeout(() => markerList.isLoading = false, 300)
       markerList.isLoading = false
       await setSubscriptionByUser(userSession.userId);
@@ -167,7 +174,7 @@ export default component$(() => {
                   </Button>
                   <div class="relative">
                     <Button class="btn-accent flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
-                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> By status
+                      <Icon name={IconCatalog.feEqualizer} class="mr-1" /> {orderByStatusOptions[orderByStatusSignal.value].name}
                     </Button>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
                   </div>

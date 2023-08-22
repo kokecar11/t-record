@@ -2,13 +2,12 @@
 import { $ } from "@builder.io/qwik";
 import { server$ } from "@builder.io/qwik-city";
 import { supabase } from "~/supabase/supabase-browser";
-import { cookieProvider, cookieUserSession, cookiesOptions } from "~/utilities";
+import { TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, cookieProvider, cookieUserSession, cookiesOptions } from "~/utilities";
 import { type Provider } from "@supabase/supabase-js";
 import type { TwitchProvider, UserSession } from "~/models";
 
 
-const TWITCH_CLIENT_SECRET = import.meta.env.VITE_TWITCH_CLIENT_SECRET
-const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID
+
 export const useAuthUser = () => {
 
     const handleSignInWithOAuth = $(async (provider:Provider = 'twitch') => { 

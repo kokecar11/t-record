@@ -69,7 +69,7 @@ export default component$(() => {
   useVisibleTask$(async() => {
     
     const { data: authListener } = await supabase.auth.onAuthStateChange(async (event:AuthChangeEvent, session:any) => {
-      if (event === 'SIGNED_IN'){
+      if (event === 'SIGNED_IN' && session){
         userSessionStore.userId = session?.user?.id;
         userSessionStore.isLoggedIn = true;
         userSessionStore.avatarUrl = session?.user?.user_metadata.avatar_url;
