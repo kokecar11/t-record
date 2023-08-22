@@ -1,4 +1,5 @@
-import type { Live } from "~/live/context/live.context";
+import type { Live } from "~/models";
+
 
 export const validateMarker = (status:string, live:Live, streamDate:Date, isInit:boolean) => {
     const stream = new Date(streamDate).toISOString();
