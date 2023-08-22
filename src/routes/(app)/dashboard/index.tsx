@@ -8,7 +8,7 @@ import { supabase } from '~/supabase/supabase-browser';
 import { useLiveStream } from '~/hooks';
 import { UserSessionContext, TwitchProviderContext, LiveStreamContext } from '~/context';
 import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
-import { SUPABASE_ANON_KEY, SUPABASE_URL, capitalizeFirstLetter } from '~/utilities';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '~/utilities';
 
 import type { Database, MarkerState, TwitchProvider, UserSession } from '~/models';
 
