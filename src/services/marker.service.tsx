@@ -5,7 +5,7 @@ import { supabase } from "~/supabase/supabase-browser";
 
 
 export const getMarkers = server$(async (fkUser:string, orderBy:any, orderMarkerByStatus:any) => {
-    console.log(orderMarkerByStatus)
+    
     const { data, error } = await supabase.from('task')
     .select('*')
     .eq('fk_user', fkUser)
