@@ -6,3 +6,4 @@ export * from './twitch.model';
 export * from './schema.model';
 export * from './live.model';
 export * from './menu.model';
+export * from './theme.model';

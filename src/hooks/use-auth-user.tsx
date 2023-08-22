@@ -1,35 +1,39 @@
 
-import { type CookieOptions, server$ } from "@builder.io/qwik-city";
+import { $ } from "@builder.io/qwik";
+import { server$ } from "@builder.io/qwik-city";
+import { supabase } from "~/supabase/supabase-browser";
+import { cookieProvider, cookieUserSession, cookiesOptions } from "~/utilities";
+import { type Provider } from "@supabase/supabase-js";
 import type { TwitchProvider, UserSession } from "~/models";
 
-const cookieUserSession = '_user';
-const cookieProvider = '_provider';
-
-const options: CookieOptions = {
-    httpOnly: true,
-    maxAge: 14400,
-    path: '/',
-    sameSite: 'strict',
-};
 
 const TWITCH_CLIENT_SECRET = import.meta.env.VITE_TWITCH_CLIENT_SECRET
 const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID
 export const useAuthUser = () => {
- 
+
+    const handleSignInWithOAuth = $(async (provider:Provider = 'twitch') => { 
+        await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+                scopes:'channel:manage:broadcast user:read:broadcast channel_read',
+            }
+        });
+    });
+
     const authUserCookies = server$(async function(provider:TwitchProvider, userSession:UserSession) {
         if(provider){
             const providerCookie = {
                 'providerToken':provider.providerToken,
                 'providerRefreshToken':provider.providerRefreshToken,
             }
-            this.cookie.set(cookieProvider, providerCookie, options);
+            this.cookie.set(cookieProvider, providerCookie, cookiesOptions);
         } 
         if (userSession){
             const userSessionCookie = {
                 'userId': userSession.userId,
                 'providerId': userSession.providerId,
             }
-            this.cookie.set(cookieUserSession, userSessionCookie, options);   
+            this.cookie.set(cookieUserSession, userSessionCookie, cookiesOptions);   
         }
     });
 
@@ -55,7 +59,7 @@ export const useAuthUser = () => {
                     'providerToken':data.access_token,
                     'providerRefreshToken':data.refresh_token,
                 } 
-                this.cookie.set(cookieProvider, providerCookie, options);
+                this.cookie.set(cookieProvider, providerCookie, cookiesOptions);
             }            
         }
         
@@ -64,5 +68,6 @@ export const useAuthUser = () => {
     return {
         authUserCookies,
         handleRefreshTokenTwitch,
+        handleSignInWithOAuth,
     }
 }

@@ -1,8 +1,6 @@
 import { createBrowserClient } from "supabase-auth-helpers-qwik";
 import type { Database } from "~/models";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utilities";
 
   
 export const supabase = createBrowserClient<Database>(

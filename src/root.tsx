@@ -1,14 +1,19 @@
-import { component$, useContextProvider, useSignal, useStore } from '@builder.io/qwik';
+import { component$, useContextProvider, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { QwikCityProvider, RouterOutlet, ServiceWorkerRegister } from '@builder.io/qwik-city';
+import { type AuthChangeEvent } from '@supabase/supabase-js';
+import { supabase } from './supabase/supabase-browser';
 import { RouterHead } from './components/router-head/router-head';
 import { QwikPartytown } from './components/partytown/partytown';
-import type { Session } from 'supabase-auth-helpers-qwik';
-import { AuthSessionContext } from './auth/context/auth.context';
-import { GlobalStore, type SiteStore } from './core/context';
-import { type Live, LiveStreamContext } from './live/context/live.context';
-import { SubscriptionUserContext } from './context/subscription.context';
-import type { SubscriptionUser } from './models';
+import { useAuthUser } from './hooks';
+import { 
+  UserSessionContext,
+  TwitchProviderContext,
+  SubscriptionUserContext,
+  LiveStreamContext,
+  GlobalStore } from './context';
+import type{ UserSession, SubscriptionUser, TwitchProvider, Live, SiteStore } from './models';
 import './global.css';
+
 
 export default component$(() => {
   /**
@@ -17,22 +22,34 @@ export default component$(() => {
    *
    * Dont remove the `<head>` and `<body>` elements.
    */
-  const authSessionSignal = useSignal<Session | null>();
+
+  const userSessionStore = useStore<UserSession>({
+    userId: '',
+    isLoggedIn: false,
+    providerId: '',
+    email:'',
+  });
   const subscriptionUserStore = useStore<SubscriptionUser>({
     status: 'on_trial',
     plan: 'STARTER'
-  })
+  });
   const siteStore = useStore<SiteStore>({
     theme: 'dark',
   });
   const liveStreamStore = useStore<Live>({
     status: 'offline'
-  })
-  
-  useContextProvider(AuthSessionContext, authSessionSignal);
+  });
+  const twitchProviderStore = useStore<TwitchProvider>({
+    providerToken: '',
+    providerRefreshToken: '' 
+  });  
+
   useContextProvider(GlobalStore, siteStore);
   useContextProvider(LiveStreamContext, liveStreamStore);
   useContextProvider(SubscriptionUserContext, subscriptionUserStore);
+
+  useContextProvider(UserSessionContext, userSessionStore);
+  useContextProvider(TwitchProviderContext, twitchProviderStore);
 
   const analyticsScript = `
     window.dataLayer = window.dataLayer || [];
@@ -47,6 +64,41 @@ export default component$(() => {
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-MLT5XFTT');
   `;
+  const { authUserCookies } = useAuthUser()
+
+  useVisibleTask$(async() => {
+    
+    const { data: authListener } = await supabase.auth.onAuthStateChange(async (event:AuthChangeEvent, session:any) => {
+      if (event === 'SIGNED_IN'){
+        userSessionStore.userId = session?.user?.id;
+        userSessionStore.isLoggedIn = true;
+        userSessionStore.avatarUrl = session?.user?.user_metadata.avatar_url;
+        userSessionStore.nickname = session?.user?.user_metadata.nickname;
+        userSessionStore.providerId = session?.user?.user_metadata.provider_id;
+        userSessionStore.email = session?.user?.email;
+        if(session.provider_token){
+          twitchProviderStore.providerToken = session?.provider_token;
+          twitchProviderStore.providerRefreshToken = session?.provider_refresh_token;
+          await authUserCookies(twitchProviderStore, userSessionStore);
+        }
+      }
+      if (event === 'SIGNED_OUT'){
+        userSessionStore.userId = "";
+        userSessionStore.isLoggedIn = false;
+        userSessionStore.avatarUrl = "";
+        userSessionStore.nickname = "";
+        userSessionStore.providerId = "";
+        userSessionStore.email = "";
+        twitchProviderStore.providerToken = "";
+        twitchProviderStore.providerRefreshToken = "";
+      }
+    }
+    
+    )
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  });
 
   return (
     <QwikCityProvider>

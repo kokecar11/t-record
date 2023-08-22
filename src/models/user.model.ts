@@ -4,4 +4,5 @@ export type UserSession ={
     avatarUrl?: string;
     nickname?: string;
     providerId: string;
+    email?: string;
 }
