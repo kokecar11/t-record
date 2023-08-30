@@ -50,7 +50,7 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
     })
 
   return (
-    <div class={`max-w-2xl bg-white bg-opacity-20 dark:bg-accent shadow-lg rounded-lg overflow-hidden`}>
+    <div class={`max-w-2xl bg-primary shadow-lg rounded-lg overflow-hidden`}>
         <div class="p-4 relative">
             <div class="flex mb-2">
                 <div class="flex-1 space-x-2">
@@ -62,28 +62,28 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
                     <FePencil class="text-accent text-xl dark:text-white" />
                 </Link> */}
                 <Link class="flex-none rounded-lg hover:bg-primary p-1 cursor-pointer transition duration-150 ease-in-out" onClick$={onDelete}>
-                    <Icon name={IconCatalog.feTrash} class="text-accent text-xl dark:text-white" />
+                    <Icon name={IconCatalog.feTrash} class="text-xl text-white" />
                 </Link>
             </div>
             {/* <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={menuOptions}/> */}
             
-            <h2 class="text-accent dark:text-white capitalize font-bold text-lg">{marker.title}</h2>
+            <h2 class="text-white capitalize font-bold text-lg">{marker.title}</h2>
 
             
-            <div class="my-2 text-accent text-sm dark:text-white dark:text-opacity-90">
+            <div class="my-2 text-sm text-white text-opacity-90">
                 <div class="mt-4">
-                    <span class="flex text-sm text-accent dark:text-white dark:text-opacity-70">{`Starts at ${toTimeString(marker.starts_at)}`}</span>
+                    <span class="flex text-sm text-white dark:text-opacity-70">{`Starts at ${toTimeString(marker.starts_at)}`}</span>
                 </div>
 
                 <div class="mt-4">
-                    <span class="flex text-sm text-accent dark:text-white dark:text-opacity-70">{`Ends at ${toTimeString(marker.ends_at)}`}</span>
+                    <span class="flex text-sm text-white text-opacity-70">{`Ends at ${toTimeString(marker.ends_at)}`}</span>
                 </div>                            
             </div>
             
         </div>
 
         <div class="flex place-content-center px-4 pb-3">
-            <Button class={`w-full text-sm ${btnMarker.isInit ? 'btn-primary': 'btn-live'}`}
+            <Button class={`w-full text-sm ${btnMarker.isInit ? 'btn-accent': 'btn-live'}`}
                     onClick$={async () => { 
                         const desc = marker.title;
                         const response = await setMarkerInStream(btnMarker.isInit, marker.id, desc);

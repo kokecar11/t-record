@@ -1,9 +1,9 @@
 import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik';
 
-import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown';
+import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown'
 
-import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown';
-import { IconCatalog } from '../icon/icon';
+import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown'
+import { IconCatalog } from '../icon/icon'
 import stylesAvatarNavbar from './Avatar-navbar.css?inline'
 
 export type ToggleAvatarProps = {
@@ -12,9 +12,9 @@ export type ToggleAvatarProps = {
 }
 
 export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
-    useStyles$(stylesAvatarNavbar);
+    useStyles$(stylesAvatarNavbar)
 
-    const isOpenDropdown = useSignal(false);
+    const isOpenDropdown = useSignal(false)
     const onCloseDropdown = $( () => !isOpenDropdown.value)
     const { showMenuDropdown } = useMenuDropdown()
     const menuOptions: MenuDropdownOptions[] = [
@@ -26,7 +26,7 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     useOnDocument('keyup', $((event)=>{
       const key = event as KeyboardEvent
       if(key.code === 'Escape') onCloseDropdown()
-    }));
+    }))
     
     return (
         <div class="relative">

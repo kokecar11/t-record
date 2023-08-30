@@ -1,6 +1,6 @@
 
 import { $ } from "@builder.io/qwik";
-import { server$ } from "@builder.io/qwik-city";
+import { server$, } from "@builder.io/qwik-city";
 import { supabase } from "~/supabase/supabase-browser";
 import { TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, cookieProvider, cookieUserSession, cookiesOptions } from "~/utilities";
 import { type Provider } from "@supabase/supabase-js";
@@ -22,8 +22,8 @@ export const useAuthUser = () => {
     const authUserCookies = server$(async function(provider:TwitchProvider, userSession:UserSession) {
         if(provider){
             const providerCookie = {
-                'providerToken':provider.providerToken,
-                'providerRefreshToken':provider.providerRefreshToken,
+                'providerToken': provider.providerToken,
+                'providerRefreshToken': provider.providerRefreshToken,
             }
             this.cookie.set(cookieProvider, providerCookie, cookiesOptions);
         } 
@@ -37,7 +37,7 @@ export const useAuthUser = () => {
     });
 
     const handleRefreshTokenTwitch = server$( async function() {
-        const provider:TwitchProvider = this.cookie.get('_provider')!.json();
+        const provider:TwitchProvider = this.cookie.get(cookieProvider)!.json();
         const headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         };

@@ -14,5 +14,7 @@ export const onGet = async (request: RequestEvent) => {
   await supabase.auth.signOut()
   request.cookie.delete(cookieUserSession, cookiesOptions)
   request.cookie.delete(cookieProvider, cookiesOptions)
+  request.cookie.delete('sb-access-token', cookiesOptions)
+  request.cookie.delete('sb-refresh-token', cookiesOptions)
   throw request.redirect(302, '/')
 };

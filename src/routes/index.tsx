@@ -1,35 +1,33 @@
-import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik'
 import {
   type DocumentHead,
   useNavigate,
   type RequestHandler,
-} from '@builder.io/qwik-city';
+} from '@builder.io/qwik-city'
 
-import { UserSessionContext } from '~/context/user.context';
-import { Collapse } from '~/components/collapse/Collapse';
-import type { Database } from '~/models';
-import { createServerClient } from 'supabase-auth-helpers-qwik';
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '~/utilities';
+import { UserSessionContext } from '~/context'
+import { Collapse } from '~/components/collapse/Collapse'
+import { cookieProvider } from '~/utilities'
 
 
 export const onRequest: RequestHandler = async (request) => {
-  const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, request)
-  const { data } = await supabase.auth.getSession();
-  if(data.session?.provider_token){
-    throw request.redirect(302, '/dashboard/')
+  const providerCookie = request.cookie.get(cookieProvider);
+  if(providerCookie){
+    throw request.redirect(302, '/dashboard')
   }
 };
+
 
 export default component$(() => {
   const userSession = useContext(UserSessionContext)
   const nav = useNavigate()
 
+  if(userSession.isLoggedIn){
+    setTimeout(() => nav('/dashboard'), 1)
+  }
 
   useVisibleTask$(async ({ track }) => {
     track(() => userSession)
-    if(userSession.isLoggedIn){
-      setTimeout(() => nav('/dashboard/'), 100)
-    }
   })
 
   return (

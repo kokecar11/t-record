@@ -1,16 +1,16 @@
 import { $, component$, useContext, useSignal, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city';
 import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city';
-import { createServerClient, type User } from 'supabase-auth-helpers-qwik';
+import { type User } from 'supabase-auth-helpers-qwik';
 
 import { supabase } from '~/supabase/supabase-browser';
 
 import { useLiveStream } from '~/hooks';
 import { UserSessionContext, TwitchProviderContext, LiveStreamContext } from '~/context';
 import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '~/utilities';
+import { cookieProvider, cookieUserSession } from '~/utilities';
 
-import type { Database, MarkerState, TwitchProvider, UserSession } from '~/models';
+import type { MarkerState, TwitchProvider, UserSession } from '~/models';
 
 import { useModal } from '~/components/modal/hooks/use-modal';
 import { useToast } from '~/components/toast/hooks/use-toast';
@@ -25,12 +25,9 @@ import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdo
 
 
 export const onRequest: RequestHandler = async (request) => {
-  const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, request)
-  const providerCookie = request.cookie.get('_provider');
-  const userCookie = request.cookie.get('_user')
-  if(!providerCookie && !userCookie){
-    await supabase.auth.signOut();
-    throw request.redirect(302, '/')
+  const providerCookie = request.cookie.get('sb-access-token');
+  if(!providerCookie){
+    throw request.redirect(302, '/logout')
   }
 };
 
@@ -56,12 +53,12 @@ export const instantMarkerForm = zod$({
 
 export const useCreateMarker = routeAction$(
   async (dataForm, {cookie}) => {
-    const user:UserSession =  cookie.get('_user')!.json()
+    const user:UserSession =  cookie.get(cookieUserSession)!.json()
     const insertData = {
       fk_user: user.userId,
       ...dataForm
     }
-    const { error } = await supabase.from('task').insert(insertData)
+    const { error } = await supabase.from('markers').insert(insertData)
     if(error){
       return {
         success: false,
@@ -77,9 +74,9 @@ export const useCreateMarker = routeAction$(
 
 export const useCreateInstantMarker = routeAction$(
   async (dataForm, {cookie}) => {
-    const provider: TwitchProvider = cookie.get('_provider')!.json();
-    const user:User =  cookie.get('_user')!.json()
-    const responseStream = await markerInStream(provider,user, dataForm.desc_marker);
+    const provider: TwitchProvider = cookie.get(cookieProvider)!.json();
+    const user:User =  cookie.get(cookieUserSession)!.json()
+    const responseStream = await markerInStream(provider, user, dataForm.desc_marker);
     
     if(responseStream.status === 404){
       return {
@@ -169,11 +166,11 @@ export default component$(() => {
             <div class="w-full container mx-auto px-4 py-6 h-full">
               <div class="gap-y-4 sm:flex sm:space-x-4">
                 <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
-                  <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showModal}>
+                  <Button class="btn-primary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showModal}>
                     <Icon name={IconCatalog.fePlus} class="mr-1" /> New task
                   </Button>
                   <div class="relative">
-                    <Button class="btn-accent flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
+                    <Button class="btn-primary flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
                       <Icon name={IconCatalog.feEqualizer} class="mr-1" /> {orderByStatusOptions[orderByStatusSignal.value].name}
                     </Button>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
@@ -181,7 +178,7 @@ export default component$(() => {
                   
                 </div>
                 <div class="grid grid-cols-1 justify-center items-center space-x-4 mt-4 sm:m-0">
-                  <Button class="btn-accent flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
+                  <Button class="btn-primary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
                     const stream = await getStatusStream();
                     live.status = stream.status;
                     setToast({message:'Live status has been refreshed.'})
