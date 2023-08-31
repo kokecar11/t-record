@@ -7,6 +7,9 @@ import { join } from "path";
 
 export default defineConfig(() => {
   return {
+    optimizeDeps:{
+      include:["@supabase/supabase-js", "@supabase/auth-helpers-shared", "cross-fetch"]
+    },
     plugins: [
       qwikCity(),
       qwikVite(),

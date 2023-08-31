@@ -1,5 +1,6 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
+import { supabase } from '~/supabase/supabase-browser';
 
 import { UserSessionContext, GlobalStore } from '~/context';
 import { getColorPreference, useAuthUser, useToggleTheme } from '~/hooks';
@@ -11,16 +12,16 @@ import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
 import Button from '~/components/button/Button';
 
 import type { NavMenuI } from '~/models';
-import { supabase } from '~/supabase/supabase-browser';
+
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
+  const { handleSignInWithOAuth } = useAuthUser();
   
   const userSession = useContext(UserSessionContext);
   const state = useContext(GlobalStore);
 
   const { setPreference } = useToggleTheme();
-  const { handleSignInWithOAuth } = useAuthUser();
   const navItems = useStore<NavMenuI>({
     navs:[
       {name:'Pricing', route:'/pricing'},
@@ -30,7 +31,8 @@ export default component$(() => {
 
   useVisibleTask$(async({track}) => {
     state.theme = getColorPreference();
-    const {data , error } = await supabase.auth.getUser();
+    const {data , error } = await supabase.auth.getUser()
+    
     if(data?.user?.id && !error){
       userSession.userId = data.user.id;
       userSession.isLoggedIn = true;
@@ -39,7 +41,7 @@ export default component$(() => {
       userSession.avatarUrl = data.user.user_metadata.avatar_url
       userSession.email = data.user.email
     }
-    track( () => [state.theme, userSession.email, userSession.avatarUrl, userSession.userId])
+    track( () => [state.theme])
     setPreference(state.theme);
   });
 
@@ -70,7 +72,7 @@ export default component$(() => {
           altText='avatar-user'
           imageSrc={userSession.avatarUrl} />
           :
-          <Button class={"btn-secondary"} onClick$={()=>handleSignInWithOAuth('twitch')}>Sign in with Twitch</Button> 
+          <Button class={"btn-secondary"} onClick$={ () => handleSignInWithOAuth('twitch')}>Sign in with Twitch</Button> 
           }
       </div>
     </Navbar>

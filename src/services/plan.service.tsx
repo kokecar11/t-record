@@ -4,7 +4,7 @@ import { supabase } from '~/supabase/supabase-browser';
 import type { Plan } from "~/models";
 
 export const getPlans = server$(async () => {
-  const { data, error } = await supabase.from('plan').select('*').order('price');
+  const { data, error } = await supabase.from('plan').select('*').order('price_monthly, price_yearly');
   if (error){
     return [];
   }else{
