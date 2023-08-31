@@ -138,13 +138,14 @@ export default component$(() => {
       {name: 'Recorded', action:$(() => orderByStatusAction(['RECORDED'], 2))},
       {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING'], 3))},
     ]
-
+    
     useVisibleTask$(async ({track}) => { 
       markerList.isLoading = true
       const stream = await getStatusStream()
       markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, filterMarkerList)
       live.status = stream.status
       live.isLoading = false
+      await setSubscriptionByUser(userSession.userId);
       track(()=> [
         markerList.markers,
         markerList.isLoading,
@@ -155,9 +156,9 @@ export default component$(() => {
         twitchProvider.providerRefreshToken,
         twitchProvider.providerToken,
         filterMarkerList.byStatus])
-      setTimeout(() => markerList.isLoading = false, 300)
-      markerList.isLoading = false
-      await setSubscriptionByUser(userSession.userId);
+        setTimeout(() => markerList.isLoading = false, 300)
+        markerList.isLoading = false
+
     });
 
     return (

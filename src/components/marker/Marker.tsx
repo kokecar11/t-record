@@ -83,7 +83,7 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
         </div>
 
         <div class="flex place-content-center px-4 pb-3">
-            <Button class={`w-full text-sm ${btnMarker.isInit ? 'btn-accent': 'btn-live'}`}
+            <Button class={`w-full text-sm ${btnMarker.isInit ? 'btn-secondary': 'btn-live'}`}
                     onClick$={async () => { 
                         const desc = marker.title;
                         const response = await setMarkerInStream(btnMarker.isInit, marker.id, desc);
