@@ -10,6 +10,5 @@
 }
   
 .navbar {
-    @apply sticky top-0 z-10 bg-transparent backdrop-filter backdrop-blur-lg border-b border-secondary border-opacity-30
-     dark:border-secondary dark:border-opacity-30 dark:backdrop-blur-lg 
+    @apply sticky top-0 z-10 bg-transparent backdrop-filter backdrop-blur-lg
 }

@@ -4,13 +4,13 @@ import { useNavigate } from '@builder.io/qwik-city';
 import { useAuthUser } from '~/hooks';
 import { UserSessionContext } from '~/context';
 import { capitalizeFirstLetter } from '~/utilities';
-import type { Plan } from '~/models';
+import type { PlanAdapter } from '~/models';
 
 import Button from '../button/Button';
 import { Tag } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon';
 
-export type CardPricingProps = Plan;
+export type CardPricingProps = PlanAdapter;
 
 export const CardPricing = component$(
   ({

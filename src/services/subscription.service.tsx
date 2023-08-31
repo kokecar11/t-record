@@ -25,6 +25,6 @@ export const setSubscriptionByUser = async (fkUser:string) => {
   if (subscriptionByUser === null){
     const plans = await getPlans();
     const starterPlan = plans.filter((plan) => plan.name === 'STARTER')[0]
-    await supabase.from('subscription').insert({fk_user: fkUser, fk_plan:starterPlan.id, status:'on_trial'});
+    await supabase.from('subscription').insert({fk_user: fkUser, fk_plan:starterPlan.id, status:'active'});
   }
 };

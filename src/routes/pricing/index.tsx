@@ -7,6 +7,7 @@ import { useTogglePricing } from '~/hooks';
 
 import { CardPricing } from '~/components/card-pricing/Card-pricing';
 import { TogglePricing } from '~/components/toggle-pricing/Toggle-pricing';
+import { plansAdapter } from '~/adapters';
 
 
 export default component$(() => {
@@ -14,8 +15,9 @@ export default component$(() => {
   useContextProvider(TypeSubscriptionContext, typeSubscription);  
   
   useTask$(async ({track}) => {
-    track(() => planStore.plans)
-    planStore.plans.push(...await getPlans());
+    track(() => [planStore.plans, typeSubscription.value])
+    const plans = await getPlans()
+    planStore.plans = plansAdapter(plans)
   });
 
 

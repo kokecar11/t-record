@@ -1,74 +1,89 @@
-import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Link, useLocation, useNavigate } from '@builder.io/qwik-city';
+import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik'
+import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
 
-import { supabase } from '~/supabase/supabase-browser';
 import { 
   UserSessionContext,
   TwitchProviderContext,
   SubscriptionUserContext,
-  GlobalStore } from '~/context';
+  GlobalStore } from '~/context'
 
-import { getSubscriptionByUser } from '~/services';
-import { getColorPreference, useToggleTheme, useAuthUser } from '~/hooks';
-import type { NavMenuI } from '~/models';
 
-import { Navbar } from '~/components/navbar/Navbar';
-import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
-import { FooterTag } from '~/components/footer-tag/Footer-tag';
-import { Live } from '~/components/live/Live';
-import Button from '~/components/button/Button';
-import { Icon, IconCatalog } from '~/components/icon/icon';
-import { Tag } from '~/components/tag/Tag';
+import { getColorPreference, useAuthUser, useToggleTheme } from '~/hooks'
+import type { NavMenuI } from '~/models'
+
+import { Navbar } from '~/components/navbar/Navbar'
+import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar'
+
+import { Footer } from '~/components/footer/Footer'
+import { Live } from '~/components/live/Live'
+import { supabase } from '~/supabase/supabase-browser'
+import Button from '~/components/button/Button'
+import { Tag } from '~/components/tag/Tag'
+import { Icon, IconCatalog } from '~/components/icon/icon'
+import type { AuthChangeEvent } from '@supabase/supabase-js'
+import { getSubscriptionByUser } from '~/services'
+
 
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
   const nav = useNavigate()
 
-  const userSession = useContext(UserSessionContext);
-  const twitchProvider = useContext(TwitchProviderContext);
-  const subscriptionUser = useContext(SubscriptionUserContext);
-  const state = useContext(GlobalStore);
 
-  const { setPreference } = useToggleTheme();
+  const userSession = useContext(UserSessionContext)
+  const twitchProvider = useContext(TwitchProviderContext)
+  const subscriptionUser = useContext(SubscriptionUserContext)
+  const state = useContext(GlobalStore)
+
+  const { setPreference } = useToggleTheme()
   const { handleRefreshTokenTwitch } = useAuthUser();
   const navItems = useStore<NavMenuI>({
     navs:[]
-  }) ;
+  })
   
-  
-  useVisibleTask$(async({track}) => {
-    state.theme = getColorPreference()
-    setPreference(state.theme)
-    const {data , error } = await supabase.auth.getSession()
-    if(data.session?.user?.id && !error){
-      const user = data.session?.user
-      userSession.userId = user.id
-      userSession.isLoggedIn = true
-      userSession.providerId = user.user_metadata.provider_id
-      userSession.nickname = user.user_metadata.nickname
-      userSession.avatarUrl = user.user_metadata.avatar_url
-      userSession.email = user.email
-      twitchProvider.providerToken = data.session?.provider_token || ''
-      twitchProvider.providerRefreshToken = data.session?.provider_refresh_token || ''
+  useVisibleTask$(async () => {
+    const { data: authListener } = await supabase.auth.onAuthStateChange(async (event:AuthChangeEvent, session:any) => {
+      if (session){
+        userSession.userId = session?.user?.id;
+        userSession.isLoggedIn = true;
+        userSession.avatarUrl = session?.user?.user_metadata.avatar_url;
+        userSession.nickname = session?.user?.user_metadata.nickname;
+        userSession.providerId = session?.user?.user_metadata.provider_id;
+        userSession.email = session?.user?.email;
+        await handleRefreshTokenTwitch()
+      }
+      if (event === 'SIGNED_OUT'){
+        userSession.userId = "";
+        userSession.isLoggedIn = false;
+        userSession.avatarUrl = "";
+        userSession.nickname = "";
+        userSession.providerId = "";
+        userSession.email = "";
+      }
     }
-    
-    await handleRefreshTokenTwitch(); 
+    )
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  })
+  useVisibleTask$(async({track}) => {
     const syb = await getSubscriptionByUser(userSession.userId)
     if (syb){
       subscriptionUser.status = syb.status
       subscriptionUser.plan = syb.plan
     }
+    state.theme = getColorPreference()
+    await handleRefreshTokenTwitch()
+    setPreference(state.theme)
     track(() => [state.theme, userSession, twitchProvider, subscriptionUser])
-  });
+  })
   
 
   return(     
   <div class="bg-back dark:bg-back">
     <Navbar>
       <div q:slot='navLogo'>
-        <Link href='/' class={"font-bold text-xl text-accent dark:text-white flex place-items-center space-x-2"}>
-
+        <Link href='/' class={"font-bold text-xl text-white flex place-items-center space-x-2"}>
           <img class="rounded-md" src='/images/logo.png' width={56} height={56} alt='Logo T-Record'/>
           <span>T-Record</span>
         </Link>
@@ -86,14 +101,14 @@ export default component$(() => {
           (<Tag variant={subscriptionUser.plan === 'PRO' ? 'pro': 'plus'} size='sm' text={subscriptionUser.plan} />)
         }
         <Live />
-        {userSession.isLoggedIn && 
-          <AvatarNavbar altText='avatar-user' imageSrc={userSession.avatarUrl}>
-          </AvatarNavbar> }
+        {
+          userSession.isLoggedIn && <AvatarNavbar altText='avatar-user' imageSrc={userSession.avatarUrl} />
+        }
       </div>
     </Navbar>
     <main class="flex items-stretch min-h-screen">
       <Slot />
     </main>
-    <FooterTag/>
+    <Footer/>
     </div>);
 });
