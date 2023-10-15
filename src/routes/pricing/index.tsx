@@ -7,7 +7,6 @@ import { useTogglePricing } from '~/hooks';
 
 import { CardPricing } from '~/components/card-pricing/Card-pricing';
 import { TogglePricing } from '~/components/toggle-pricing/Toggle-pricing';
-import { plansAdapter } from '~/adapters';
 
 
 export default component$(() => {
@@ -17,7 +16,7 @@ export default component$(() => {
   useTask$(async ({track}) => {
     track(() => [planStore.plans, typeSubscription.value])
     const plans = await getPlans()
-    planStore.plans = plansAdapter(plans)
+    planStore.plans = plans
   });
 
 
@@ -41,7 +40,7 @@ export default component$(() => {
       <div class="gap-6 flex flex-wrap items-start justify-center mt-10 animate-fade-up delay-300 animate-duration-1000 md:items-stretch">
           {
             planStore.plans
-            .filter((plan) => plan.type === typeSubscription.value)
+            .filter((plan) => plan.typeSubscription === typeSubscription.value)
             .map((plan) => (
               <CardPricing key={plan.id} {...plan} /> 
             ))

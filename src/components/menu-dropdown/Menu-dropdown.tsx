@@ -13,7 +13,7 @@ export interface MenuDropdownOptions {
     name: string;
     route?: string;
     icon?: IconCatalog;
-    action?: PropFunction<() => void>
+    action?: PropFunction<() => void> | PropFunction
     target?: '_blank' | '_parent' | '_top' | '_self'
 }
 

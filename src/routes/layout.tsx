@@ -1,9 +1,9 @@
 import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
-import { supabase } from '~/supabase/supabase-browser';
 
-import { UserSessionContext, GlobalStore } from '~/context';
-import { getColorPreference, useAuthUser, useToggleTheme } from '~/hooks';
+import { GlobalStore } from '~/context';
+import { getColorPreference, useToggleTheme } from '~/hooks';
+import { useAuthSignin,useAuthSession } from './plugin@auth';
 
 
 import { Navbar } from '~/components/navbar/Navbar';
@@ -14,11 +14,12 @@ import Button from '~/components/button/Button';
 import type { NavMenuI } from '~/models';
 
 
+
 export default component$(() => {
   const pathname = useLocation().url.pathname;
-  const { handleSignInWithOAuth } = useAuthUser();
-  
-  const userSession = useContext(UserSessionContext);
+  const signIn = useAuthSignin();
+  const session = useAuthSession();
+
   const state = useContext(GlobalStore);
 
   const { setPreference } = useToggleTheme();
@@ -31,21 +32,9 @@ export default component$(() => {
 
   useVisibleTask$(async({track}) => {
     state.theme = getColorPreference();
-    const {data , error } = await supabase.auth.getUser()
-    
-    if(data?.user?.id && !error){
-      userSession.userId = data.user.id;
-      userSession.isLoggedIn = true;
-      userSession.providerId = data.user.user_metadata.provider_id
-      userSession.nickname = data.user.user_metadata.nickname
-      userSession.avatarUrl = data.user.user_metadata.avatar_url
-      userSession.email = data.user.email
-    }
     track( () => [state.theme])
     setPreference(state.theme);
   });
-
-  
 
 
   return(     
@@ -67,13 +56,14 @@ export default component$(() => {
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-2"}>            
 
         {
-          userSession.isLoggedIn ? 
+          session.value?.user ? 
           <AvatarNavbar 
           altText='avatar-user'
-          imageSrc={userSession.avatarUrl} />
+          imageSrc={session.value.user.image as string} />
           :
-          <Button class={"btn-secondary"} onClick$={ () => handleSignInWithOAuth('twitch')}>Sign in with Twitch</Button> 
+          <Button class={"btn-secondary"} onClick$={() => signIn.submit({ providerId: 'twitch' })}>Sign in with Twitch</Button> 
           }
+
       </div>
     </Navbar>
     <main class="text-white">

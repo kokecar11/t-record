@@ -1,14 +1,13 @@
-import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
+import { component$ } from '@builder.io/qwik';
 import { useNavigate } from '@builder.io/qwik-city';
 
-import { useAuthUser } from '~/hooks';
-import { UserSessionContext } from '~/context';
 import { capitalizeFirstLetter } from '~/utilities';
 import type { PlanAdapter } from '~/models';
 
 import Button from '../button/Button';
 import { Tag } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon';
+import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth';
 
 export type CardPricingProps = PlanAdapter;
 
@@ -19,16 +18,13 @@ export const CardPricing = component$(
     popular,
     features,
     link,
-    type,
-    name,
+    typePlan,
+    typeSubscription
   }: CardPricingProps) => {
-    const userSession = useContext(UserSessionContext)
+    const session = useAuthSession();
+    const signIn = useAuthSignin();
     const nav = useNavigate()
-    const { handleSignInWithOAuth } = useAuthUser()
 
-    useVisibleTask$(async ({track}) => {
-      track(() => [userSession.email, userSession.isLoggedIn])
-    })
     return (
       <div
         class={`w-full sm:min-w-[20rem] max-w-sm p-0.5 border border-secondary rounded-lg ${
@@ -55,7 +51,7 @@ export const CardPricing = component$(
 
           <div class="flex items-baseline text-white">
             <span class="text-5xl font-extrabold tracking-tight">${price}</span>
-            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(type)}</span>
+            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(typeSubscription)}</span>
           </div>
           <hr class="mt-8 border-white opacity-10"></hr>
           <ul role="list" class="space-y-5 my-7">
@@ -73,15 +69,15 @@ export const CardPricing = component$(
           </ul>
 
           <div class="flex flex-col mt-auto">
-            {name === 'STARTER' ? (
+            {typePlan === 'STARTER' ? (
               <Button
                 class={`sticky bottom-0 btn-secondary`}
-                id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
-                  if (userSession.isLoggedIn) {
+                  if (session.value?.user) {
                     nav(link)
                   } else {
-                    handleSignInWithOAuth('twitch')
+                    signIn.submit({ providerId: 'twitch', callbackUrl:'/pricing' })
                   }
                 }}
               >
@@ -90,14 +86,15 @@ export const CardPricing = component$(
             ) : (
               <Button 
                 class={`w-full btn-secondary`} 
-                id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
-                  if(userSession.isLoggedIn){
-                    nav(`${link}${userSession.email}`)
+                  if(session.value?.user){
+                    nav(`${link}${session.value?.user?.email}`)
                   } else {
-                    handleSignInWithOAuth('twitch')
+                    signIn.submit({ providerId: 'twitch', callbackUrl:'/pricing' })
                   }
-                }}>
+                }}
+                >
                 Get started
               </Button>
             )}
