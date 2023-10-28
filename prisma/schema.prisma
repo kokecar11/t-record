@@ -8,7 +8,6 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialActions"] // You won't need this in Prisma 3.X or higher.
 }
 
 
@@ -20,7 +19,7 @@ model Account {
   providerAccountId  String
   refresh_token      String?  @db.Text
   access_token       String?  @db.Text
-  expires_at         Int? @map("expires_in")
+  expires_in         Int?
   token_type         String?
   scope              String?
   id_token           String?  @db.Text
@@ -62,7 +61,7 @@ model VerificationToken {
 model Plan {
   id                 String  @id @default(cuid())
   title              String
-  type               String
+  type               TypePlan
   popular            Boolean?
   price_monthly      String?
   price_yearly       String?
@@ -79,11 +78,11 @@ model Subscription {
   id                 String  @id @default(cuid())
   userId             String  @unique
   planId             String
-  created_at         DateTime?
+  created_at         DateTime  @default(now())
   start_date         DateTime?
   expiration_date    DateTime?
-  status             String?
-  type               String?
+  status             StatusSubscription  @default(active)
+  type               TypeSubscription?
 
   user User @relation(fields: userId, references: id, onDelete: Cascade)
   plan Plan @relation(fields: planId, references: id, onDelete: Cascade)
@@ -92,15 +91,40 @@ model Subscription {
 
 model Marker {
   id                 String  @id @default(cuid())
-  userId             String  @unique
-  title              String?
-  stream_date        DateTime?
+  userId             String
+  title              String
+  stream_date        DateTime
   starts_at          Int?
   ends_at            Int?
-  created_at         DateTime?
+  created_at         DateTime  @default(now())
   updated_at         DateTime?
-  status             String?
+  status             StatusMarker @default(UNRECORDED)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum StatusMarker {
+  UNRECORDED
+  RECORDING
+  RECORDED
+}
+
+enum TypeSubscription {
+  monthly
+  yearly
+}
+enum StatusSubscription {
+  on_trial
+  active
+  paused
+  past_due
+  unpaid
+  cancelled
+  expired
+}
+
+enum TypePlan {
+  STARTER
+  PLUS
+  PRO
+}
