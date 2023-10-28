@@ -1,60 +1,67 @@
 import { server$ } from "@builder.io/qwik-city";
-import type { User } from "supabase-auth-helpers-qwik";
-import { supabase } from "~/supabase/supabase-browser";
-import type{ MarkerType, TwitchProvider, UserSession } from "~/models";
-import { cookieProvider, cookieUserSession } from "~/utilities";
+import { type Marker, PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient()
 
-export const getMarkers = server$(async (fkUser:string, orderBy:any, orderMarkerByStatus:any) => {
+export const getMarkers = server$(async (userId:string) => {
+    const markers = await prisma.marker.findMany({
+        where: { userId }
+    })
+    return markers
+})
+
+export const createMarker = server$(async (data: {title:string, stream_date: Date, userId:string}) => {
+    const {title, stream_date, userId } = data
+    const marker = await prisma.marker.create({
+        data:{
+            userId,
+            title,
+            stream_date
+        }
+    })
+    return marker
+})
+
+export const deleteMarker = server$(async (markerId: string) => {
+    const markerDeleted = await prisma.marker.delete({
+        where: { id: markerId }
+    })
+    return markerDeleted
+})
+
+// export const markerInStream = server$(async (provider:TwitchProvider, user:User, markerDesc: string) => {
+//     const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
+//     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
+
+//     const headers = {
+//         'Authorization':"Bearer " + provider.providerToken,
+//         'Client-Id': TWITCH_CLIENT_ID
+//     };
+  
+//     const respStream = await fetch(`${urlApiTwitch}?user_id=${user.user_metadata.provider_id}&description=${markerDesc}`, {
+//         method:'POST',
+//         headers
+//     });
     
-    const { data, error } = await supabase.from('markers')
-    .select('*')
-    .eq('fk_user', fkUser)
-    .in('status', orderMarkerByStatus.byStatus)
-    .order(orderBy, {ascending:false})
-    if (error){
-        return [];
-    }else{
-        return [...data] as MarkerType[];
-    }
-});
+//     return await respStream.json();
+// });
 
-export const deleteMarker = server$(async (idMarker:number) => {
-    await supabase.from('markers')
-    .delete()
-    .eq('id', idMarker)
-});
-
-export const markerInStream = server$(async (provider:TwitchProvider, user:User, markerDesc: string) => {
-    const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
+export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, marker:Marker, userId:string) {
+    const TWITCH_CLIENT_ID = import.meta.env.TWITCH_ID;
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
 
+    const account = await prisma.account.findFirst({
+        where: { userId }
+    })
+    const accesTokenProvider = account?.access_token as string
+    const providerAccountId = account?.providerAccountId as string
+    
     const headers = {
-        'Authorization':"Bearer " + provider.providerToken,
+        'Authorization':"Bearer " + accesTokenProvider,
         'Client-Id': TWITCH_CLIENT_ID
     };
   
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${user.user_metadata.provider_id}&description=${markerDesc}`, {
-        method:'POST',
-        headers
-    });
-    
-    return await respStream.json();
-});
-
-export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, markerId:number, markerTitle:string) {
-    const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
-    const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
-    
-    const provider:TwitchProvider = this.cookie.get(cookieProvider)!.json();
-    const user:UserSession = this.cookie.get(cookieUserSession)!.json();
-    
-    const headers = {
-        'Authorization':"Bearer " + provider.providerToken,
-        'Client-Id': TWITCH_CLIENT_ID
-    };
-  
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${user.providerId}&description=${markerTitle}`, {
+    const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}&description=${marker.title}`, {
         method:'POST',
         headers
     });
@@ -65,17 +72,23 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     const position_seconds = data.data[0].position_seconds;
     if (live !== 404){
       if(isStartMarker){
-        const { data } = await supabase.from('markers')
-        .update({ status: 'RECORDING', starts_at: position_seconds })
-        .eq('fk_user', user.userId)
-        .eq('id', markerId).select()
-        return { data }
+        const markerUpdated = await prisma.marker.update({
+            where: {userId, id: marker.id},
+            data: {
+                status:'RECORDING',
+                starts_at: position_seconds
+            }
+        })
+        return { markerUpdated }
       }else{
-        const { data } = await supabase.from('markers')
-        .update({ status: 'RECORDED', ends_at: position_seconds })
-        .eq('fk_user', user.userId)
-        .eq('id', markerId).select()
-        return { data }
+        const markerUpdated = await prisma.marker.update({
+            where: {userId, id: marker.id},
+            data: {
+                status:'RECORDED',
+                ends_at: position_seconds
+            }
+        })
+        return { markerUpdated }
       }
     }
     return {data}

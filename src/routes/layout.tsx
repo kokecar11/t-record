@@ -31,6 +31,7 @@ export default component$(() => {
 
 
   useVisibleTask$(async({track}) => {
+    if (session.value?.error === "RefreshAccessTokenError") signIn.submit({ providerId: 'twitch' })
     state.theme = getColorPreference();
     track( () => [state.theme])
     setPreference(state.theme);

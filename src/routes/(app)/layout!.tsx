@@ -1,81 +1,49 @@
-import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik'
+import { component$, Slot, useContext, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
 import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
 
-import { 
-  UserSessionContext,
-  TwitchProviderContext,
-  SubscriptionUserContext,
-  GlobalStore } from '~/context'
+import { GlobalStore } from '~/context'
 
 
-import { getColorPreference, useAuthUser, useToggleTheme } from '~/hooks'
+import { useAuthSession, useAuthSignin } from '../plugin@auth'
+import { getColorPreference, useToggleTheme } from '~/hooks'
 import type { NavMenuI } from '~/models'
+import { type Plan } from '@prisma/client'
 
 import { Navbar } from '~/components/navbar/Navbar'
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar'
-
 import { Footer } from '~/components/footer/Footer'
 import { Live } from '~/components/live/Live'
-import { supabase } from '~/supabase/supabase-browser'
+import { getSubcriptionByUserPrisma } from '~/services'
 import Button from '~/components/button/Button'
 import { Tag } from '~/components/tag/Tag'
 import { Icon, IconCatalog } from '~/components/icon/icon'
-import type { AuthChangeEvent } from '@supabase/supabase-js'
-import { getSubscriptionByUser } from '~/services'
+
 
 
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
   const nav = useNavigate()
-
-
-  const userSession = useContext(UserSessionContext)
-  const twitchProvider = useContext(TwitchProviderContext)
-  const subscriptionUser = useContext(SubscriptionUserContext)
+  
+  const session = useAuthSession()
+  const signIn = useAuthSignin()
   const state = useContext(GlobalStore)
 
   const { setPreference } = useToggleTheme()
-  const { handleRefreshTokenTwitch } = useAuthUser();
   const navItems = useStore<NavMenuI>({
     navs:[]
   })
-  
-  useVisibleTask$(async () => {
-    const { data: authListener } = await supabase.auth.onAuthStateChange(async (event:AuthChangeEvent, session:any) => {
-      if (session){
-        userSession.userId = session?.user?.id;
-        userSession.isLoggedIn = true;
-        userSession.avatarUrl = session?.user?.user_metadata.avatar_url;
-        userSession.nickname = session?.user?.user_metadata.nickname;
-        userSession.providerId = session?.user?.user_metadata.provider_id;
-        userSession.email = session?.user?.email;
-        await handleRefreshTokenTwitch()
-      }
-      if (event === 'SIGNED_OUT'){
-        userSession.userId = "";
-        userSession.isLoggedIn = false;
-        userSession.avatarUrl = "";
-        userSession.nickname = "";
-        userSession.providerId = "";
-        userSession.email = "";
-      }
-    }
-    )
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+  const subscriptionUser = useSignal<Plan>()
+  useTask$(async () => {
+    subscriptionUser.value = await getSubcriptionByUserPrisma(session.value?.userId as string)
   })
-  useVisibleTask$(async({track}) => {
-    const syb = await getSubscriptionByUser(userSession.userId)
-    if (syb){
-      subscriptionUser.status = syb.status
-      subscriptionUser.plan = syb.plan
-    }
+
+  useVisibleTask$(async({track}) => {    
+    if (session.value?.error === "RefreshAccessTokenError") signIn.submit({ providerId: 'twitch' })
     state.theme = getColorPreference()
-    await handleRefreshTokenTwitch()
     setPreference(state.theme)
-    track(() => [state.theme, userSession, twitchProvider, subscriptionUser])
+    track(() => [state.theme])
+    
   })
   
 
@@ -97,12 +65,12 @@ export default component$(() => {
       </div>
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
         {
-          subscriptionUser.plan === 'STARTER' ? <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
-          (<Tag variant={subscriptionUser.plan === 'PRO' ? 'pro': 'plus'} size='sm' text={subscriptionUser.plan} />)
+          subscriptionUser.value?.type === 'STARTER' ? <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
+          (<Tag variant={subscriptionUser.value?.type === 'PRO' ? 'pro': 'plus'} size='sm' text={subscriptionUser.value?.type} />)
         }
         <Live />
         {
-          userSession.isLoggedIn && <AvatarNavbar altText='avatar-user' imageSrc={userSession.avatarUrl} />
+          session.value?.user && <AvatarNavbar altText='avatar-user' imageSrc={session.value.user.image as string} />
         }
       </div>
     </Navbar>

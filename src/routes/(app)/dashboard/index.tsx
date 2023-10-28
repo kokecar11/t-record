@@ -1,33 +1,30 @@
-import { $, component$, useContext, useSignal, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city';
-import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city';
-import { type User } from 'supabase-auth-helpers-qwik';
+import { $, component$, useContext, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
+import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city'
+import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city'
 
-import { supabase } from '~/supabase/supabase-browser';
+import { useLiveStream } from '~/hooks'
+import { LiveStreamContext } from '~/context'
+import { createMarker, deleteMarker, getMarkers } from '~/services'
 
-import { useLiveStream } from '~/hooks';
-import { UserSessionContext, TwitchProviderContext, LiveStreamContext } from '~/context';
-import { deleteMarker, getMarkers, markerInStream, setSubscriptionByUser } from '~/services';
-import { cookieProvider, cookieUserSession } from '~/utilities';
+import type { MarkerState } from '~/models'
 
-import type { MarkerState, TwitchProvider, UserSession } from '~/models';
-
-import { useModal } from '~/components/modal/hooks/use-modal';
-import { useToast } from '~/components/toast/hooks/use-toast';
-import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown';
-import Modal from '~/components/modal/Modal';
-import Button from '~/components/button/Button';
-import { Input } from '~/components/input/Input';
-import { Marker } from '~/components/marker/Marker';
-import { Icon, IconCatalog } from '~/components/icon/icon';
-import { Loader } from '~/components/loader/Loader';
-import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdown/Menu-dropdown';
+import { useModal } from '~/components/modal/hooks/use-modal'
+import { useToast } from '~/components/toast/hooks/use-toast'
+import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown'
+import Modal from '~/components/modal/Modal'
+import Button from '~/components/button/Button'
+import { Input } from '~/components/input/Input'
+import { Marker } from '~/components/marker/Marker'
+import { Icon, IconCatalog } from '~/components/icon/icon'
+import { Loader } from '~/components/loader/Loader'
+import { MenuDropdown, type MenuDropdownOptions } from '~/components/menu-dropdown/Menu-dropdown'
+import { useAuthSession } from '~/routes/plugin@auth'
 
 
 export const onRequest: RequestHandler = async (request) => {
-  const providerCookie = request.cookie.get('sb-access-token');
+  const providerCookie = request.cookie.get('next-auth.session-token');
   if(!providerCookie){
-    throw request.redirect(302, '/logout')
+    throw request.redirect(302, '/')
   }
 };
 
@@ -39,8 +36,9 @@ export const taskForm = zod$({
   }),
   stream_date: z.string().nonempty({
     message:"The date of the stream is required"
-  }).transform(str => new Date(str))
-});
+  }).transform(str => new Date(str)),
+  userId: z.string(),
+})
 
 export const instantMarkerForm = zod$({
   desc_marker: z.string({
@@ -49,17 +47,12 @@ export const instantMarkerForm = zod$({
   }).nonempty({
     message: "La descripción del marcador es requerida.",
   }),
-});
+})
 
 export const useCreateMarker = routeAction$(
-  async (dataForm, {cookie}) => {
-    const user:UserSession =  cookie.get(cookieUserSession)!.json()
-    const insertData = {
-      fk_user: user.userId,
-      ...dataForm
-    }
-    const { error } = await supabase.from('markers').insert(insertData)
-    if(error){
+  async (dataForm) => {
+    const resp = await createMarker(dataForm)
+    if(!resp){
       return {
         success: false,
         msg: 'Task could not be saved'
@@ -70,26 +63,26 @@ export const useCreateMarker = routeAction$(
       msg: 'Task successfully saved!'
     };
 
-},  taskForm);
+},  taskForm)
 
-export const useCreateInstantMarker = routeAction$(
-  async (dataForm, {cookie}) => {
-    const provider: TwitchProvider = cookie.get(cookieProvider)!.json();
-    const user:User =  cookie.get(cookieUserSession)!.json()
-    const responseStream = await markerInStream(provider, user, dataForm.desc_marker);
+// export const useCreateInstantMarker = routeAction$(
+//   async (dataForm, {cookie}) => {
+//     const provider: TwitchProvider = cookie.get(cookieProvider)!.json();
+//     const user:User =  cookie.get(cookieUserSession)!.json()
+//     const responseStream = await markerInStream(provider, user, dataForm.desc_marker);
     
-    if(responseStream.status === 404){
-      return {
-        success: false,
-        msg: 'Marker could not be created in the stream.'
-      };
-    }
-    return {
-      success: true,
-      msg: 'Marker successfully created in the stream!'
-    };
+//     if(responseStream.status === 404){
+//       return {
+//         success: false,
+//         msg: 'Marker could not be created in the stream.'
+//       };
+//     }
+//     return {
+//       success: true,
+//       msg: 'Marker successfully created in the stream!'
+//     };
 
-},  instantMarkerForm);
+// },  instantMarkerForm);
 
 export type OrderByMarker = 'stream_date'| 'created_at' | 'status';
 export type OrderMarkerByStatus = 'RECORDING'| 'RECORDED' | 'UNRECORDED';
@@ -97,33 +90,31 @@ interface FiltersMarkerState {
   byStatus: OrderMarkerByStatus[]
 }
 export default component$(() => {
-
+    const session = useAuthSession()
     const { isVisibleMenuDropdown, showMenuDropdown } = useMenuDropdown();
     const createMarker = useCreateMarker();
 
     const { getStatusStream } = useLiveStream();
-    const { isVisibleModal ,showModal } = useModal();
+    const { isVisibleModal, showModal } = useModal();
     const { setToast, Toasts } = useToast();
 
-    const userSession = useContext(UserSessionContext);
-    const twitchProvider = useContext(TwitchProviderContext);
     const live = useContext(LiveStreamContext);
     
     const markerList = useStore<MarkerState>({
         currentPage: 0,
         markers: [],
-        isLoading: false,
+        isLoading: true,
         indicators: [
           {title: 'Total',counter: 0},
           {title: 'Recording',counter: 0},
           {title: 'Unrecorded',counter: 0},
           {title: 'Recorded',counter: 0}
         ]
-    });
+    })
     const filterMarkerList = useStore<FiltersMarkerState>({
       byStatus: ['RECORDED', 'RECORDING', 'UNRECORDED']
     })
-    const orderBySignal = useSignal<OrderByMarker>('stream_date');
+    // const orderBySignal = useSignal<OrderByMarker>('stream_date');
     const orderByStatusSignal = useSignal<number>(0);
 
     const orderByStatusAction = $((status:OrderMarkerByStatus[], ord: number) =>{
@@ -138,28 +129,18 @@ export default component$(() => {
       {name: 'Recorded', action:$(() => orderByStatusAction(['RECORDED'], 2))},
       {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING'], 3))},
     ]
-    
-    useVisibleTask$(async ({track}) => { 
-      markerList.isLoading = true
+
+    useTask$(async ({track}) => { 
       const stream = await getStatusStream()
-      markerList.markers = await getMarkers(userSession.userId, orderBySignal.value, filterMarkerList)
       live.status = stream.status
       live.isLoading = false
-      await setSubscriptionByUser(userSession.userId);
-      track(()=> [
-        markerList.markers,
-        markerList.isLoading,
-        live.status,
-        live.isLoading,
-        orderBySignal.value, 
-        orderByStatusSignal.value,
-        twitchProvider.providerRefreshToken,
-        twitchProvider.providerToken,
-        filterMarkerList.byStatus])
-        setTimeout(() => markerList.isLoading = false, 300)
-        markerList.isLoading = false
-
-    });
+      track(()=> [markerList.isLoading, markerList.markers, live.isLoading, live.status])
+      markerList.markers = await getMarkers(session.value?.userId as string)
+    })
+    
+    useVisibleTask$(async () => { 
+      markerList.isLoading = false
+    })
 
     return (
         <>
@@ -239,6 +220,7 @@ export default component$(() => {
                 }}
                 spaReset
                 >
+                  <Input type="hidden" name='userId' value={session.value?.userId as string}></Input>
                   <Input label='Marker title' name='title' type='text' placeholder='Marker title' value={createMarker.formData?.get('title')} />
                   {createMarker.value?.fieldErrors?.title && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.title}</p>}
 
@@ -253,7 +235,7 @@ export default component$(() => {
             </Modal>
       </>
     )
-});
+})
 
 export const head: DocumentHead = {
   title: 'Dashboard | T-Record',
@@ -263,4 +245,4 @@ export const head: DocumentHead = {
       content: 'Dashboard T-Record',
     },
   ],
-};
+}

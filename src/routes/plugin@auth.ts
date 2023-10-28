@@ -17,6 +17,7 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
       Twitch({
         clientId: env.get("TWITCH_ID")!,
         clientSecret: env.get("TWITCH_SECRET")!,
+        authorization: {params : { scope:'openid user:read:email channel:manage:broadcast user:read:broadcast channel_read'}}
       }),
     ] as Provider[],
     callbacks : {
@@ -25,7 +26,22 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
           where: { userId: user.id, provider: "twitch"},
         })
 
-        if (twitch.expires_in! * 1000 < Date.now()) {
+        const plan = await prisma.plan.findFirst({
+          where: { type:'STARTER' }
+        })
+        
+        await prisma.subscription.upsert({
+          where: { userId: user.id },
+          update: {},
+          create: {            
+            planId: plan?.id as string,
+            userId: user.id,
+            type: 'monthly',
+            status: 'active'
+          },
+        })
+        
+        if (twitch.expires_in! < Date.now()) {
           try {
             const response = await fetch("https://id.twitch.tv/oauth2/token", {
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -39,7 +55,7 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
             })
   
             const tokens: TokenSet = await response.json()
-  
+            
             if (!response.ok) throw tokens
   
             await prisma.account.update({
@@ -59,8 +75,10 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
             session.error = "RefreshAccessTokenError"
           }
         }
+        session.userId = user.id
         return session
       }
+      
     }
   }));
 
@@ -68,5 +86,6 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
   declare module "@auth/core/types" {
     interface Session {
       error?: "RefreshAccessTokenError"
+      userId?: string
     }
   }

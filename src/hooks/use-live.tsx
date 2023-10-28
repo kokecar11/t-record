@@ -1,39 +1,52 @@
 import { useSignal } from "@builder.io/qwik"
 import { server$ } from "@builder.io/qwik-city"
-import type { StatusLive, TwitchProvider } from "~/models"
-import { cookieProvider, cookieUserSession } from "~/utilities"
-import type { UserSession } from '~/models';
+import { PrismaClient } from "@prisma/client"
+
+import type { StatusLive } from "~/models"
+import { useAuthSession } from "~/routes/plugin@auth"
 
 
 export const useLiveStream = () => {
     const userProviderToken = useSignal('')
+    const session = useAuthSession()
 
     const getStatusStream = server$( async function(){
-        const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID
-        const urlApiTwitch = 'https://api.twitch.tv/helix/streams'        
-        const providerToken: TwitchProvider = this.cookie.get(cookieProvider)!.json()
-        const userSession: UserSession  = this.cookie.get(cookieUserSession)!.json()
-        
+        const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID') as string
+        const urlApiTwitch = new URL('https://api.twitch.tv/helix/streams')
+        const prisma = new PrismaClient()
+        const user = await prisma.user.findFirst({
+          where:{
+            email: session.value?.user?.email
+          },
+          include:{
+            accounts:true
+          }
+        })
+        const account = user?.accounts[0]
         const headers = {
-            'Authorization':"Bearer " + providerToken.providerToken,
-            'Client-Id': TWITCH_CLIENT_ID
-        };
-        
-        const resp = await fetch(`${urlApiTwitch}?user_id=${userSession.providerId}`, {
-            headers
-        });
-        const { data } = (await resp.json()) as {data: {type:StatusLive}[]};
-        
-        if (data.length > 0){
-          const live = {
-            status: data[0].type
-          };
-          return live;
+            'Accept': 'application/json',
+            'Authorization':"Bearer " + account?.access_token,
+            'Client-Id': TWITCH_CLIENT_ID 
         }
         
-        const status: StatusLive = 'offline';
-        return {status};
-      });
+        urlApiTwitch.searchParams.set('user_id', account?.providerAccountId as string)
+        const resp = await fetch(urlApiTwitch, {
+          headers,
+          method:'GET',
+        })
+      
+        
+        const { data } = (await resp.json()) as {data: {type:StatusLive}[]}
+        if (data === undefined || data.length === 0){
+          const status: StatusLive = 'offline';
+          return { status };
+        }
+
+        const live = {
+          status: data[0].type
+        }
+        return live
+      })
         
 
     return {

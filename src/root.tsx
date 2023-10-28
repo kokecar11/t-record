@@ -64,41 +64,6 @@ export default component$(() => {
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-MLT5XFTT');
   `;
-  const { authUserCookies } = useAuthUser()
-
-  useVisibleTask$(async() => {
-    
-    const { data: authListener } = await supabase.auth.onAuthStateChange(async (event:AuthChangeEvent, session:any) => {
-      if (event === 'SIGNED_IN' && session){
-        userSessionStore.userId = session?.user?.id;
-        userSessionStore.isLoggedIn = true;
-        userSessionStore.avatarUrl = session?.user?.user_metadata.avatar_url;
-        userSessionStore.nickname = session?.user?.user_metadata.nickname;
-        userSessionStore.providerId = session?.user?.user_metadata.provider_id;
-        userSessionStore.email = session?.user?.email;
-        if(session.provider_token){
-          twitchProviderStore.providerToken = session?.provider_token;
-          twitchProviderStore.providerRefreshToken = session?.provider_refresh_token;
-          await authUserCookies(twitchProviderStore, userSessionStore);
-        }
-      }
-      if (event === 'SIGNED_OUT'){
-        userSessionStore.userId = "";
-        userSessionStore.isLoggedIn = false;
-        userSessionStore.avatarUrl = "";
-        userSessionStore.nickname = "";
-        userSessionStore.providerId = "";
-        userSessionStore.email = "";
-        twitchProviderStore.providerToken = "";
-        twitchProviderStore.providerRefreshToken = "";
-      }
-    }
-    
-    )
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  });
 
   return (
     <QwikCityProvider>
