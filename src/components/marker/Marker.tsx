@@ -1,15 +1,14 @@
-import { type PropFunction, component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { Link } from "@builder.io/qwik-city";
+import { type PropFunction, component$, useStore, useVisibleTask$ } from '@builder.io/qwik'
+import { Link } from '@builder.io/qwik-city'
 
-import { setMarkerInStream } from '~/services';
-import { validateMarker } from '~/utilities';
+import { useAuthSession } from '~/routes/plugin@auth'
+import { setMarkerInStream } from '~/services'
+import { validateMarker } from '~/utilities'
 
-import type{ Live, MarkerType } from '~/models';
-
-import { Tag } from "../tag/Tag";
-import Button from "../button/Button";
-import { Icon, IconCatalog } from '../icon/icon';
-import { useAuthSession } from '~/routes/plugin@auth';
+import type{ Live, MarkerType } from '~/models'
+import { Tag } from "../tag/Tag"
+import Button, { ButtonSize, ButtonVariant } from "../button/Button"
+import { Icon, IconCatalog } from '../icon/icon'
 
 
 
@@ -86,15 +85,12 @@ export const Marker = component$(({onDelete, marker, live}: MarkerProps) => {
         </div>
 
         <div class="flex place-content-center px-4 pb-3">
-            <Button class={`w-full text-sm ${btnMarker.isInit ? 'btn-secondary': 'btn-live'}`}
+            <Button variant={ButtonVariant.secondary} isFullWidth size={ButtonSize.sm}
                     onClick$={async () => { 
                         const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string);
-                        if (response.data.error){
-                            live.status = 'offline'
-                        }
                         live.isLoading = true;
-                        marker.status = response.data[0].status;
-                        if (marker.status === 'RECORDING'){ 
+                        marker.status = response.markerUpdated?.status as string;
+                        if (response.markerUpdated?.status === 'RECORDING'){ 
                             btnMarker.title = 'Finish';
                             btnMarker.isInit = false;
                         }
