@@ -3,14 +3,14 @@ import { serverAuth$ } from "@builder.io/qwik-auth";
 import Twitch from "@auth/core/providers/twitch";
 import type { Provider } from "@auth/core/providers";
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
 import type { TokenSet } from "@auth/core/types";
+import { db } from "~/db";
 
-const prisma = new PrismaClient()
+
 
 export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
   serverAuth$(({ env }) => ({
-    adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(db),
     secret: env.get("AUTH_SECRET"),
     trustHost: true,
     providers: [
@@ -22,15 +22,15 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
     ] as Provider[],
     callbacks : {
       async session({session, user}){
-        const [twitch] = await prisma.account.findMany({
+        const [twitch] = await db.account.findMany({
           where: { userId: user.id, provider: "twitch"},
         })
 
-        const plan = await prisma.plan.findFirst({
+        const plan = await db.plan.findFirst({
           where: { type:'STARTER' }
         })
         
-        await prisma.subscription.upsert({
+        await db.subscription.upsert({
           where: { userId: user.id },
           update: {},
           create: {            
@@ -58,7 +58,7 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
             
             if (!response.ok) throw tokens
   
-            await prisma.account.update({
+            await db.account.update({
               data: {
                 access_token: tokens.access_token,
                 expires_in: Math.floor(Date.now() / 1000 + tokens.expires_in!),

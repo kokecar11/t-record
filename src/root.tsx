@@ -1,10 +1,7 @@
-import { component$, useContextProvider, useStore, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useContextProvider, useStore } from '@builder.io/qwik';
 import { QwikCityProvider, RouterOutlet, ServiceWorkerRegister } from '@builder.io/qwik-city';
-import { type AuthChangeEvent } from '@supabase/supabase-js';
-import { supabase } from './supabase/supabase-browser';
 import { RouterHead } from './components/router-head/router-head';
 import { QwikPartytown } from './components/partytown/partytown';
-import { useAuthUser } from './hooks';
 import { 
   UserSessionContext,
   TwitchProviderContext,

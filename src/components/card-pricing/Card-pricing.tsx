@@ -4,7 +4,7 @@ import { useNavigate } from '@builder.io/qwik-city';
 import { capitalizeFirstLetter } from '~/utilities';
 import type { PlanAdapter } from '~/models';
 
-import Button from '../button/Button';
+import Button, { ButtonSize, ButtonVariant } from '../button/Button';
 import { Tag } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon';
 import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth';
@@ -71,7 +71,9 @@ export const CardPricing = component$(
           <div class="flex flex-col mt-auto">
             {typePlan === 'STARTER' ? (
               <Button
-                class={`sticky bottom-0 btn-secondary`}
+                variant={ButtonVariant.secondary}
+                size={ButtonSize.sm}
+                isFullWidth
                 id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
                   if (session.value?.user) {
@@ -85,7 +87,9 @@ export const CardPricing = component$(
               </Button>
             ) : (
               <Button 
-                class={`w-full btn-secondary`} 
+                variant={ButtonVariant.secondary}
+                size={ButtonSize.sm}
+                isFullWidth 
                 id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
                   if(session.value?.user){

@@ -14,7 +14,7 @@ import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar'
 import { Footer } from '~/components/footer/Footer'
 import { Live } from '~/components/live/Live'
 import { getSubcriptionByUserPrisma } from '~/services'
-import Button from '~/components/button/Button'
+import Button, { ButtonVariant } from '~/components/button/Button'
 import { Tag } from '~/components/tag/Tag'
 import { Icon, IconCatalog } from '~/components/icon/icon'
 
@@ -65,7 +65,7 @@ export default component$(() => {
       </div>
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
         {
-          subscriptionUser.value?.type === 'STARTER' ? <Button class="btn-outlined-secondary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
+          subscriptionUser.value?.type === 'STARTER' ? <Button variant={ButtonVariant['outlined-secondary']} onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
           (<Tag variant={subscriptionUser.value?.type === 'PRO' ? 'pro': 'plus'} size='sm' text={subscriptionUser.value?.type} />)
         }
         <Live />

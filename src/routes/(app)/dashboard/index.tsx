@@ -12,7 +12,7 @@ import { useModal } from '~/components/modal/hooks/use-modal'
 import { useToast } from '~/components/toast/hooks/use-toast'
 import { useMenuDropdown } from '~/components/menu-dropdown/hooks/use-menu-dropdown'
 import Modal from '~/components/modal/Modal'
-import Button from '~/components/button/Button'
+import Button, { ButtonVariant } from '~/components/button/Button'
 import { Input } from '~/components/input/Input'
 import { Marker } from '~/components/marker/Marker'
 import { Icon, IconCatalog } from '~/components/icon/icon'
@@ -65,25 +65,6 @@ export const useCreateMarker = routeAction$(
 
 },  taskForm)
 
-// export const useCreateInstantMarker = routeAction$(
-//   async (dataForm, {cookie}) => {
-//     const provider: TwitchProvider = cookie.get(cookieProvider)!.json();
-//     const user:User =  cookie.get(cookieUserSession)!.json()
-//     const responseStream = await markerInStream(provider, user, dataForm.desc_marker);
-    
-//     if(responseStream.status === 404){
-//       return {
-//         success: false,
-//         msg: 'Marker could not be created in the stream.'
-//       };
-//     }
-//     return {
-//       success: true,
-//       msg: 'Marker successfully created in the stream!'
-//     };
-
-// },  instantMarkerForm);
-
 export type OrderByMarker = 'stream_date'| 'created_at' | 'status';
 export type OrderMarkerByStatus = 'RECORDING'| 'RECORDED' | 'UNRECORDED';
 interface FiltersMarkerState {
@@ -130,16 +111,17 @@ export default component$(() => {
       {name: 'Recording', action:$(() => orderByStatusAction(['RECORDING'], 3))},
     ]
 
-    useTask$(async ({track}) => { 
+    useTask$( async () =>{
+      markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList.byStatus)
+    })
+
+    useVisibleTask$(async ({track}) => { 
       const stream = await getStatusStream()
       live.status = stream.status
       live.isLoading = false
-      track(()=> [markerList.isLoading, markerList.markers, live.isLoading, live.status])
-      markerList.markers = await getMarkers(session.value?.userId as string)
-    })
-    
-    useVisibleTask$(async () => { 
       markerList.isLoading = false
+      track(()=> [live.isLoading, live.status, markerList.markers])
+      markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList.byStatus )
     })
 
     return (
@@ -148,11 +130,11 @@ export default component$(() => {
             <div class="w-full container mx-auto px-4 py-6 h-full">
               <div class="gap-y-4 sm:flex sm:space-x-4">
                 <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
-                  <Button class="btn-primary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={showModal}>
+                  <Button onClick$={showModal} variant={ButtonVariant.primary}>
                     <Icon name={IconCatalog.fePlus} class="mr-1" /> New task
                   </Button>
                   <div class="relative">
-                    <Button class="btn-primary flex relative items-center justify-center w-full md:w-40 shadow-lg" onClick$={showMenuDropdown}>
+                    <Button variant={ButtonVariant.primary} onClick$={showMenuDropdown}>
                       <Icon name={IconCatalog.feEqualizer} class="mr-1" /> {orderByStatusOptions[orderByStatusSignal.value].name}
                     </Button>
                     <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={orderByStatusOptions}/>
@@ -160,7 +142,7 @@ export default component$(() => {
                   
                 </div>
                 <div class="grid grid-cols-1 justify-center items-center space-x-4 mt-4 sm:m-0">
-                  <Button class="btn-primary flex items-center justify-center w-full md:w-auto shadow-lg" onClick$={async () => {
+                  <Button variant={ButtonVariant.primary} onClick$={async () => {
                     const stream = await getStatusStream();
                     live.status = stream.status;
                     setToast({message:'Live status has been refreshed.'})
@@ -195,7 +177,7 @@ export default component$(() => {
                         <h1 class="text-3xl font-bold text-white">
                           You don't have any task for your stream yet, create a task.
                         </h1>
-                        <Button class="btn-secondary flex items-center justify-center mx-auto" onClick$={showModal}>
+                        <Button onClick$={showModal}>
                             <Icon name={IconCatalog.fePlus} class="text-xl mr-1" /> Create your first task
                         </Button>
                       </div>
@@ -205,16 +187,19 @@ export default component$(() => {
 
             </div>
             <Toasts></Toasts>
-            <Modal isVisible={isVisibleModal.value} onClose={showModal}>
+            <Modal isVisible={isVisibleModal.value} onClose={showModal} title='New Task'>
               <h2 q:slot='modal-title' class="text-secondary dark:text-white font-bold text-2xl flex place-items-center">
                 New task
               </h2>
-              <div q:slot="modal-content" class={"mx-5"}>
-                <Form action={createMarker} 
+              <div q:slot="modal-body" class={"mx-5"}>
+                <Form action={createMarker}
+                onSubmit$={() => {
+                  markerList.isLoading = true
+                }}
                 onSubmitCompleted$={() => {
-                   if (!createMarker.value?.failed){
+                  markerList.isLoading = true
+                   if (createMarker.value?.success){
                      showModal();
-                     markerList.isLoading = true
                      setToast({message:createMarker.value?.msg})
                   } 
                 }}
@@ -227,8 +212,8 @@ export default component$(() => {
                   <Input name='stream_date' label='Stream date' placeholder='Stream date' type='date' value={createMarker.formData?.get('stream_date')}></Input>
                   {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
                   <div class={"mt-6 flex space-x-4"}>
-                    <Button class="btn-outlined-secondary w-full" type='button' onClick$={showModal}>Cancel</Button>
-                    <Button class="btn-secondary w-full" type='submit'>Create</Button>
+                    <Button variant={ButtonVariant['outlined-secondary']} isFullWidth type='button' onClick$={showModal}>Cancel</Button>
+                    <Button isFullWidth type='submit'>Save</Button>
                   </div>
                 </Form>
               </div>

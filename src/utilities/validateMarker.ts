@@ -13,14 +13,15 @@ export const validateMarker = (status:string, live:Live, streamDate:Date, isInit
         return true;
     }
 
-    if (status === 'RECORDING' || status === 'RECORDED' || live.status === 'offline' ){
-        if (isInit) return true;
+    if (status === 'RECORDED' || live.status === 'offline' ){
+        if (isInit) return true
     }
 
     if (status === 'UNRECORDED' && live.status === 'live' ){
         return false;
     }
 
-    if (live.status === 'offline') return true;
+    if (live.status === 'offline') return true
+    return false
 }
 

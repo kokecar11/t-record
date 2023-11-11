@@ -9,7 +9,7 @@ import { useAuthSignin,useAuthSession } from './plugin@auth';
 import { Navbar } from '~/components/navbar/Navbar';
 import { Footer } from '~/components/footer/Footer';
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar';
-import Button from '~/components/button/Button';
+import Button, { ButtonVariant } from '~/components/button/Button';
 
 import type { NavMenuI } from '~/models';
 
@@ -62,7 +62,7 @@ export default component$(() => {
           altText='avatar-user'
           imageSrc={session.value.user.image as string} />
           :
-          <Button class={"btn-secondary"} onClick$={() => signIn.submit({ providerId: 'twitch' })}>Sign in with Twitch</Button> 
+          <Button variant={ButtonVariant.secondary} onClick$={() => signIn.submit({ providerId: 'twitch' })}>Sign in with Twitch</Button> 
           }
 
       </div>

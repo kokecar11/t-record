@@ -1,6 +1,6 @@
 import { useSignal } from "@builder.io/qwik"
 import { server$ } from "@builder.io/qwik-city"
-import { PrismaClient } from "@prisma/client"
+import { db } from "~/db"
 
 import type { StatusLive } from "~/models"
 import { useAuthSession } from "~/routes/plugin@auth"
@@ -13,8 +13,7 @@ export const useLiveStream = () => {
     const getStatusStream = server$( async function(){
         const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID') as string
         const urlApiTwitch = new URL('https://api.twitch.tv/helix/streams')
-        const prisma = new PrismaClient()
-        const user = await prisma.user.findFirst({
+        const user = await db.user.findFirst({
           where:{
             email: session.value?.user?.email
           },
