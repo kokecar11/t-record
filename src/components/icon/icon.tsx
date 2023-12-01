@@ -31,13 +31,16 @@ export enum IconCatalog {
     feWallet = 'M20 9c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3Zm-2 0V6H4v12h14v-3h-2c-1.1 0-2-1.1-2-2v-1.968C14 9.9 14.9 9 16 9h2Zm-2 4h2v-2h-2v2Z',
     feBolt = 'M18 2h-8L6 13h4l-2 9l9-13h-4.995z',
     feNoticePush = 'M17 11a4 4 0 1 1 0-8a4 4 0 0 1 0 8ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
-    feEqualizer = 'M13.17 7a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2h-2.17a3.001 3.001 0 0 1-5.66 0H3a1 1 0 1 1 0-2h10.17Zm-8 8a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2H10.83a3.001 3.001 0 0 1-5.66 0H3a1 1 0 0 1 0-2h2.17ZM16 9a1 1 0 1 0 0-2a1 1 0 0 0 0 2Zm-8 8a1 1 0 1 0 0-2a1 1 0 0 0 0 2Z'
+    feEqualizer = 'M13.17 7a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2h-2.17a3.001 3.001 0 0 1-5.66 0H3a1 1 0 1 1 0-2h10.17Zm-8 8a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2H10.83a3.001 3.001 0 0 1-5.66 0H3a1 1 0 0 1 0-2h2.17ZM16 9a1 1 0 1 0 0-2a1 1 0 0 0 0 2Zm-8 8a1 1 0 1 0 0-2a1 1 0 0 0 0 2Z',
+    feUsers = 'M8 13a3 3 0 1 1 0-6a3 3 0 0 1 0 6Zm8 0a3 3 0 1 1 0-6a3 3 0 0 1 0 6Zm-8 2a7.98 7.98 0 0 1 6 2.708V19H2v-1.292A7.98 7.98 0 0 1 8 15Zm8 4v-2.048l-.5-.567a10.057 10.057 0 0 0-1.25-1.193A8.028 8.028 0 0 1 16 15a7.98 7.98 0 0 1 6 2.708V19h-6Z',
+    feLinkExternal = 'M6 8h5v2H6v8h8v-5h2v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Zm10.614-2H12V4h8v8h-2V7.442l-5.336 5.336l-1.414-1.414L16.614 6Z',
+    feElipsisH = 'M18 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4ZM6 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4a2 2 0 0 1 0 4Z'
 }
 type IconProps = QwikIntrinsicElements['div'] & {
     name: IconCatalog
 }
 export function Icon({name ,...props}:IconProps, key: string) {
     return (
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feMagic0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feMagic1" fill="currentColor"><path id="feMagic2" d={name}></path></g></g></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feMagic0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feMagic1" fill="currentColor"><path id="feMagic2" d={name}></path></g></g></svg>
     )
 }
