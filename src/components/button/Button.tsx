@@ -1,7 +1,6 @@
-import { component$, Slot } from '@builder.io/qwik';
-import type { ButtonHTMLAttributes } from '@builder.io/qwik';
-import cn from 'classnames';
-
+import { component$, Slot } from '@builder.io/qwik'
+import type { ButtonHTMLAttributes } from '@builder.io/qwik'
+import cn from 'classnames'
 
 
 export enum ButtonSize {
@@ -31,17 +30,21 @@ export enum ButtonVariant {
   accent = 'accent',
   ghost = 'ghost',
   live = 'live',
+  pro = 'pro',
+  plus = 'plus',
   'outlined-primary' = 'outlined-primary',
   'outlined-secondary' = 'outlined-secondary'
 }
 
 const Variants: Record<ButtonVariant, string> = {
-  [ButtonVariant.primary]: 'bg-primary hover:bg-opacity-90 text-white',
+  [ButtonVariant.primary]: 'bg-primary border border-slate-600 hover:border hover:border-slate-500 text-white',
   [ButtonVariant.secondary]: 'bg-secondary hover:bg-opacity-90 text-white',
   [ButtonVariant.accent]: 'bg-accent hover:bg-opacity-90 text-white',
   [ButtonVariant.ghost]: 'bg-transparent hover:bg-slate-100 hover:text-primary text-white',
   [ButtonVariant.live]: 'bg-transparent hover:bg-live hover:text-primary text-white',
-  [ButtonVariant['outlined-primary']]: 'bg-transparent hover:bg-primary text-white border-solid border border-secondary',
+  [ButtonVariant.plus]: 'text-white bg-gradient-to-r from-pink-600 via-pink-700 to-pink-800 hover:bg-gradient-to-br transition duration-300 ease-in-out shadow-lg',
+  [ButtonVariant.pro]: 'text-white bg-gradient-to-r from-violet-600 via-violet-700 to-violet-800 hover:bg-gradient-to-br transition duration-300 ease-in-out shadow-lg',
+  [ButtonVariant['outlined-primary']]: 'bg-transparent hover:bg-primary text-white border-solid border border-primary',
   [ButtonVariant['outlined-secondary']]: 'bg-transparent hover:bg-secondary text-white border-solid border border-secondary'
 };
 
@@ -60,7 +63,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>{
 
 export default component$( ({
   size = ButtonSize.base,
-  variant = ButtonVariant.secondary,
+  variant = ButtonVariant.primary,
   isDisabled = false,
   isOnlyIcon = false,
   isFullWidth,

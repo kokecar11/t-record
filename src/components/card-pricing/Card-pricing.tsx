@@ -5,7 +5,7 @@ import { capitalizeFirstLetter } from '~/utilities';
 import type { PlanAdapter } from '~/models';
 
 import Button, { ButtonSize, ButtonVariant } from '../button/Button';
-import { Tag } from '../tag/Tag';
+import { Tag, TagSize, TagVariant } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon';
 import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth';
 
@@ -45,7 +45,7 @@ export const CardPricing = component$(
         >
           <span class="mb-4 text-xl font-medium text-gray-400">
             {title}{' '}
-            {popular && <Tag text="New" variant="secondary" size="xs" />}
+            {popular && <Tag text="New" variant={TagVariant.pro} size={TagSize.xs} />}
           </span>
           <hr class="mb-8 border-white opacity-10"></hr>
 

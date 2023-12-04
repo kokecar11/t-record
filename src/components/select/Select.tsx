@@ -31,7 +31,7 @@ export enum SelectVariant {
 }
 
 const Variants: Record<SelectVariant, string> = {
-    [SelectVariant.primary]: 'bg-primary border border-slate-600 hover:border hover:border-secondary text-white',
+    [SelectVariant.primary]: 'bg-primary border border-slate-600 hover:border hover:border-slate-500 hover:bg-opacity-90 text-white',
     // [SelectVariant.secondary]: 'bg-secondary border border-primary border-opacity-20 hover:border hover:border-primary',
 }
 
@@ -112,10 +112,10 @@ export const Select = component$(({
     
     const clasess = {
         container: cn(
-            'relative inline-block text-left z-30',
+            'relative inline-block text-left',
         ),
         button: cn(
-            'inline-flex items-center justify-center w-full rounded-lg shadow-sm bg-accent text-sm font-medium text-white hover:bg-accent hover:bg-opacity-20',
+            'inline-flex items-center justify-center w-full rounded-lg shadow-sm hover:bg-accent hover:bg-opacity-20',
             Variants[variant],
             setSizes(),
             {
