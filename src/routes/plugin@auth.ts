@@ -7,7 +7,6 @@ import type { TokenSet } from "@auth/core/types";
 import { db } from "~/db";
 
 
-
 export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
   serverAuth$(({ env }) => ({
     adapter: PrismaAdapter(db),
@@ -17,7 +16,11 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
       Twitch({
         clientId: env.get("TWITCH_ID")!,
         clientSecret: env.get("TWITCH_SECRET")!,
-        authorization: {params : { scope:'openid user:read:email channel:manage:broadcast user:read:broadcast channel_read'}}
+        authorization: {
+          params : {
+            scope:'openid user:read:email channel:manage:broadcast user:read:broadcast channel_read'
+          }
+        },
       }),
     ] as Provider[],
     callbacks : {

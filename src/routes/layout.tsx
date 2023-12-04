@@ -26,6 +26,8 @@ export default component$(() => {
   const navItems = useStore<NavMenuI>({
     navs:[
       {name:'Pricing', route:'/pricing'},
+      {name:'Feature Request', route: 'https://t-record.canny.io/feature-requests'},
+      {name:'Roadmap', route: 'https://t-record.canny.io/'},
     ]
   }) ;
 

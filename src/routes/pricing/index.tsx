@@ -1,4 +1,4 @@
-import { component$, useContextProvider, useTask$} from '@builder.io/qwik'
+import { component$, useContextProvider, useTask$ } from '@builder.io/qwik'
 import { type DocumentHead } from '@builder.io/qwik-city'
 
 import { TypeSubscriptionContext } from '~/context'
@@ -43,14 +43,14 @@ export const head: DocumentHead = {
 }
 
 export const PrincingList = component$(() => {
-  const { typeSubscription, planStore } = useTogglePricing();
+  const { typeSubscription, planStore } = useTogglePricing()
 
   useTask$(async ({track}) => {
     const plans = await getPlans()    
     track(() => [planStore.plans, typeSubscription.value])
     planStore.plans = plans
-    console.log(typeSubscription.value)
-  });
+  })
+
   return (
     <div class="gap-6 flex flex-wrap items-start justify-center mt-10 animate-fade-up delay-300 animate-duration-1000 md:items-stretch">
     {

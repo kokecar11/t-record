@@ -1,25 +1,30 @@
 import { component$, Slot, useContext, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
-import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
+import { Link, type RequestHandler, useLocation, useNavigate } from '@builder.io/qwik-city'
 
 import { GlobalStore } from '~/context'
 
-
 import { useAuthSession, useAuthSignin } from '../plugin@auth'
 import { getColorPreference, useToggleTheme } from '~/hooks'
+
 import type { NavMenuI } from '~/models'
-import { type Plan } from '@prisma/client'
+import { type Session, type Plan } from '@prisma/client'
 
 import { Navbar } from '~/components/navbar/Navbar'
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar'
 import { Footer } from '~/components/footer/Footer'
 import { Live } from '~/components/live/Live'
-import { getSubcriptionByUserPrisma } from '~/services'
+import { getSubcriptionByUser } from '~/services'
 import Button, { ButtonVariant } from '~/components/button/Button'
-import { Tag } from '~/components/tag/Tag'
+import { Tag, TagSize, TagVariant } from '~/components/tag/Tag'
 import { Icon, IconCatalog } from '~/components/icon/icon'
 
 
-
+export const onRequest: RequestHandler = (event) => {
+  const session: Session | null = event.sharedMap.get('session')
+  if (!session || new Date(session.expires) < new Date()) {
+    throw event.redirect(302, `/`)
+  }
+}
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;
@@ -35,7 +40,7 @@ export default component$(() => {
   })
   const subscriptionUser = useSignal<Plan>()
   useTask$(async () => {
-    subscriptionUser.value = await getSubcriptionByUserPrisma(session.value?.userId as string)
+    subscriptionUser.value = await getSubcriptionByUser(session.value?.userId as string)
   })
 
   useVisibleTask$(async({track}) => {    
@@ -43,7 +48,6 @@ export default component$(() => {
     state.theme = getColorPreference()
     setPreference(state.theme)
     track(() => [state.theme])
-    
   })
   
 
@@ -66,7 +70,7 @@ export default component$(() => {
       <div q:slot='navItemsEnd' class={"flex flex-none items-center justify-center space-x-3"}>
         {
           subscriptionUser.value?.type === 'STARTER' ? <Button variant={ButtonVariant['outlined-secondary']} onClick$={() => nav('/pricing')}> <Icon name={IconCatalog.feBolt} class="mr-1" />Upgrade now</Button> :
-          (<Tag variant={subscriptionUser.value?.type === 'PRO' ? 'pro': 'plus'} size='sm' text={subscriptionUser.value?.type} />)
+          (<Tag variant={subscriptionUser.value?.type === 'PRO' ? TagVariant.pro : TagVariant.plus} size={TagSize.sm} text={subscriptionUser.value?.type} />)
         }
         <Live />
         {

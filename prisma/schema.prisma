@@ -47,7 +47,10 @@ model User {
   accounts      Account[]
   sessions      Session[]
   subscriptions Subscription?
-  markers Marker[]
+  markers       Marker[]
+  teams         Team[]
+  inviter       Invitation[]  @relation("UserInviter")
+  invitee       Invitation[] @relation("UserInvitee")
 }
 
 model VerificationToken {
@@ -69,7 +72,6 @@ model Plan {
   link_yearly        String?
   features           String[]
   product_id         String?
-  variant_id         String[]
 
   subscription Subscription[]
 }
@@ -78,9 +80,13 @@ model Subscription {
   id                 String  @id @default(cuid())
   userId             String  @unique
   planId             String
+  ls_subsId          String?
+  variant_id         String?
   created_at         DateTime  @default(now())
   start_date         DateTime?
   expiration_date    DateTime?
+  renews_at          DateTime?
+  ends_at            DateTime?
   status             StatusSubscription  @default(active)
   type               TypeSubscription?
 
@@ -92,8 +98,9 @@ model Subscription {
 model Marker {
   id                 String  @id @default(cuid())
   userId             String
+  videoIdStream      String?
   title              String
-  stream_date        DateTime
+  stream_date        DateTime @db.Timestamptz()
   starts_at          Int?
   ends_at            Int?
   created_at         DateTime  @default(now())
@@ -101,6 +108,26 @@ model Marker {
   status             StatusMarker @default(UNRECORDED)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Team {
+  id                 String  @id @default(cuid())
+  name               String
+  ownerId            String  @unique
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  invitations Invitation[]
+}
+
+model Invitation {
+  id                 String  @id @default(cuid())
+  teamId             String
+  inviterId          String
+  inviteeId          String
+  status             StatusInvitations @default(pending)
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter User @relation(fields: [inviterId], references: [id], onDelete: Cascade, name: "UserInviter")
+  invitee User @relation(fields: [inviteeId], references: [id], onDelete: Cascade, name: "UserInvitee")
 }
 
 enum StatusMarker {
@@ -113,6 +140,7 @@ enum TypeSubscription {
   monthly
   yearly
 }
+
 enum StatusSubscription {
   on_trial
   active
@@ -127,4 +155,10 @@ enum TypePlan {
   STARTER
   PLUS
   PRO
+}
+
+enum StatusInvitations {
+  rejected
+  pending
+  accepted
 }

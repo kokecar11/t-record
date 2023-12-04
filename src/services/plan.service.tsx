@@ -12,3 +12,13 @@ export const getPlans = server$( async () => {
 
   return plansAdapter(plans)
 })
+
+export const getPlanByProductId = server$( async (product_id:string) => {
+  const plan = await db.plan.findFirst({
+    where: {
+      product_id
+    }
+  })
+
+  return plan
+})

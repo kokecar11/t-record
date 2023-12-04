@@ -56,6 +56,8 @@
     "@supabase/auth-helpers-shared": "^0.4.1",
     "@supabase/supabase-js": "^2.38.2",
     "classnames": "^2.3.2",
+    "date-fns": "^2.30.0",
+    "lemonsqueezy.ts": "^0.1.7",
     "supabase-auth-helpers-qwik": "^0.0.3"
   }
 }

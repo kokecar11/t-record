@@ -4,6 +4,7 @@ import type { Database } from "./schema.model";
 export interface MarkerState {
     currentPage:number;
     markers: Marker[];
+    allMarkers: Marker[];
     isLoading: boolean;
     indicators: {title: string, counter: number}[]
 }

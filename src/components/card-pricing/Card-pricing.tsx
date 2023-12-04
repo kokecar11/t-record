@@ -34,7 +34,7 @@ export const CardPricing = component$(
         }`}
       >
         {popular && (
-          <p class="flex items-center justify-center text-center bg-secondary py-2 font-semibold">
+          <p class="flex text-white items-center justify-center text-center bg-secondary py-2 font-semibold">
             <Icon name={IconCatalog.feStar} class="text-lg mr-1" /> Most Popular
           </p>
         )}
