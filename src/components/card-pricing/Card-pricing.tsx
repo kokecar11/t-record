@@ -1,13 +1,13 @@
-import { component$ } from '@builder.io/qwik';
-import { useNavigate } from '@builder.io/qwik-city';
+import { component$ } from '@builder.io/qwik'
+import { useNavigate } from '@builder.io/qwik-city'
 
-import { capitalizeFirstLetter } from '~/utilities';
-import type { PlanAdapter } from '~/models';
+import { capitalizeFirstLetter } from '~/utilities'
+import type { PlanAdapter } from '~/models'
 
-import Button, { ButtonSize, ButtonVariant } from '../button/Button';
-import { Tag, TagSize, TagVariant } from '../tag/Tag';
-import { Icon, IconCatalog } from '../icon/icon';
-import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth';
+import Button, { ButtonSize, ButtonVariant } from '../button/Button'
+// import { Tag, TagSize, TagVariant } from '../tag/Tag';
+import { Icon, IconCatalog } from '../icon/icon'
+import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
 
 export type CardPricingProps = PlanAdapter;
 
@@ -45,7 +45,7 @@ export const CardPricing = component$(
         >
           <span class="mb-4 text-xl font-medium text-gray-400">
             {title}{' '}
-            {popular && <Tag text="New" variant={TagVariant.pro} size={TagSize.xs} />}
+            {/* {popular && <Tag text="New" variant={TagVariant.pro} size={TagSize.xs} />} */}
           </span>
           <hr class="mb-8 border-white opacity-10"></hr>
 
