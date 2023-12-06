@@ -46,8 +46,7 @@ export const head: DocumentHead = {
 export const PrincingList = component$(({typeSubscription}:{typeSubscription:any}) => {
   const { planStore } = useTogglePricing()
 
-  useTask$(async ({track}) => {
-    track(() => [planStore.plans])
+  useTask$(async () => {
     planStore.plans = await getPlans()    
   })
 

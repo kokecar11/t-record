@@ -22,11 +22,10 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const { showMenuDropdown } = useMenuDropdown()
     const menuOptions: MenuDropdownOptions[] = [
       {name: 'Dashboard', icon: IconCatalog.feBarChart, route: '/dashboard'},
-      // {name: 'Team', icon: IconCatalog.feUsers, route: '/team'},
-      {name: 'Pricing', icon: IconCatalog.feMoney, route: '/pricing'},
-      // {name: 'Billing', icon: IconCatalog.feWallet, route: '/billing'},
+      {name: 'Billing', icon: IconCatalog.feWallet, route: '/billing'},
       {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests', target:'_blank'},
       {name: 'Sign Out', icon:IconCatalog.feLogout, action: onSignOut},
+      // {name: 'Team', icon: IconCatalog.feUsers, route: '/team'},
   ]
     useOnDocument('keyup', $((event)=>{
       const key = event as KeyboardEvent

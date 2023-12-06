@@ -1,5 +1,5 @@
 import { component$, Slot, useContext, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
-import { Link, type RequestHandler, useLocation, useNavigate } from '@builder.io/qwik-city'
+import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
 
 import { GlobalStore } from '~/context'
 
@@ -7,7 +7,7 @@ import { useAuthSession, useAuthSignin } from '../plugin@auth'
 import { getColorPreference, useToggleTheme } from '~/hooks'
 
 import type { NavMenuI } from '~/models'
-import { type Session, type Plan } from '@prisma/client'
+import { type Plan } from '@prisma/client'
 
 import { Navbar } from '~/components/navbar/Navbar'
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar'
@@ -18,13 +18,6 @@ import Button, { ButtonVariant } from '~/components/button/Button'
 import { Tag, TagSize, TagVariant } from '~/components/tag/Tag'
 import { Icon, IconCatalog } from '~/components/icon/icon'
 
-
-export const onRequest: RequestHandler = (event) => {
-  const session: Session | null = event.sharedMap.get('session')
-  if (!session || new Date(session.expires) < new Date()) {
-    throw event.redirect(302, `/`)
-  }
-}
 
 export default component$(() => {
   const pathname = useLocation().url.pathname;

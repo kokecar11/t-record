@@ -1,13 +1,13 @@
 import { $, component$, useContext, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
 import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city'
-import type { DocumentHead } from '@builder.io/qwik-city'
+import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city'
 import { startOfToday } from 'date-fns'
 
 import { useLiveStream } from '~/hooks'
 import { LiveStreamContext } from '~/context'
 import { createMarker, deleteMarker, getAllMarkers, getMarkers } from '~/services'
 
-import { type StatusMarker } from '@prisma/client'
+import type { Session, StatusMarker } from '@prisma/client'
 import type { MarkerState } from '~/models'
 
 import { useModal } from '~/components/modal/hooks/use-modal'
@@ -23,6 +23,14 @@ import { useAuthSession } from '~/routes/plugin@auth'
 import Datepicker from '~/components/datepicker/Datepicker'
 import { Select, SelectVariant } from '~/components/select/Select'
 
+
+
+export const onRequest: RequestHandler = async(event) => {
+  const session: Session | null = event.sharedMap.get('session')
+  if (!session || new Date(session.expires) < new Date()) {
+    throw event.redirect(302, `/`)
+  }
+}
 
 export const taskForm = zod$({
   title: z.string().nonempty({

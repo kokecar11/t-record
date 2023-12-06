@@ -9,16 +9,23 @@ export const getSubcriptionByUser = server$(async (userId: string) => {
       plan: true
     }
   })
-  
   return mySubcription?.plan
 })
 
 export const getSubcriptionPlanByUser = server$(async (userId: string) => { 
-  const mySubcription = await db.subscription.findFirst({
-    where: { userId },
-    include: {
-      plan: true
-    }
+    const mySubcription = await db.subscription.findFirst({
+      where: { userId },
+      include: {
+        plan: true
+      }
+    })
+    return subscriptionBillingUserAdapter(mySubcription)
+})
+
+
+export const getUserByEmail = server$(async (userEmail: string) => { 
+  const mySubcription = await db.user.findFirst({
+    where: { email: userEmail },
   })
-  return subscriptionBillingUserAdapter(mySubcription)
+  return mySubcription
 })

@@ -1,30 +1,36 @@
-import { component$, useSignal, useTask$, $, useVisibleTask$ } from '@builder.io/qwik';
-import { type DocumentHead } from '@builder.io/qwik-city';
+import { component$, useSignal, useTask$, $, useContextProvider } from '@builder.io/qwik'
+import { type RequestHandler, type DocumentHead, useNavigate } from '@builder.io/qwik-city'
 
-import { useAuthSession } from '~/routes/plugin@auth';
-import { cancelSubscription, getPlans, getSubcriptionPlanByUser, invoices } from '~/services';
+import { useAuthSession } from '~/routes/plugin@auth'
+import { getSubcriptionPlanByUser } from '~/services'
 
-import { Tag, TagSize, TagVariant } from '~/components/tag/Tag';
-import Button, { ButtonVariant } from '~/components/button/Button';
-import { type SubscriptionBillingUser } from '~/adapters';
-import { useTogglePricing } from '~/hooks';
-import { PrincingList } from '~/routes/pricing';
+import { useTogglePricing } from '~/hooks'
+import { TypeSubscriptionContext } from '~/context'
 
-// export const onRequest: RequestHandler = (event) => {
-//   throw event.redirect(302, `/dashboard`)
-// }
+import { Tag, TagSize, TagVariant } from '~/components/tag/Tag'
+import Button, { ButtonVariant } from '~/components/button/Button'
+
+import { type SubscriptionBillingUser } from '~/adapters'
+import { type Session } from '@prisma/client'
+
+export const onRequest: RequestHandler = async(event) => {
+  const session: Session | null = event.sharedMap.get('session')
+  if (!session || new Date(session.expires) < new Date()) {
+    throw event.redirect(302, `/`)
+  }
+}
+
 export default component$(() => {
-  const showPlan = useSignal<boolean>(false)
+  const nav = useNavigate()
   const subscription = useSignal<SubscriptionBillingUser>()
-  const { planStore } = useTogglePricing()
   const session = useAuthSession()
-  // getSubcriptionByUser
-  const toggleShowPlan = $(() => showPlan.value = !showPlan.value)
-  useVisibleTask$(async () => {
-    await invoices(session.value?.user?.email as string)
-    const plans = await getPlans()    
+  const handlePricing = $(() => nav('/pricing'))
+  const { typeSubscription } = useTogglePricing()
+  useContextProvider(TypeSubscriptionContext, typeSubscription)
+
+  useTask$(async () => {
+    // await invoices(session.value?.user?.email as string)
     subscription.value = await getSubcriptionPlanByUser(session.value?.userId as string)
-    planStore.plans = plans
   })
 
   
@@ -51,18 +57,16 @@ export default component$(() => {
             
             <div class="grid gap-y-4 sm:flex sm:space-x-4 my-auto">
               <Button variant={ButtonVariant['primary']} onClick$={async()=>{
-                await cancelSubscription()
+                // await cancelSubscription()
               }} >
                 Cancel sub
               </Button>
-              <Button variant={ButtonVariant['pro']} onClick$={toggleShowPlan}>
+              <Button variant={ButtonVariant['pro']} onClick$={handlePricing}>
                 Change plan
               </Button>
             </div>
           </div>
         </div>
-
-        {showPlan.value && (<PrincingList/>)}
         
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg my-2">
           <table class="w-full text-sm text-left rtl:text-right text-gray-400">
