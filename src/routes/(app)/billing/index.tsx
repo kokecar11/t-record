@@ -1,5 +1,5 @@
-import { component$, useSignal, useTask$, $, useContextProvider } from '@builder.io/qwik'
-import { type RequestHandler, type DocumentHead, useNavigate } from '@builder.io/qwik-city'
+import { component$, useSignal, useTask$, useContextProvider } from '@builder.io/qwik'
+import { type RequestHandler, type DocumentHead } from '@builder.io/qwik-city'
 
 import { useAuthSession } from '~/routes/plugin@auth'
 import { getSubcriptionPlanByUser } from '~/services'
@@ -7,8 +7,7 @@ import { getSubcriptionPlanByUser } from '~/services'
 import { useTogglePricing } from '~/hooks'
 import { TypeSubscriptionContext } from '~/context'
 
-import { Tag, TagSize, TagVariant } from '~/components/tag/Tag'
-import Button, { ButtonVariant } from '~/components/button/Button'
+// import Button, { ButtonVariant } from '~/components/button/Button'
 
 import { type SubscriptionBillingUser } from '~/adapters'
 import { type Session } from '@prisma/client'
@@ -21,15 +20,14 @@ export const onRequest: RequestHandler = async(event) => {
 }
 
 export default component$(() => {
-  const nav = useNavigate()
+  // const nav = useNavigate()
   const subscription = useSignal<SubscriptionBillingUser>()
   const session = useAuthSession()
-  const handlePricing = $(() => nav('/pricing'))
+  // const handlePricing = $(() => nav('/pricing'))
   const { typeSubscription } = useTogglePricing()
   useContextProvider(TypeSubscriptionContext, typeSubscription)
 
   useTask$(async () => {
-    // await invoices(session.value?.user?.email as string)
     subscription.value = await getSubcriptionPlanByUser(session.value?.userId as string)
   })
 
@@ -49,67 +47,29 @@ export default component$(() => {
                 {subscription.value?.typePlan === 'STARTER' ? <span class='text-xl text-white'>FREE</span> : <span class='text-xl text-white'>${subscription.value?.price} <span class='text-xs text-gray-300'> per month</span></span> }
             </div>
             { subscription.value?.renews_at &&
-              <div class="grid">
+              <div class="grid sm:flex-1">
                 <span class='text-sm text-gray-400'>Renews at</span>
                 <span class='text-xl text-white'>{subscription.value?.renews_at.toLocaleDateString()}</span>
               </div>
             }
+            { subscription.value?.ends_at &&
+              <div class="grid sm:flex-1">
+                <span class='text-sm text-gray-400'>Ends at</span>
+                <span class='text-xl text-white'>{subscription.value?.ends_at.toLocaleDateString()}</span>
+              </div>
+            }
             
-            <div class="grid gap-y-4 sm:flex sm:space-x-4 my-auto">
+            {/* <div class="grid gap-y-4 sm:flex sm:space-x-4 my-auto">
               <Button variant={ButtonVariant['primary']} onClick$={async()=>{
-                // await cancelSubscription()
+                await cancelSubscription(session.value?.userId as string)
               }} >
                 Cancel sub
               </Button>
               <Button variant={ButtonVariant['pro']} onClick$={handlePricing}>
                 Change plan
               </Button>
-            </div>
+            </div> */}
           </div>
-        </div>
-        
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg my-2">
-          <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-              <thead class="text-xs text-gray-400 capitalize bg-gray-700">
-                  <tr>
-                    <th scope="col" class="px-6 py-3">
-                        Date
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Amount due
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Invoice number
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Status
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        <span class="sr-only">Edit</span>
-                    </th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr class="bg-white border-b dark:bg-accent dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 dark:text-white">
-                    <th class="px-6 py-4">
-                        21/10/2023, 18:22:05
-                    </th>
-                    <td class="px-6 py-4">
-                        $5.99
-                    </td>
-                    <td class="px-6 py-4">
-                        12342-3dsd-232
-                    </td>
-                    <td class="px-6 py-4">
-                        <Tag text='Paid' size={TagSize.xs} variant={TagVariant['success-outlined']}/>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                    </td>
-                  </tr>
-        
-              </tbody>
-          </table>
         </div>
       </div>
     </>

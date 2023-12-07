@@ -2,6 +2,7 @@ import type { RequestHandler } from '@builder.io/qwik-city';
 import { setPaymentSubscriptionByUser } from '~/services';
 
 export interface PaymentResponse {
+    id: string,
     data: {
         attributes: PaymentData
     }
@@ -13,6 +14,7 @@ export interface PaymentData {
     variant_name: string,
     renews_at: string,
     ends_at: string,
+    ls_subsId: string,
 }
 
 export const onPost: RequestHandler = async ({ json, parseBody }) => {
@@ -24,6 +26,7 @@ export const onPost: RequestHandler = async ({ json, parseBody }) => {
         variant_name: body.data.attributes.variant_name.toLowerCase(),
         renews_at: body.data.attributes.renews_at,
         ends_at: body.data.attributes.ends_at,
+        ls_subsId: body.id,
     }
     console.log(data)
     await setPaymentSubscriptionByUser(data)

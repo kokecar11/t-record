@@ -1,6 +1,7 @@
-import { server$ } from '@builder.io/qwik-city';
-import { plansAdapter } from '~/adapters';
-import { db } from '~/db';
+import { server$ } from '@builder.io/qwik-city'
+import { plansAdapter } from '~/adapters'
+import { db } from '~/db'
+import type { TypePlan } from '@prisma/client'
 
 
 export const getPlans = server$( async () => {
@@ -17,6 +18,16 @@ export const getPlanByProductId = server$( async (product_id:string) => {
   const plan = await db.plan.findFirst({
     where: {
       product_id
+    }
+  })
+
+  return plan
+})
+
+export const getPlanByType = server$( async (type:TypePlan) => {
+  const plan = await db.plan.findFirst({
+    where: {
+      type
     }
   })
 
