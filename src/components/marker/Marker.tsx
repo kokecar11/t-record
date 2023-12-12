@@ -111,7 +111,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         <div class="flex place-content-center px-4 pb-3">
             <Button variant={ButtonVariant.secondary} isFullWidth size={ButtonSize.sm}
                     onClick$={async () => { 
-                        const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string, live.vod as string)
+                        const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string)
                         live.isLoading = true
                         if(response.markerUpdated){
                             marker.status = response.markerUpdated?.status

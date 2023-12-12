@@ -96,7 +96,7 @@ export const setVODInMarker = server$(async function( isStartMarker:boolean = tr
 })
 
 
-export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, marker:Marker, userId:string, vodId:string) {
+export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, marker:Marker, userId:string) {
     const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID')
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
 
