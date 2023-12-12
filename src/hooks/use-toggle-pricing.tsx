@@ -7,7 +7,7 @@ export const useTogglePricing = () => {
     const typeSubscription = useSignal<TypeSubscription>('monthly');
     const planStore= useStore<{plans: PlanAdapter[]}>(
         { 
-          plans:[],
+            plans:[],
         }
     );
     useContextProvider(TypeSubscriptionContext, typeSubscription);

@@ -1,25 +1,17 @@
-import { component$, useContextProvider, useTask$} from '@builder.io/qwik';
-import { type DocumentHead } from '@builder.io/qwik-city';
+import { component$, useContextProvider, useTask$ } from '@builder.io/qwik'
+import { type DocumentHead } from '@builder.io/qwik-city'
 
-import { TypeSubscriptionContext } from '~/context';
-import { getPlans } from '~/services';
-import { useTogglePricing } from '~/hooks';
+import { TypeSubscriptionContext } from '~/context'
+import { getPlans } from '~/services'
+import { useTogglePricing } from '~/hooks'
 
-import { CardPricing } from '~/components/card-pricing/Card-pricing';
-import { TogglePricing } from '~/components/toggle-pricing/Toggle-pricing';
-import { plansAdapter } from '~/adapters';
+import { CardPricing } from '~/components/card-pricing/Card-pricing'
+import { TogglePricing } from '~/components/toggle-pricing/Toggle-pricing'
 
 
 export default component$(() => {
-  const { typeSubscription, planStore } = useTogglePricing();
-  useContextProvider(TypeSubscriptionContext, typeSubscription);  
-  
-  useTask$(async ({track}) => {
-    track(() => [planStore.plans, typeSubscription.value])
-    const plans = await getPlans()
-    planStore.plans = plansAdapter(plans)
-  });
-
+  const { typeSubscription } = useTogglePricing()
+  useContextProvider(TypeSubscriptionContext, typeSubscription)
 
   return (
     <div class="flex flex-col m-10 h-full">
@@ -33,20 +25,10 @@ export default component$(() => {
           Join the revolution of interactive experiences on Twitch!
         </span>
       </p>
-      
       <div class="flex flex-row justify-center items-center gap-2 mt-4">
         <TogglePricing/>
       </div>
-
-      <div class="gap-6 flex flex-wrap items-start justify-center mt-10 animate-fade-up delay-300 animate-duration-1000 md:items-stretch">
-          {
-            planStore.plans
-            .filter((plan) => plan.type === typeSubscription.value)
-            .map((plan) => (
-              <CardPricing key={plan.id} {...plan} /> 
-            ))
-          }
-      </div>
+        <PrincingList typeSubscription={typeSubscription.value}/>
     </div>
   )
 })
@@ -60,3 +42,23 @@ export const head: DocumentHead = {
     },
   ],
 }
+
+export const PrincingList = component$(({typeSubscription}:{typeSubscription:any}) => {
+  const { planStore } = useTogglePricing()
+
+  useTask$(async () => {
+    planStore.plans = await getPlans()    
+  })
+
+  return (
+    <div class="gap-6 flex flex-wrap items-start justify-center mt-10 animate-fade-up delay-300 animate-duration-1000 md:items-stretch">
+    {
+      planStore.plans
+      .filter((plan) => plan.typeSubscription === typeSubscription)
+      .map((plan) => (
+        <CardPricing key={plan.id} {...plan} /> 
+      ))
+    }
+</div>
+  )
+})

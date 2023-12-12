@@ -1,82 +1,147 @@
-import { server$ } from "@builder.io/qwik-city";
-import type { User } from "supabase-auth-helpers-qwik";
-import { supabase } from "~/supabase/supabase-browser";
-import type{ MarkerType, TwitchProvider, UserSession } from "~/models";
-import { cookieProvider, cookieUserSession } from "~/utilities";
+import { server$ } from "@builder.io/qwik-city"
+import { db } from "~/db"
+import { type Marker } from "@prisma/client"
+
+import {type FiltersMarkerState } from "~/routes/(app)/dashboard"
 
 
-export const getMarkers = server$(async (fkUser:string, orderBy:any, orderMarkerByStatus:any) => {
+export const getMarkers = server$(async (userId:string, filters:FiltersMarkerState) => {
+    const tomorrow = new Date(filters.selectDayStream)
+    const markers = await db.marker.findMany({
+        where: { 
+            userId,
+            status: filters.byStatus[0],
+            stream_date: {
+                gte: new Date(filters.selectDayStream),
+                lte: new Date(tomorrow.setDate(tomorrow.getDate()+1))
+            }
+        },
+    })
+    return markers
+})
+
+export const getAllMarkers = server$(async (userId:string) => {
+    const markers = await db.marker.findMany({
+        where: { 
+            userId
+        }
+    })
+    return markers
+})
+
+export const createMarker = server$(async (data: {title:string, stream_date: Date, userId:string}) => {
+    const {title, stream_date, userId } = data
+    const marker = await db.marker.create({
+        data:{
+            userId,
+            title,
+            stream_date
+        }
+    })
+    return marker
+})
+
+export const deleteMarker = server$(async (markerId: string) => {
+    const markerDeleted = await db.marker.delete({
+        where: { id: markerId }
+    })
+    return markerDeleted
+})
+
+export const setVODInMarker = server$(async function( isStartMarker:boolean = true, marker:Marker, userId:string ) {
+    const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID')
+    const urlApiTwitch = 'https://api.twitch.tv/helix/videos';
+
+    const account = await db.account.findFirst({
+        where: { userId }
+    })
+
+    const accesTokenProvider = account?.access_token as string
+    const providerAccountId = account?.providerAccountId as string
     
-    const { data, error } = await supabase.from('markers')
-    .select('*')
-    .eq('fk_user', fkUser)
-    .in('status', orderMarkerByStatus.byStatus)
-    .order(orderBy, {ascending:false})
-    if (error){
-        return [];
-    }else{
-        return [...data] as MarkerType[];
+    const headers = {
+        'Authorization':"Bearer " + accesTokenProvider,
+        'Client-Id': TWITCH_CLIENT_ID
+    };
+    const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}&type=archive&sort=time`, {
+        method:'GET',
+        headers
+    });
+
+    const { data } = await respStream.json() as {data: {id:string}[]}
+    if(data.length > 0){
+        if(isStartMarker){
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    videoIdStreamStart: data[0].id
+                }
+            })
+            return {markerUpdated}
+        }else{
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    videoIdStreamEnd: data[0].id
+                }
+            })
+            return {markerUpdated}
+        }
     }
-});
 
-export const deleteMarker = server$(async (idMarker:number) => {
-    await supabase.from('markers')
-    .delete()
-    .eq('id', idMarker)
-});
+    return {
+        title:'VOD Not ready.',
+        message: 'Stream markers aren’t available during the first few seconds of a stream. Wait a few seconds and try again.'
+    }
+})
 
-export const markerInStream = server$(async (provider:TwitchProvider, user:User, markerDesc: string) => {
-    const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
+
+export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, marker:Marker, userId:string, vodId:string) {
+    const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID')
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
 
+    const account = await db.account.findFirst({
+        where: { userId }
+    })
+    const accesTokenProvider = account?.access_token as string
+    const providerAccountId = account?.providerAccountId as string
+    
     const headers = {
-        'Authorization':"Bearer " + provider.providerToken,
+        'Authorization':"Bearer " + accesTokenProvider,
         'Client-Id': TWITCH_CLIENT_ID
     };
-  
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${user.user_metadata.provider_id}&description=${markerDesc}`, {
+    const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}&description=${marker.title}`, {
         method:'POST',
         headers
     });
     
-    return await respStream.json();
-});
-
-export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, markerId:number, markerTitle:string) {
-    const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
-    const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
-    
-    const provider:TwitchProvider = this.cookie.get(cookieProvider)!.json();
-    const user:UserSession = this.cookie.get(cookieUserSession)!.json();
-    
-    const headers = {
-        'Authorization':"Bearer " + provider.providerToken,
-        'Client-Id': TWITCH_CLIENT_ID
-    };
-  
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${user.providerId}&description=${markerTitle}`, {
-        method:'POST',
-        headers
-    });
-    
-    const data = await respStream.json();
-    const live = data.status;
-    
-    const position_seconds = data.data[0].position_seconds;
+    const resp = await respStream.json()
+    const live = resp.status
     if (live !== 404){
-      if(isStartMarker){
-        const { data } = await supabase.from('markers')
-        .update({ status: 'RECORDING', starts_at: position_seconds })
-        .eq('fk_user', user.userId)
-        .eq('id', markerId).select()
-        return { data }
-      }else{
-        const { data } = await supabase.from('markers')
-        .update({ status: 'RECORDED', ends_at: position_seconds })
-        .eq('fk_user', user.userId)
-        .eq('id', markerId).select()
-        return { data }
-      }
+        const position_seconds = resp.data[0].position_seconds
+        if(isStartMarker){
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    status:'RECORDING',
+                    starts_at: position_seconds,
+                }
+            })
+            return { markerUpdated }
+        }else{
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    status:'RECORDED',
+                    ends_at: position_seconds,
+                }
+            })
+            return { markerUpdated }
+        }
     }
-    return {data}
+
+    return {
+        title:'VOD Not ready.',
+        message: 'Stream markers aren’t available during the first few seconds of a stream. Wait a few seconds and try again.'
+    }
 });

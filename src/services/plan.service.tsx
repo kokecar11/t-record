@@ -1,13 +1,35 @@
-import { server$ } from '@builder.io/qwik-city';
-import { supabase } from '~/supabase/supabase-browser';
+import { server$ } from '@builder.io/qwik-city'
+import { plansAdapter } from '~/adapters'
+import { db } from '~/db'
+import type { TypePlan } from '@prisma/client'
 
-import type { Plan } from "~/models";
 
-export const getPlans = server$(async () => {
-  const { data, error } = await supabase.from('plan').select('*').order('price_monthly, price_yearly');
-  if (error){
-    return [];
-  }else{
-    return [ ...data  ] as Plan[];
-  }
-});
+export const getPlans = server$( async () => {
+  const plans = await db.plan.findMany({
+    orderBy:{
+      price_monthly:'asc',
+    }
+  })
+
+  return plansAdapter(plans)
+})
+
+export const getPlanByProductId = server$( async (product_id:string) => {
+  const plan = await db.plan.findFirst({
+    where: {
+      product_id
+    }
+  })
+
+  return plan
+})
+
+export const getPlanByType = server$( async (type:TypePlan) => {
+  const plan = await db.plan.findFirst({
+    where: {
+      type
+    }
+  })
+
+  return plan
+})

@@ -1,19 +1,8 @@
-import { component$, useContext, useTask$ } from "@builder.io/qwik"
-import { LiveStreamContext } from "~/context"
-import { useLiveStream } from "~/hooks"
-
+import { component$, useContext } from '@builder.io/qwik'
+import { LiveStreamContext } from '~/context'
 
 export const Live = component$(() => {
-  
   const live = useContext(LiveStreamContext)
-  const { getStatusStream } = useLiveStream()
-
-  useTask$ (async ({track}) => {
-    const stream  = await getStatusStream()
-    track(() => live.status)
-    live.status = stream.status
-  })
-
   return (
     <div class="flex place-items-center space-x-2">
         <span class="font-semibold text-white capitalize">{live.status}</span> 

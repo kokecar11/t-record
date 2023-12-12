@@ -2,20 +2,10 @@ import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik'
 import {
   type DocumentHead,
   useNavigate,
-  type RequestHandler,
 } from '@builder.io/qwik-city'
 
 import { UserSessionContext } from '~/context'
 import { Collapse } from '~/components/collapse/Collapse'
-import { cookieProvider } from '~/utilities'
-
-
-export const onRequest: RequestHandler = async (request) => {
-  const providerCookie = request.cookie.get(cookieProvider);
-  if(providerCookie){
-    throw request.redirect(302, '/dashboard')
-  }
-};
 
 
 export default component$(() => {

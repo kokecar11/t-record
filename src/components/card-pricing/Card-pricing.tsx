@@ -1,14 +1,15 @@
-import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik';
-import { useNavigate } from '@builder.io/qwik-city';
+import { component$, useSignal, useTask$ } from '@builder.io/qwik'
+import { useNavigate } from '@builder.io/qwik-city'
 
-import { useAuthUser } from '~/hooks';
-import { UserSessionContext } from '~/context';
-import { capitalizeFirstLetter } from '~/utilities';
-import type { PlanAdapter } from '~/models';
+import { capitalizeFirstLetter } from '~/utilities'
+import { getSubcriptionPlanByUser } from '~/services'
+import type { PlanAdapter } from '~/models'
 
-import Button from '../button/Button';
-import { Tag } from '../tag/Tag';
-import { Icon, IconCatalog } from '../icon/icon';
+import Button, { ButtonSize, ButtonVariant } from '../button/Button'
+// import { Tag, TagSize, TagVariant } from '../tag/Tag';
+import { Icon, IconCatalog } from '../icon/icon'
+import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
+import { type SubscriptionBillingUser } from '~/adapters'
 
 export type CardPricingProps = PlanAdapter;
 
@@ -19,16 +20,18 @@ export const CardPricing = component$(
     popular,
     features,
     link,
-    type,
-    name,
+    typePlan,
+    typeSubscription
   }: CardPricingProps) => {
-    const userSession = useContext(UserSessionContext)
+    const session = useAuthSession();
+    const signIn = useAuthSignin();
     const nav = useNavigate()
-    const { handleSignInWithOAuth } = useAuthUser()
+    const subscription = useSignal<SubscriptionBillingUser>()
 
-    useVisibleTask$(async ({track}) => {
-      track(() => [userSession.email, userSession.isLoggedIn])
+    useTask$(async () => {
+      subscription.value = await getSubcriptionPlanByUser(session.value?.userId as string)
     })
+
     return (
       <div
         class={`w-full sm:min-w-[20rem] max-w-sm p-0.5 border border-secondary rounded-lg ${
@@ -38,7 +41,7 @@ export const CardPricing = component$(
         }`}
       >
         {popular && (
-          <p class="flex items-center justify-center text-center bg-secondary py-2 font-semibold">
+          <p class="flex text-white items-center justify-center text-center bg-secondary py-2 font-semibold">
             <Icon name={IconCatalog.feStar} class="text-lg mr-1" /> Most Popular
           </p>
         )}
@@ -49,13 +52,13 @@ export const CardPricing = component$(
         >
           <span class="mb-4 text-xl font-medium text-gray-400">
             {title}{' '}
-            {popular && <Tag text="New" variant="secondary" size="xs" />}
+            {/* {popular && <Tag text="New" variant={TagVariant.pro} size={TagSize.xs} />} */}
           </span>
           <hr class="mb-8 border-white opacity-10"></hr>
 
           <div class="flex items-baseline text-white">
             <span class="text-5xl font-extrabold tracking-tight">${price}</span>
-            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(type)}</span>
+            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(typeSubscription)}</span>
           </div>
           <hr class="mt-8 border-white opacity-10"></hr>
           <ul role="list" class="space-y-5 my-7">
@@ -73,15 +76,17 @@ export const CardPricing = component$(
           </ul>
 
           <div class="flex flex-col mt-auto">
-            {name === 'STARTER' ? (
+            {typePlan === 'STARTER' ? (
               <Button
-                class={`sticky bottom-0 btn-secondary`}
-                id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                variant={ButtonVariant.secondary}
+                size={ButtonSize.sm}
+                isFullWidth
+                id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
-                  if (userSession.isLoggedIn) {
-                    nav(link)
+                  if (session.value?.user) {
+                    nav(`/billing`)
                   } else {
-                    handleSignInWithOAuth('twitch')
+                    signIn.submit({ providerId: 'twitch', callbackUrl:'/pricing' })
                   }
                 }}
               >
@@ -89,15 +94,22 @@ export const CardPricing = component$(
               </Button>
             ) : (
               <Button 
-                class={`w-full btn-secondary`} 
-                id={`${capitalizeFirstLetter(name.toLowerCase())}-${capitalizeFirstLetter(type.toString())}`} 
+                variant={ButtonVariant.secondary}
+                size={ButtonSize.sm}
+                isFullWidth 
+                id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
-                  if(userSession.isLoggedIn){
-                    nav(`${link}${userSession.email}`)
+                  if(session.value?.user){
+                    if(subscription.value?.typePlan !== 'STARTER'){
+                      nav(`/dashboard`)
+                    }else{
+                      nav(`${link}${session.value?.user?.email}`)
+                    }
                   } else {
-                    handleSignInWithOAuth('twitch')
+                    signIn.submit({ providerId: 'twitch', callbackUrl:'/pricing' })
                   }
-                }}>
+                }}
+                >
                 Get started
               </Button>
             )}

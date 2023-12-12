@@ -2,6 +2,6 @@
     @apply absolute z-10 mt-2 mr-3 w-40 shadow-lg overflow-hidden bg-primary origin-top-right right-0 rounded-lg
 }
 .menu-option{
-    @apply px-4 py-2 text-sm flex items-center text-white hover:bg-opacity-10 hover:text-opacity-80 
+    @apply p-2 text-sm flex items-center text-white hover:bg-opacity-10 hover:text-opacity-80 
     dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 cursor-pointer
 }

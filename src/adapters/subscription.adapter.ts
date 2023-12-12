@@ -1,20 +1,19 @@
-import type { Subscription } from "~/models";
+export interface SubscriptionBillingUser {
+    price: string
+    typePlan: string,
+    renews_at: Date,
+    typeSubscription: string,
+    ends_at: Date
+}
 
+export const subscriptionBillingUserAdapter = (subs: any) => {
+    const price = subs.type === 'monthly' ? subs.plan.price_monthly : subs.plan.price_yearly
+    return {
+        price,
+        typePlan: subs.plan.type,
+        renews_at: subs.renews_at,
+        typeSubscription: subs.type,
+        ends_at: subs.ends_at
+    } as SubscriptionBillingUser 
+}
 
-export const subscriptionUserAdapter = (subs: Subscription) => ({
-    start_date: subs.start_date,
-    expiration_date: subs.expiration_date,
-    plan: subs.fk_plan.name,
-    status: subs.status
-})
-
-// export const subscriptionPlanAdapter = (subs: Subscription) => ({
-//     id: subs.id,
-//     plan: subs.plan,
-//     link: subs.link,
-//     popular: subs.popular,
-//     price: subs.price,
-//     title: subs.title,
-//     type: subs.type,
-//     feauter: subs.features
-// })
