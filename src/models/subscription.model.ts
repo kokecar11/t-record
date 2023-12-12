@@ -1,5 +1,5 @@
 import type { Plan, TypePlan } from "./plan.model"
-import type { Database } from "./schema.model";
+
 export type TypeSubscription = 'yearly' | 'monthly'; 
 
 export interface Subscription {
@@ -17,5 +17,3 @@ export interface SubscriptionUser {
     start_date?: Date
     expiration_date?: Date
 }
-
-export type SubscriptionType = Database['public']['Tables']['subscription']['Row'];

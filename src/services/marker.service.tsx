@@ -62,11 +62,12 @@ export const setVODInMarker = server$(async function( isStartMarker:boolean = tr
     const headers = {
         'Authorization':"Bearer " + accesTokenProvider,
         'Client-Id': TWITCH_CLIENT_ID
-    };
+    } as HeadersInit
+
     const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}&type=archive&sort=time`, {
         method:'GET',
         headers
-    });
+    })
 
     const { data } = await respStream.json() as {data: {id:string}[]}
     if(data.length > 0){
@@ -109,11 +110,12 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     const headers = {
         'Authorization':"Bearer " + accesTokenProvider,
         'Client-Id': TWITCH_CLIENT_ID
-    };
+    } as HeadersInit
+    
     const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}&description=${marker.title}`, {
         method:'POST',
         headers
-    });
+    })
     
     const resp = await respStream.json()
     const live = resp.status

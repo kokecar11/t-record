@@ -1,4 +1,4 @@
-import type { Database } from "./schema.model";
+
 import type { TypeSubscription } from "./subscription.model";
 
 export type TypePlan = 'PLUS' | 'STARTER' | 'PRO';
@@ -24,5 +24,3 @@ export interface PlanAdapter {
     typePlan: string
     typeSubscription: TypeSubscription
 }
-
-export type PlanType = Database['public']['Tables']['plan']['Row'];
