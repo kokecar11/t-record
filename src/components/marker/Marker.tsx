@@ -1,8 +1,9 @@
-import { type PropFunction, component$, useStore, useVisibleTask$ } from '@builder.io/qwik'
+import { type PropFunction, component$, useStore, useVisibleTask$, useSignal } from '@builder.io/qwik'
+import { Link } from '@builder.io/qwik-city'
 import { format } from 'date-fns'
 
 import { useAuthSession } from '~/routes/plugin@auth'
-import { setMarkerInStream } from '~/services'
+import { getSubcriptionPlanByUser, setMarkerInStream, setVODInMarker } from '~/services'
 import { validateMarker } from '~/utilities'
 
 import type { Live } from '~/models'
@@ -13,6 +14,7 @@ import { Icon, IconCatalog } from '../icon/icon'
 import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown'
 import { MenuDropdown, type  MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown'
 import { type Marker  as MarkerType} from '@prisma/client'
+import { type SubscriptionBillingUser } from '~/adapters'
 
 
 export type MarkerProps = {
@@ -33,6 +35,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         title: 'Start',
         isInit: true
     })
+    const subscription = useSignal<SubscriptionBillingUser>()
     const streamDate = format(new Date(marker.stream_date), "yyyy-MM-dd")
 
     const toTimeString = (totalSeconds:number) => {
@@ -47,7 +50,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         return `${hours}h${minutes}m${remainingSeconds}s`
     }
     
-    const linkToHighlightTwitch = () => `https://dashboard.twitch.tv/u/${session.value?.user?.name?.toLowerCase()}/content/video-producer/highlighter/${marker.videoIdStream}?t=${formatSecondsToTime(marker.starts_at as number)}`
+    const linkToHighlightTwitch = (VOD:string, time:number) => `https://dashboard.twitch.tv/u/${session.value?.user?.name?.toLowerCase()}/content/video-producer/highlighter/${VOD}?t=${formatSecondsToTime(time as number)}`
     
     const status: { [key: string]: any } = {
         RECORDED: 'success',
@@ -55,15 +58,17 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         UNRECORDED: TagVariant.danger
     }
     const markerMenuOptions: MenuDropdownOptions[] = [
-        {name: 'Go to VOD', icon: IconCatalog.feLinkExternal, route: linkToHighlightTwitch(), target:'_blank', plan:true},
+        // {name: 'Go to VOD start', icon: IconCatalog.feLinkExternal, route: linkToHighlightTwitch(), target:'_blank', plan:true},
         // {name: 'Delete', icon:IconCatalog.feTrash}
     ]
-    useVisibleTask$(({track})=>{
+    useVisibleTask$(async ({track})=>{
         track(()=>[btnMarker.isInit, btnMarker.title])
         if (marker.status === 'RECORDING'){ 
             btnMarker.title = 'Finish'
             btnMarker.isInit = false
         }
+        subscription.value = await getSubcriptionPlanByUser(session.value?.userId as string)    
+
     })
 
     return (
@@ -75,22 +80,29 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
                     <Tag text={streamDate} size={TagSize.xs}/>
                 </div>
                 
-                <Button variant={ButtonVariant.ghost} onClick$={showMenuDropdown} isOnlyIcon> 
+                {/* <Button variant={ButtonVariant.ghost} onClick$={showMenuDropdown} isOnlyIcon> 
                     <Icon name={IconCatalog.feElipsisH} class='text-xl' /> 
-                </Button>
+                </Button> */}
             </div>
                 <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={markerMenuOptions}/>
             
             <h2 class="text-white capitalize font-bold text-lg">{marker.title}</h2>
-
             
             <div class="my-2 text-sm text-white text-opacity-90">
                 <div class="mt-4">
-                    <span class="flex text-sm text-white dark:text-opacity-70">{`Starts at ${toTimeString(marker.starts_at as number)}`}</span>
+                    {marker.videoIdStreamStart && subscription.value?.typePlan ==='PLUS' ? 
+                    (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamStart as string, marker?.starts_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
+                        <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon> {`Starts at ${toTimeString(marker.starts_at as number)}`}
+                    </Link> ): 
+                    (<span class="flex text-sm text-white text-opacity-70">{`Starts at ${toTimeString(marker.starts_at as number)}`}</span>)}
                 </div>
 
                 <div class="mt-4">
-                    <span class="flex text-sm text-white text-opacity-70">{`Ends at ${toTimeString(marker.ends_at as number)}`}</span>
+                    {marker.videoIdStreamEnd && subscription.value?.typePlan ==='PLUS' ? 
+                        (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamEnd as string, marker?.ends_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
+                            <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon>{`Ends at ${toTimeString(marker.ends_at as number)}`}
+                        </Link>):
+                        (<span class="flex text-sm text-white text-opacity-70">{`Starts at ${toTimeString(marker.starts_at as number)}`}</span>)}
                 </div>                            
             </div>
             
@@ -99,16 +111,20 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         <div class="flex place-content-center px-4 pb-3">
             <Button variant={ButtonVariant.secondary} isFullWidth size={ButtonSize.sm}
                     onClick$={async () => { 
-                        const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string)
+                        const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string, live.vod as string)
                         live.isLoading = true
                         if(response.markerUpdated){
                             marker.status = response.markerUpdated?.status
+                            const markerUpdatedVOD = await setVODInMarker(btnMarker.isInit, response.markerUpdated, session.value?.userId as string)
                             if (response.markerUpdated?.status === 'RECORDING'){ 
                                 btnMarker.title = 'Finish'
                                 btnMarker.isInit = false
                             }
+                            if(markerUpdatedVOD.markerUpdated){
+                                marker.videoIdStreamStart = markerUpdatedVOD?.markerUpdated.videoIdStreamStart as string
+                                marker.videoIdStreamEnd = markerUpdatedVOD?.markerUpdated.videoIdStreamEnd as string
+                            }
                         }
-                        
                     }}
                     disabled={validateMarker(marker.status, live, marker.stream_date, btnMarker.isInit)}
                 >

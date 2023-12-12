@@ -26,10 +26,10 @@ export const getSubcriptionPlanByUser = server$(async (userId: string) => {
 })
 
 export const getUserByEmail = server$(async (email: string) => { 
-  const mySubcription = await db.user.findFirst({
+  const me = await db.user.findFirst({
     where: { email },
   })
-  return mySubcription
+  return me
 })
 
 export const getLsSubscriptionIdByUserId = server$(async (userId:string) => {

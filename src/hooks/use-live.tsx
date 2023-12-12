@@ -33,19 +33,19 @@ export const useLiveStream = () => {
           headers,
           method:'GET',
         })
-      
-        
-        const { data } = (await resp.json()) as {data: {type:StatusLive}[]}
+
+        const { data } = (await resp.json()) as {data: {type:StatusLive, id: string, game_id:string}[]}
         if (data === undefined || data.length === 0){
           const status: StatusLive = 'offline';
-          return { status };
+          return { status, vod: '', gameId: '' };
         }
-
         const live = {
-          status: data[0].type
+          status: data[0].type,
+          vod: data[0].id,
+          gameId: data[0].game_id
         }
         return live
-      })
+    })
         
 
     return {

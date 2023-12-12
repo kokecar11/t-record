@@ -1,6 +1,7 @@
 import { server$ } from "@builder.io/qwik-city"
-import { type Marker } from "@prisma/client"
 import { db } from "~/db"
+import { type Marker } from "@prisma/client"
+
 import {type FiltersMarkerState } from "~/routes/(app)/dashboard"
 
 
@@ -47,10 +48,9 @@ export const deleteMarker = server$(async (markerId: string) => {
     return markerDeleted
 })
 
-
-export const getMarkersInStream = server$(async function(userId:string) {
+export const setVODInMarker = server$(async function( isStartMarker:boolean = true, marker:Marker, userId:string ) {
     const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID')
-    const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
+    const urlApiTwitch = 'https://api.twitch.tv/helix/videos';
 
     const account = await db.account.findFirst({
         where: { userId }
@@ -63,15 +63,40 @@ export const getMarkersInStream = server$(async function(userId:string) {
         'Authorization':"Bearer " + accesTokenProvider,
         'Client-Id': TWITCH_CLIENT_ID
     };
-    const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}`, {
+    const respStream = await fetch(`${urlApiTwitch}?user_id=${providerAccountId}&type=archive&sort=time`, {
         method:'GET',
         headers
     });
 
-    console.log(await respStream.json())
+    const { data } = await respStream.json() as {data: {id:string}[]}
+    if(data.length > 0){
+        if(isStartMarker){
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    videoIdStreamStart: data[0].id
+                }
+            })
+            return {markerUpdated}
+        }else{
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    videoIdStreamEnd: data[0].id
+                }
+            })
+            return {markerUpdated}
+        }
+    }
+
+    return {
+        title:'VOD Not ready.',
+        message: 'Stream markers aren’t available during the first few seconds of a stream. Wait a few seconds and try again.'
+    }
 })
 
-export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, marker:Marker, userId:string) {
+
+export const setMarkerInStream = server$(async function(isStartMarker: boolean = true, marker:Marker, userId:string, vodId:string) {
     const TWITCH_CLIENT_ID = this.env.get('TWITCH_ID')
     const urlApiTwitch = 'https://api.twitch.tv/helix/streams/markers';
 
@@ -91,28 +116,27 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
     });
     
     const resp = await respStream.json()
-    const live = resp.status;
-    console.log(resp)
+    const live = resp.status
     if (live !== 404){
-        const position_seconds = resp.data[0].position_seconds;
+        const position_seconds = resp.data[0].position_seconds
         if(isStartMarker){
-        const markerUpdated = await db.marker.update({
-            where: {userId, id: marker.id},
-            data: {
-                status:'RECORDING',
-                starts_at: position_seconds,
-            }
-        })
-        return { markerUpdated }
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    status:'RECORDING',
+                    starts_at: position_seconds,
+                }
+            })
+            return { markerUpdated }
         }else{
-        const markerUpdated = await db.marker.update({
-            where: {userId, id: marker.id},
-            data: {
-                status:'RECORDED',
-                ends_at: position_seconds
-            }
-        })
-        return { markerUpdated }
+            const markerUpdated = await db.marker.update({
+                where: {userId, id: marker.id},
+                data: {
+                    status:'RECORDED',
+                    ends_at: position_seconds,
+                }
+            })
+            return { markerUpdated }
         }
     }
 

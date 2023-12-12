@@ -83,8 +83,6 @@ model Subscription {
   ls_subsId          String?
   variant_id         String?
   created_at         DateTime  @default(now())
-  start_date         DateTime?
-  expiration_date    DateTime?
   renews_at          DateTime?
   ends_at            DateTime?
   status             StatusSubscription  @default(active)
@@ -96,16 +94,17 @@ model Subscription {
 
 
 model Marker {
-  id                 String  @id @default(cuid())
-  userId             String
-  videoIdStream      String?
-  title              String
-  stream_date        DateTime @db.Timestamptz()
-  starts_at          Int?
-  ends_at            Int?
-  created_at         DateTime  @default(now())
-  updated_at         DateTime?
-  status             StatusMarker @default(UNRECORDED)
+  id                      String  @id @default(cuid())
+  userId                  String
+  videoIdStreamStart      String?
+  videoIdStreamEnd        String?
+  title                   String
+  stream_date             DateTime @db.Timestamptz()
+  starts_at               Int?
+  ends_at                 Int?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime?
+  status                  StatusMarker @default(UNRECORDED)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -108,10 +108,15 @@ export default component$(() => {
       const stream = await getStatusStream()
       live.status = stream.status
       live.isLoading = false
+      live.vod = stream?.vod
+      live.gameId = stream?.gameId
       markerList.isLoading = false
       track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
       markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList)
       markerList.allMarkers = await getAllMarkers(session.value?.userId as string)
+  
+      // await getVideos(session.value?.userId as string, live)
+
     })
 
     return (
@@ -168,7 +173,7 @@ export default component$(() => {
 
           </div>
           <Toasts></Toasts>
-          <Modal isVisible={isVisibleModal} title='New Task'>
+          <Modal isVisible={isVisibleModal} title='New Marker'>
             <h2 q:slot='modal-title' class="text-secondary dark:text-white font-bold text-2xl flex place-items-center">
               New task
             </h2>

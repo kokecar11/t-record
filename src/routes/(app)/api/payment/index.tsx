@@ -17,7 +17,7 @@ export interface PaymentData {
     ls_subsId: string,
 }
 
-export const onPost: RequestHandler = async ({ json, parseBody }) => {
+export const onPost: RequestHandler = async ({ parseBody }) => {
     const body = await parseBody() as PaymentResponse
     const data: PaymentData = {
         product_id: body.data.attributes.product_id.toString(),
@@ -28,7 +28,5 @@ export const onPost: RequestHandler = async ({ json, parseBody }) => {
         ends_at: body.data.attributes.ends_at,
         ls_subsId: body.id,
     }
-    console.log(data)
     await setPaymentSubscriptionByUser(data)
-    json(200, { hello: 'world' });
 }
