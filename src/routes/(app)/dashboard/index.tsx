@@ -114,9 +114,6 @@ export default component$(() => {
       track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
       markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList)
       markerList.allMarkers = await getAllMarkers(session.value?.userId as string)
-  
-      // await getVideos(session.value?.userId as string, live)
-
     })
 
     return (

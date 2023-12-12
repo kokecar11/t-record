@@ -1,13 +1,15 @@
-import { component$ } from '@builder.io/qwik'
+import { component$, useSignal, useTask$ } from '@builder.io/qwik'
 import { useNavigate } from '@builder.io/qwik-city'
 
 import { capitalizeFirstLetter } from '~/utilities'
+import { getSubcriptionPlanByUser } from '~/services'
 import type { PlanAdapter } from '~/models'
 
 import Button, { ButtonSize, ButtonVariant } from '../button/Button'
 // import { Tag, TagSize, TagVariant } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon'
 import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
+import { type SubscriptionBillingUser } from '~/adapters'
 
 export type CardPricingProps = PlanAdapter;
 
@@ -24,6 +26,11 @@ export const CardPricing = component$(
     const session = useAuthSession();
     const signIn = useAuthSignin();
     const nav = useNavigate()
+    const subscription = useSignal<SubscriptionBillingUser>()
+
+    useTask$(async () => {
+      subscription.value = await getSubcriptionPlanByUser(session.value?.userId as string)
+    })
 
     return (
       <div
@@ -77,7 +84,7 @@ export const CardPricing = component$(
                 id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
                   if (session.value?.user) {
-                    nav(link)
+                    nav(`/billing`)
                   } else {
                     signIn.submit({ providerId: 'twitch', callbackUrl:'/pricing' })
                   }
@@ -93,7 +100,11 @@ export const CardPricing = component$(
                 id={`${capitalizeFirstLetter(typePlan.toLowerCase())}-${capitalizeFirstLetter(typePlan.toString())}`} 
                 onClick$={() => {
                   if(session.value?.user){
-                    nav(`${link}${session.value?.user?.email}`)
+                    if(subscription.value?.typePlan !== 'STARTER'){
+                      nav(`/dashboard`)
+                    }else{
+                      nav(`${link}${session.value?.user?.email}`)
+                    }
                   } else {
                     signIn.submit({ providerId: 'twitch', callbackUrl:'/pricing' })
                   }
