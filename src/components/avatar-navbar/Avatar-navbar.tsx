@@ -1,7 +1,6 @@
-import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik';
+import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik'
 
-import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown'
-import { useAuthSignout} from '~/routes/plugin@auth';
+import { useAuthSignout} from '~/routes/plugin@auth'
 
 import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown'
 import { IconCatalog } from '../icon/icon'
@@ -19,7 +18,7 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const isOpenDropdown = useSignal(false)
     const onCloseDropdown = $( () => !isOpenDropdown.value)
     const onSignOut =  $(async() => await signOut.submit({ callbackUrl: '/' }))
-    const { showMenuDropdown } = useMenuDropdown()
+
     const menuOptions: MenuDropdownOptions[] = [
       {name: 'Dashboard', icon: IconCatalog.feBarChart, route: '/dashboard'},
       {name: 'Billing', icon: IconCatalog.feWallet, route: '/billing'},
@@ -44,7 +43,7 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
                 alt={altText}
               />
           </div>
-          <MenuDropdown  onClose={showMenuDropdown} isVisible={isOpenDropdown.value} options={menuOptions}/>
+          <MenuDropdown isVisible={isOpenDropdown.value} options={menuOptions}/>
         </div>
     )
 })

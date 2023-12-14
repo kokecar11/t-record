@@ -1,4 +1,4 @@
-import { component$, useContext, $, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useContext, $, useTask$ } from '@builder.io/qwik';
 import cn from 'classnames'
 
 import { TypeSubscriptionContext } from '~/context';
@@ -6,7 +6,7 @@ import { capitalizeFirstLetter } from '~/utilities';
 
 export const TogglePricing = component$(() => {
     const typeSubscription = useContext(TypeSubscriptionContext)
-    useVisibleTask$(async ({track}) => {
+    useTask$(async ({track}) => {
         track(() => [typeSubscription.value])
     })
     const classes = {

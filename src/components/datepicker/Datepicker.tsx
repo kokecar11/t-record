@@ -148,7 +148,7 @@ export default component$(({
       <div ref={selectRef} class='relative'>
         <button class={clasess.button} onClick$={toggleDatePicker}>
           <Icon class='mr-1' name={IconCatalog.feCalendar} />
-          Today
+          {isEqual(today, filters.selectDayStream)? 'Today' : format(filters.selectDayStream, 'dd MMM')}
         </button>
         {showDatePicker.value && (
           <div class={clasess.container}>

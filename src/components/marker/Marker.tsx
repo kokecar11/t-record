@@ -1,4 +1,4 @@
-import { type PropFunction, component$, useStore, useVisibleTask$, useSignal } from '@builder.io/qwik'
+import { type PropFunction, component$, useStore, useSignal, useTask$ } from '@builder.io/qwik'
 import { Link } from '@builder.io/qwik-city'
 import { format } from 'date-fns'
 
@@ -30,7 +30,7 @@ interface BtnMarkerI {
 
 export const Marker = component$(({marker, live}: MarkerProps) => {
     const session = useAuthSession()
-    const {isVisibleMenuDropdown, showMenuDropdown} = useMenuDropdown()
+    const { isVisibleMenuDropdown } = useMenuDropdown()
     const btnMarker = useStore<BtnMarkerI>({
         title: 'Start',
         isInit: true
@@ -61,7 +61,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         // {name: 'Go to VOD start', icon: IconCatalog.feLinkExternal, route: linkToHighlightTwitch(), target:'_blank', plan:true},
         // {name: 'Delete', icon:IconCatalog.feTrash}
     ]
-    useVisibleTask$(async ({track})=>{
+    useTask$(async ({track})=>{
         track(()=>[btnMarker.isInit, btnMarker.title])
         if (marker.status === 'RECORDING'){ 
             btnMarker.title = 'Finish'
@@ -84,7 +84,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
                     <Icon name={IconCatalog.feElipsisH} class='text-xl' /> 
                 </Button> */}
             </div>
-                <MenuDropdown isVisible={isVisibleMenuDropdown.value} onClose={showMenuDropdown} options={markerMenuOptions}/>
+                <MenuDropdown isVisible={isVisibleMenuDropdown.value} options={markerMenuOptions}/>
             
             <h2 class="text-white capitalize font-bold text-lg">{marker.title}</h2>
             

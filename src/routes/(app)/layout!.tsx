@@ -1,10 +1,10 @@
-import { component$, Slot, useContext, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
+import { component$, Slot, useSignal, useStore, useTask$ } from '@builder.io/qwik'
 import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
 
-import { GlobalStore } from '~/context'
+// import { GlobalStore } from '~/context'
 
 import { useAuthSession, useAuthSignin } from '../plugin@auth'
-import { getColorPreference, useToggleTheme } from '~/hooks'
+// import { getColorPreference, useToggleTheme } from '~/hooks'
 
 import type { NavMenuI } from '~/models'
 import { type Plan } from '@prisma/client'
@@ -25,9 +25,9 @@ export default component$(() => {
   
   const session = useAuthSession()
   const signIn = useAuthSignin()
-  const state = useContext(GlobalStore)
+  // const state = useContext(GlobalStore)
 
-  const { setPreference } = useToggleTheme()
+  // const { setPreference } = useToggleTheme()
   const navItems = useStore<NavMenuI>({
     navs:[]
   })
@@ -36,11 +36,11 @@ export default component$(() => {
     subscriptionUser.value = await getSubcriptionByUser(session.value?.userId as string)
   })
 
-  useVisibleTask$(async({track}) => {    
+  useTask$(async() => {    
     if (session.value?.error === "RefreshAccessTokenError") signIn.submit({ providerId: 'twitch' })
-    state.theme = getColorPreference()
-    setPreference(state.theme)
-    track(() => [state.theme])
+    // state.theme = getColorPreference()
+    // setPreference(state.theme)
+    // track(() => [state.theme])
   })
   
 

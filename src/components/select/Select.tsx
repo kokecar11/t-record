@@ -1,4 +1,4 @@
-import { component$, useSignal, $, type ButtonHTMLAttributes, useOnDocument, useVisibleTask$ } from '@builder.io/qwik'
+import { component$, useSignal, $, type ButtonHTMLAttributes, useOnDocument, useTask$ } from '@builder.io/qwik'
 import cn from 'classnames'
 
 import { Icon, IconCatalog } from '../icon/icon'
@@ -79,7 +79,6 @@ export const Select = component$(({
     const selectOption = $((option: SelectOption) => {
         selectedOption.value = option
         isOpen.value = false
-        
         selectedValue?.splice(0, selectedValue.length)
         selectedValue?.push(option.value)
     })
@@ -100,7 +99,7 @@ export const Select = component$(({
         }
     }))
     
-    useVisibleTask$(() => {
+    useTask$(() => {
         if (isDisplayFirstOption) {
             selectedOption.value = options[0]
         }
@@ -126,7 +125,7 @@ export const Select = component$(({
             classNames
         ),
         options: cn(
-            'origin-top-right absolute right-0 mt-2 w-full rounded-lg shadow-lg bg-accent'
+            'origin-top-right absolute right-0 mt-2 w-full rounded-lg shadow-lg bg-accent z-20'
         ),
         option: cn(
             'block px-4 py-2 text-sm text-white hover:bg-white hover:bg-opacity-10 cursor-pointer'

@@ -99,19 +99,20 @@ export default component$(() => {
       selectDayStream: today
     })
 
-    useTask$( async () =>{
+    useTask$( async ({track}) => {
+      track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
       markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList)
       markerList.allMarkers = await getAllMarkers(session.value?.userId as string)
     })
     
     useVisibleTask$(async ({track}) => { 
+      track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
       const stream = await getStatusStream()
       live.status = stream.status
       live.isLoading = false
       live.vod = stream?.vod
       live.gameId = stream?.gameId
       markerList.isLoading = false
-      track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
       markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList)
       markerList.allMarkers = await getAllMarkers(session.value?.userId as string)
     })

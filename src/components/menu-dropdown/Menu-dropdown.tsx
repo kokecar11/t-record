@@ -6,11 +6,11 @@ import { Tag, TagSize, TagVariant } from "../tag/Tag";
 import { type Plan } from "@prisma/client";
 import { getSubcriptionByUser } from "~/services";
 import { useAuthSession } from "~/routes/plugin@auth";
+import { useMenuDropdown } from "./hooks/use-menu-dropdown";
 
 export interface MenuDropdownProps {
     options: MenuDropdownOptions[],
     isVisible: boolean,
-    onClose: PropFunction<() => boolean >
 }
 
 export interface MenuDropdownOptions {
@@ -23,14 +23,13 @@ export interface MenuDropdownOptions {
     disabled?: boolean
 }
 
-export const MenuDropdown = component$( ({options, isVisible, onClose}:MenuDropdownProps) => {
-    const session = useAuthSession()
-    
+export const MenuDropdown = component$( ({options, isVisible}:MenuDropdownProps) => {
     useStyles$(styleMenuDropdown)
-
+    const session = useAuthSession()
+    const { showMenuDropdown } = useMenuDropdown()
     useOnDocument('keydown', $((event)=>{
         const key = event as KeyboardEvent
-        if(key.code === 'Escape' && isVisible) onClose()
+        if(key.code === 'Escape' && isVisible) showMenuDropdown
     }));
     const subscriptionUser = useSignal<Plan>()
     useTask$(async () => {

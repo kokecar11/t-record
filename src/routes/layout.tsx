@@ -1,8 +1,8 @@
-import { component$, Slot, useContext, useStore, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, Slot, useStore, useTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
 
-import { GlobalStore } from '~/context';
-import { getColorPreference, useToggleTheme } from '~/hooks';
+// import { GlobalStore } from '~/context';
+// import { getColorPreference, useToggleTheme } from '~/hooks';
 import { useAuthSignin,useAuthSession } from './plugin@auth';
 
 
@@ -20,9 +20,9 @@ export default component$(() => {
   const signIn = useAuthSignin();
   const session = useAuthSession();
 
-  const state = useContext(GlobalStore);
+  // const state = useContext(GlobalStore);
 
-  const { setPreference } = useToggleTheme();
+  // const { setPreference } = useToggleTheme();
   const navItems = useStore<NavMenuI>({
     navs:[
       {name:'Pricing', route:'/pricing'},
@@ -32,12 +32,13 @@ export default component$(() => {
   }) ;
 
 
-  useVisibleTask$(async({track}) => {
+  useTask$(async() => {
     if (session.value?.error === "RefreshAccessTokenError") signIn.submit({ providerId: 'twitch' })
-    state.theme = getColorPreference();
-    track( () => [state.theme])
-    setPreference(state.theme);
+    // state.theme = getColorPreference();
+    // track( () => [state.theme])
+    // setPreference(state.theme);
   });
+  
 
 
   return(     

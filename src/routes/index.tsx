@@ -1,4 +1,4 @@
-import { component$, useContext, useVisibleTask$ } from '@builder.io/qwik'
+import { component$, useContext } from '@builder.io/qwik'
 import {
   type DocumentHead,
   useNavigate,
@@ -16,9 +16,6 @@ export default component$(() => {
     setTimeout(() => nav('/dashboard'), 1)
   }
 
-  useVisibleTask$(async ({ track }) => {
-    track(() => userSession)
-  })
 
   return (
     <div class="flex flex-col m-10">
@@ -54,7 +51,6 @@ export default component$(() => {
           <div class="flex items-center animate-fade-left w-full md:w-3/5">
             <video
               class="rounded-lg border border-secondary border-opacity-30"
-              autoPlay
               loop
               src="https://res.cloudinary.com/dlcx4lubg/video/upload/f_auto:video,q_auto/s8uqnjezzoudl3b3euss"
             ></video>
