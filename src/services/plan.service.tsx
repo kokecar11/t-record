@@ -1,7 +1,7 @@
 import { server$ } from '@builder.io/qwik-city'
 import { plansAdapter } from '~/adapters'
 import { db } from '~/db'
-import type { TypePlan } from '@prisma/client'
+import type { TypePlan } from '@prisma/client/edge'
 
 
 export const getPlans = server$( async () => {

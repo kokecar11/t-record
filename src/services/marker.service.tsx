@@ -1,6 +1,6 @@
 import { server$ } from "@builder.io/qwik-city"
 import { db } from "~/db"
-import { type Marker } from "@prisma/client"
+import { type Marker } from "@prisma/client/edge"
 
 import {type FiltersMarkerState } from "~/routes/(app)/dashboard"
 

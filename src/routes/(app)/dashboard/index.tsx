@@ -7,7 +7,7 @@ import { useLiveStream } from '~/hooks'
 import { LiveStreamContext } from '~/context'
 import { createMarker, deleteMarker, getAllMarkers, getMarkers } from '~/services'
 
-import type { Session, StatusMarker } from '@prisma/client'
+import type { Session, StatusMarker } from '@prisma/client/edge'
 import type { MarkerState } from '~/models'
 
 import { useModal } from '~/components/modal/hooks/use-modal'

@@ -10,7 +10,7 @@ import { TypeSubscriptionContext } from '~/context'
 // import Button, { ButtonVariant } from '~/components/button/Button'
 
 import { type SubscriptionBillingUser } from '~/adapters'
-import { type Session } from '@prisma/client'
+import { type Session } from '@prisma/client/edge'
 
 export const onRequest: RequestHandler = async(event) => {
   const session: Session | null = event.sharedMap.get('session')

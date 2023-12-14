@@ -1,4 +1,4 @@
-import type { Marker } from "@prisma/client";
+import type { Marker } from "@prisma/client/edge";
 
 export interface MarkerState {
     currentPage:number;

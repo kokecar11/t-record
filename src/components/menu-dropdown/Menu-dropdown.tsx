@@ -3,7 +3,7 @@ import { Link } from "@builder.io/qwik-city";
 import styleMenuDropdown from "./Menu-dropdown.css?inline"
 import { Icon, type IconCatalog } from "../icon/icon";
 import { Tag, TagSize, TagVariant } from "../tag/Tag";
-import { type Plan } from "@prisma/client";
+import { type Plan } from "@prisma/client/edge";
 import { getSubcriptionByUser } from "~/services";
 import { useAuthSession } from "~/routes/plugin@auth";
 import { useMenuDropdown } from "./hooks/use-menu-dropdown";

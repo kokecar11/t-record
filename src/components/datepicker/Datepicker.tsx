@@ -17,7 +17,7 @@ import {
 
 import { Icon, IconCatalog } from '../icon/icon'
 
-import type { Marker } from '@prisma/client'
+import type { Marker } from '@prisma/client/edge'
 import { type FiltersMarkerState } from '~/routes/(app)/dashboard'
 
 

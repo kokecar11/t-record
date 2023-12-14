@@ -1,5 +1,5 @@
 import { server$ } from '@builder.io/qwik-city'
-import type { TypeSubscription } from '@prisma/client'
+import type { TypeSubscription } from '@prisma/client/edge'
 import { subscriptionBillingUserAdapter } from '~/adapters'
 import { db } from '~/db'
 import { getPlanByProductId, getPlanByType } from './plan.service'
