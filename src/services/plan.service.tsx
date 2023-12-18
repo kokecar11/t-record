@@ -1,7 +1,7 @@
 import { server$ } from '@builder.io/qwik-city'
 import { plansAdapter } from '~/adapters'
 import { db } from '~/db'
-import type { TypePlan } from '@prisma/client/edge'
+import type { TypePlan } from '@prisma/client'
 
 
 export const getPlans = server$( async () => {
@@ -9,7 +9,9 @@ export const getPlans = server$( async () => {
     orderBy:{
       price_monthly:'asc',
     }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
 
   return plansAdapter(plans)
 })
@@ -19,7 +21,9 @@ export const getPlanByProductId = server$( async (product_id:string) => {
     where: {
       product_id
     }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
 
   return plan
 })
@@ -29,7 +33,9 @@ export const getPlanByType = server$( async (type:TypePlan) => {
     where: {
       type
     }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
 
   return plan
 })

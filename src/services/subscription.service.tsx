@@ -1,5 +1,5 @@
 import { server$ } from '@builder.io/qwik-city'
-import type { TypeSubscription } from '@prisma/client/edge'
+import type { TypeSubscription } from '@prisma/client'
 import { subscriptionBillingUserAdapter } from '~/adapters'
 import { db } from '~/db'
 import { getPlanByProductId, getPlanByType } from './plan.service'
@@ -11,7 +11,9 @@ export const getSubcriptionByUser = server$(async (userId: string) => {
     include: {
       plan: true
     }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
   return mySubcription?.plan
 })
 
@@ -21,21 +23,27 @@ export const getSubcriptionPlanByUser = server$(async (userId: string) => {
     include: {
       plan: true
     }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
   return subscriptionBillingUserAdapter(mySubcription)
 })
 
 export const getUserByEmail = server$(async (email: string) => { 
   const me = await db.user.findFirst({
     where: { email },
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
   return me
 })
 
 export const getLsSubscriptionIdByUserId = server$(async (userId:string) => {
   const subscription = await db.subscription.findFirst({
     where: { userId }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
   return subscription?.ls_subsId
 })
 
@@ -54,7 +62,9 @@ export const setPaymentSubscriptionByUser = server$(async (data: PaymentData) =>
         planId: plan?.id,
         ls_subsId: data.ls_subsId,
     }
-  })
+  }).finally(() => {
+    db.$disconnect();
+})
 })
 
 export const cancelSubscription = server$(async function(userId: string) {

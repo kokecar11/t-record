@@ -13,7 +13,7 @@ import Button, { ButtonSize, ButtonVariant } from '../button/Button'
 import { Icon, IconCatalog } from '../icon/icon'
 import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown'
 import { MenuDropdown, type  MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown'
-import { type Marker  as MarkerType} from '@prisma/client/edge'
+import { type Marker  as MarkerType} from '@prisma/client'
 import { type SubscriptionBillingUser } from '~/adapters'
 
 

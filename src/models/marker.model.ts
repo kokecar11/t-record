@@ -1,9 +1,14 @@
-import type { Marker } from "@prisma/client/edge";
+import type { Marker } from "@prisma/client";
 
 export interface MarkerState {
     currentPage:number;
     markers: Marker[];
-    allMarkers: Marker[];
+    allMarkers: MarkerDate[];
     isLoading: boolean;
-    indicators: {title: string, counter: number}[]
+}
+
+
+export interface MarkerDate {
+    stream_date: Date
+    title: string
 }

@@ -7,7 +7,7 @@ import { useAuthSession, useAuthSignin } from '../plugin@auth'
 // import { getColorPreference, useToggleTheme } from '~/hooks'
 
 import type { NavMenuI } from '~/models'
-import { type Plan } from '@prisma/client/edge'
+import { type Plan } from '@prisma/client'
 
 import { Navbar } from '~/components/navbar/Navbar'
 import AvatarNavbar from '~/components/avatar-navbar/Avatar-navbar'

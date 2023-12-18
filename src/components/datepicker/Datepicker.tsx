@@ -17,8 +17,8 @@ import {
 
 import { Icon, IconCatalog } from '../icon/icon'
 
-import type { Marker } from '@prisma/client/edge'
 import { type FiltersMarkerState } from '~/routes/(app)/dashboard'
+import { type MarkerDate } from '~/models'
 
 
 export enum DatePickerSize {
@@ -57,7 +57,7 @@ export type DatePickerProps = {
   isSquare?: boolean
   isFullWidth?: boolean
   isDisabled?: boolean
-  markers?: Marker[]
+  markers?: MarkerDate[]
   filters: FiltersMarkerState
   classNames?: string
 }

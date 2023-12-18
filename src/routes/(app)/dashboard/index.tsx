@@ -1,4 +1,4 @@
-import { $, component$, useContext, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
+import { $, Resource, component$, useContext, useResource$, useSignal, useStore } from '@builder.io/qwik'
 import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city'
 import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city'
 import { startOfToday } from 'date-fns'
@@ -7,8 +7,8 @@ import { useLiveStream } from '~/hooks'
 import { LiveStreamContext } from '~/context'
 import { createMarker, deleteMarker, getAllMarkers, getMarkers } from '~/services'
 
-import type { Session, StatusMarker } from '@prisma/client/edge'
-import type { MarkerState } from '~/models'
+import type { Marker as MarkerList , Session, StatusMarker } from '@prisma/client'
+import type { MarkerDate } from '~/models'
 
 import { useModal } from '~/components/modal/hooks/use-modal'
 import { useToast } from '~/components/toast/hooks/use-toast'
@@ -70,56 +70,44 @@ export type OrderByMarker = 'stream_date'| 'created_at' | 'status'
 export interface FiltersMarkerState {
   byStatus: StatusMarker[]
   selectDayStream: Date
+  status : StatusMarker
 }
 export default component$(() => {
     const today = startOfToday()
     const session = useAuthSession()
-    const createMarker = useCreateMarker();
+    const createMarker = useCreateMarker()
 
     const { getStatusStream } = useLiveStream()
-    const { isVisibleModal, showModal } = useModal();
-    const { setToast, Toasts } = useToast();
+    const { isVisibleModal, showModal } = useModal()
+    const { setToast, Toasts } = useToast()
 
-    const live = useContext(LiveStreamContext);
+    const live = useContext(LiveStreamContext)
     
-    const markerList = useStore<MarkerState>({
-        currentPage: 0,
-        markers: [],
-        allMarkers: [],
-        isLoading: true,
-        indicators: [
-          {title: 'Total',counter: 0},
-          {title: 'Recording',counter: 0},
-          {title: 'Unrecorded',counter: 0},
-          {title: 'Recorded',counter: 0}
-        ]
-    })
-    const filterMarkerList = useStore<FiltersMarkerState>({
+    const markersList = useSignal<MarkerList[]>([])    
+    const allMarkersDate = useSignal<MarkerDate[]>([])    
+    const filtersMarkers = useStore<FiltersMarkerState>({
       byStatus: [],
-      selectDayStream: today
+      selectDayStream: today,
+      status: 'UNRECORDED'
     })
 
-    useTask$( async ({track}) => {
-      track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
-      markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList)
-      markerList.allMarkers = await getAllMarkers(session.value?.userId as string)
-    })
-    
-    useVisibleTask$(async ({track}) => { 
-      track(()=> [markerList.markers, filterMarkerList.byStatus, filterMarkerList.selectDayStream, markerList.allMarkers])
+    const markersResource = useResource$(async ({track, cleanup}) => {
+      const filters = track(filtersMarkers)
+      const abortController = new AbortController()
+
+      cleanup(() => abortController.abort("cleanup"))
       const stream = await getStatusStream()
       live.status = stream.status
       live.isLoading = false
       live.vod = stream?.vod
       live.gameId = stream?.gameId
-      markerList.isLoading = false
-      markerList.markers = await getMarkers(session.value?.userId as string, filterMarkerList)
-      markerList.allMarkers = await getAllMarkers(session.value?.userId as string)
+      markersList.value = await getMarkers(session.value?.userId as string, filters)
+      allMarkersDate.value = await getAllMarkers(session.value?.userId as string)
+      return markersList.value
     })
 
     return (
         <>
-          {markerList.isLoading && <Loader />}
           <div class="w-full container px-4 mx-auto py-6 h-full">
             <div class="gap-y-4 sm:flex sm:space-x-4">
               <div class="grid gap-y-4 sm:flex sm:flex-1 sm:space-x-4">
@@ -128,7 +116,7 @@ export default component$(() => {
                 </Button>                  
               </div>
               <div class="flex justify-center items-center space-x-4 mt-4 sm:m-0">
-                <Datepicker markers={markerList.allMarkers} filters={filterMarkerList} />
+                <Datepicker markers={allMarkersDate.value} filters={filtersMarkers} />
                 <Select variant={SelectVariant.primary} options={[
                   {name:'Unrecorded', value:'UNRECORDED'},
                   {name:'Recorded', value:'RECORDED'},
@@ -136,38 +124,35 @@ export default component$(() => {
                   ]} 
                   placeholder='Filter by status'
                   showClear
-                  selectedValue={filterMarkerList.byStatus}
+                  selectedValue={filtersMarkers}
                   />
               </div>
             </div>
-            
-              {
-                markerList.markers.length > 0 ? (
-                <>
-                  <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3 md:my-6 md:gap-6 lg:grid-cols-4">
-                    {
-                      markerList.markers.map((m) => (
-                        <Marker key={m.id} marker={m} onDelete={$(() => {
-                          deleteMarker(m.id)
-                          live.isLoading = true
-                          setToast({message:'Task has been deleted', variant:'info'})
-                        })} live={live}/>
-                      ))
-                    }
-                  </div>
-                </>
-                )
-                :
-                (
-                  <div class="flex items-center justify-center mt-4 h-full">
-                    <div class="space-y-4"> 
-                      <h1 class="text-3xl font-bold text-white">
-                        You don't have any marker for your stream yet, create a marker.
-                      </h1>
-                    </div>
-                  </div>
-                )
-              }
+                  {
+                    <Resource value={markersResource}
+                    onPending={()=><Loader />}
+                    onResolved={(markers)=> markers.length > 0 ? (
+                      <>
+                        <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3 md:my-6 md:gap-6 lg:grid-cols-4">
+                          {
+                            markers.map((m) => (
+                              <Marker key={m.id} marker={m} onDelete={$(() => {
+                                deleteMarker(m.id)
+                                live.isLoading = true
+                                setToast({message:'Task has been deleted', variant:'info'})
+                              })} live={live}/>
+                            ))
+                          }
+                        </div>
+                      </>
+                      ): (<div class="flex items-center justify-center mt-4 h-full">
+                      <div class="space-y-4"> 
+                        <h1 class="text-3xl font-bold text-white">
+                          You don't have any marker for your stream yet, create a marker.
+                        </h1>
+                      </div>
+                    </div>)} />
+                  }
 
           </div>
           <Toasts></Toasts>
@@ -177,14 +162,16 @@ export default component$(() => {
             </h2>
             <div q:slot="modal-body" class={"mx-5"}>
               <Form action={createMarker}
-              onSubmit$={() => {
-                markerList.isLoading = true
-              }}
+              // onSubmit$={async() => {
+              
+              //   // markerList.isLoading = true
+
+              // }}
               onSubmitCompleted$={() => {
-                markerList.isLoading = true
-                  if (createMarker.value?.success){
-                    showModal();
-                    setToast({message:createMarker.value?.msg})
+                // markerList.isLoading = true
+                if (createMarker.value?.success){
+                  showModal();
+                  setToast({message:createMarker.value?.msg})
                 } 
               }}
               spaReset

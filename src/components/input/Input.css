@@ -1,5 +1,5 @@
 .label-input{
-    @apply block mb-2 text-base text-secondary dark:text-white font-semibold
+    @apply block mb-2 text-base text-white font-semibold
 }
 
 .input{

@@ -1,21 +1,22 @@
 import { server$ } from "@builder.io/qwik-city"
 import { db } from "~/db"
-import { type Marker } from "@prisma/client/edge"
+import type { Marker } from "@prisma/client"
+import type { FiltersMarkerState } from "~/routes/(app)/dashboard"
 
-import {type FiltersMarkerState } from "~/routes/(app)/dashboard"
 
-
-export const getMarkers = server$(async (userId:string, filters:FiltersMarkerState) => {
-    const tomorrow = new Date(filters.selectDayStream)
+export const getMarkers = server$(async (userId:string, filters?:FiltersMarkerState) => {
+    const tomorrow = new Date(filters!.selectDayStream)
     const markers = await db.marker.findMany({
         where: { 
             userId,
-            status: filters.byStatus[0],
+            status: filters?.status,
             stream_date: {
-                gte: new Date(filters.selectDayStream),
+                gte: new Date(filters!.selectDayStream),
                 lte: new Date(tomorrow.setDate(tomorrow.getDate()+1))
             }
         },
+    }).finally(() => {
+        db.$disconnect();
     })
     return markers
 })
@@ -24,7 +25,10 @@ export const getAllMarkers = server$(async (userId:string) => {
     const markers = await db.marker.findMany({
         where: { 
             userId
-        }
+        },
+        select:{stream_date:true, title:true}
+    }).finally(() => {
+        db.$disconnect();
     })
     return markers
 })
@@ -37,6 +41,8 @@ export const createMarker = server$(async (data: {title:string, stream_date: Dat
             title,
             stream_date
         }
+    }).finally(() => {
+        db.$disconnect();
     })
     return marker
 })
@@ -44,6 +50,8 @@ export const createMarker = server$(async (data: {title:string, stream_date: Dat
 export const deleteMarker = server$(async (markerId: string) => {
     const markerDeleted = await db.marker.delete({
         where: { id: markerId }
+    }).finally(() => {
+        db.$disconnect();
     })
     return markerDeleted
 })
@@ -54,6 +62,8 @@ export const setVODInMarker = server$(async function( isStartMarker:boolean = tr
 
     const account = await db.account.findFirst({
         where: { userId }
+    }).finally(() => {
+        db.$disconnect();
     })
 
     const accesTokenProvider = account?.access_token as string
@@ -103,6 +113,8 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
 
     const account = await db.account.findFirst({
         where: { userId }
+    }).finally(() => {
+        db.$disconnect();
     })
     const accesTokenProvider = account?.access_token as string
     const providerAccountId = account?.providerAccountId as string

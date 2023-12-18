@@ -2,6 +2,8 @@ import { component$, useSignal, $, type ButtonHTMLAttributes, useOnDocument, use
 import cn from 'classnames'
 
 import { Icon, IconCatalog } from '../icon/icon'
+import type { StatusMarker } from '@prisma/client'
+import type { FiltersMarkerState } from '~/routes/(app)/dashboard'
 
 
 export enum SelectSize {
@@ -47,7 +49,7 @@ export interface SelectProps extends ButtonHTMLAttributes<HTMLButtonElement>{
     placeholder?: string
     isDisplayFirstOption?: boolean
     showClear?: boolean
-    selectedValue?: string[]
+    selectedValue: FiltersMarkerState
 }
 
 interface SelectOption {
@@ -79,8 +81,10 @@ export const Select = component$(({
     const selectOption = $((option: SelectOption) => {
         selectedOption.value = option
         isOpen.value = false
-        selectedValue?.splice(0, selectedValue.length)
-        selectedValue?.push(option.value)
+        // selectedValue.byStatus.splice(0, selectedValue.byStatus.length)
+        // selectedValue.byStatus = [option.value as StatusMarker]
+        selectedValue.status = option.value as StatusMarker
+
     })
 
     const clearSelectedOption = $((event:any) => {
@@ -90,7 +94,9 @@ export const Select = component$(({
         } else {
             selectedOption.value = undefined
         }
-        selectedValue?.splice(0, selectedValue.length)
+        // selectedValue?.splice(0, selectedValue.length)
+        // selectedValue?.byStatus.splice(0, selectedValue.byStatus.length)
+        selectedValue.status = 'UNRECORDED'
     })
 
     useOnDocument('click', $((event)=>{
@@ -137,7 +143,7 @@ export const Select = component$(({
             <div>
                 <button type="button" onClick$={toggleDropdown} class={clasess.button}>
                     {selectedOption.value ? selectedOption.value.name : placeholder}
-                    {(selectedOption.value && showClear) && <Icon onClick$={clearSelectedOption} class='mx-1 text-md hover:text-secondary' name={IconCatalog.feClose}/>}
+                    {(selectedOption.value && showClear) && <Icon onClick$={clearSelectedOption} class='mx-1 text-md text-white hover:text-opacity-80' name={IconCatalog.feClose}/>}
                     <Icon class='ml-1 text-md' name={IconCatalog.feArrowDown}/>
                 </button>
             </div>

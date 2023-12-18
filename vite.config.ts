@@ -10,12 +10,11 @@ export default defineConfig(() => {
     optimizeDeps:{
       include:["@supabase/supabase-js", "@supabase/auth-helpers-shared", "cross-fetch", "@auth/core"]
     },
-    resolve: {
-      alias: {
-        // ".prisma/client": "./node_modules/.prisma/client"
-        ".prisma/client/index-browser": "./node_modules/.prisma/client/index-browser.js"
-      }
-    },
+    // resolve: {
+    //   alias: {
+    //     ".prisma/client/index-browser": "./node_modules/.prisma/client/index-browser.js"
+    //   }
+    // },
     plugins: [
       qwikCity(),
       qwikVite(),

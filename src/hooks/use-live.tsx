@@ -20,7 +20,9 @@ export const useLiveStream = () => {
           include:{
             accounts:true
           }
-        })
+        }).finally(() => {
+          db.$disconnect();
+      })
         const account = user?.accounts[0]
         const headers = {
             'Accept': 'application/json',
