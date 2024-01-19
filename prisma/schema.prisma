@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // Only needed when using a cloud provider that doesn't support the creation of new databases, like Heroku. Learn more: https://pris.ly/d/migrate-shadow
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // output = "./../node_modules/.prisma/client"
+}
+
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_in         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  subscriptions Subscription?
+  markers       Marker[]
+  teams         Team[]
+  inviter       Invitation[]  @relation("UserInviter")
+  invitee       Invitation[] @relation("UserInvitee")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Plan {
+  id                 String  @id @default(cuid())
+  title              String
+  type               TypePlan
+  popular            Boolean?
+  price_monthly      String?
+  price_yearly       String?
+  link_monthly       String?
+  link_yearly        String?
+  features           String[]
+  product_id         String?
+
+  subscription Subscription[]
+}
+
+model Subscription {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  planId             String
+  ls_subsId          String?
+  variant_id         String?
+  created_at         DateTime  @default(now())
+  renews_at          DateTime?
+  ends_at            DateTime?
+  status             StatusSubscription  @default(active)
+  type               TypeSubscription?
+
+  user User @relation(fields: userId, references: id, onDelete: Cascade)
+  plan Plan @relation(fields: planId, references: id, onDelete: Cascade)
+}
+
+
+model Marker {
+  id                      String  @id @default(cuid())
+  userId                  String
+  videoIdStreamStart      String?
+  videoIdStreamEnd        String?
+  title                   String
+  stream_date             DateTime @db.Timestamptz()
+  starts_at               Int?
+  ends_at                 Int?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime?
+  status                  StatusMarker @default(UNRECORDED)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Team {
+  id                 String  @id @default(cuid())
+  name               String
+  ownerId            String  @unique
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  invitations Invitation[]
+}
+
+model Invitation {
+  id                 String  @id @default(cuid())
+  teamId             String
+  inviterId          String
+  inviteeId          String
+  status             StatusInvitations @default(pending)
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter User @relation(fields: [inviterId], references: [id], onDelete: Cascade, name: "UserInviter")
+  invitee User @relation(fields: [inviteeId], references: [id], onDelete: Cascade, name: "UserInvitee")
+}
+
+enum StatusMarker {
+  UNRECORDED
+  RECORDING
+  RECORDED
+}
+
+enum TypeSubscription {
+  monthly
+  yearly
+}
+
+enum StatusSubscription {
+  on_trial
+  active
+  paused
+  past_due
+  unpaid
+  cancelled
+  expired
+}
+
+enum TypePlan {
+  STARTER
+  PLUS
+  PRO
+}
+
+enum StatusInvitations {
+  rejected
+  pending
+  accepted
+}

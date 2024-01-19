@@ -1,30 +1,108 @@
-import { server$ } from '@builder.io/qwik-city';
-import { supabase } from '~/supabase/supabase-browser';
+import { server$ } from '@builder.io/qwik-city'
+import type { TypeSubscription } from '@prisma/client'
+import { subscriptionBillingUserAdapter } from '~/adapters'
+import { db } from '~/db'
+import { getPlanByProductId, getPlanByType } from './plan.service'
+import type { PaymentData } from '~/routes/(app)/api/payment'
 
-import { getPlans } from './plan.service';
-import { subscriptionUserAdapter } from '~/adapters';
+export const getSubcriptionByUser = server$(async (userId: string) => { 
+  const mySubcription = await db.subscription.findFirst({
+    where: { userId },
+    include: {
+      plan: true
+    }
+  }).finally(() => {
+    db.$disconnect();
+})
+  return mySubcription?.plan
+})
 
-import type { Subscription } from '~/models';
+export const getSubcriptionPlanByUser = server$(async (userId: string) => {
+  const mySubcription = await db.subscription.findFirst({
+    where: { userId },
+    include: {
+      plan: true
+    }
+  }).finally(() => {
+    db.$disconnect();
+})
+  return subscriptionBillingUserAdapter(mySubcription)
+})
 
-export const getSubscriptionByUser = server$(async (fkUser:string) => {
-  const { data } = await supabase.from('subscription')
-  .select(`start_date, expiration_date, status, fk_plan (name)`)
-  .eq('fk_user', fkUser);
-  if (data){
-    if (data.length === 0){
-      return null
-    } 
-    const subscription = data[0] as unknown as Subscription;
-    const result = subscriptionUserAdapter(subscription);
-    return result;
+export const getUserByEmail = server$(async (email: string) => { 
+  const me = await db.user.findFirst({
+    where: { email },
+  }).finally(() => {
+    db.$disconnect();
+})
+  return me
+})
+
+export const getLsSubscriptionIdByUserId = server$(async (userId:string) => {
+  const subscription = await db.subscription.findFirst({
+    where: { userId }
+  }).finally(() => {
+    db.$disconnect();
+})
+  return subscription?.ls_subsId
+})
+
+export const setPaymentSubscriptionByUser = server$(async (data: PaymentData) => { 
+  const user = await getUserByEmail(data.user_email)
+  const plan = await getPlanByProductId(data.product_id as string)
+  await db.subscription.update({
+    where: {
+      userId: user?.id
+    },
+    data: {
+        renews_at: data.renews_at,
+        ends_at: data.ends_at,
+        variant_id: data.variant_id,
+        type: data.variant_name as TypeSubscription,
+        planId: plan?.id,
+        ls_subsId: data.ls_subsId,
+    }
+  }).finally(() => {
+    db.$disconnect();
+})
+})
+
+export const cancelSubscription = server$(async function(userId: string) {
+  const urlApiLemonSqueezy = 'https://api.lemonsqueezy.com/v1/subscriptions/';
+  const LS_API_KEY = this.env.get('LS_API_KEY')
+
+  const lsSubscriptionId = await getLsSubscriptionIdByUserId(userId)
+  const headers = {
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json',
+      'Authorization':"Bearer " + LS_API_KEY,
+  };
+  const respCancelSubscription = await fetch(`${urlApiLemonSqueezy}${lsSubscriptionId}`, {
+      method:'DELETE',
+      headers
+  });
+  const respCancelSubscriptionJson = await respCancelSubscription.json()
+
+  const planStarter = await getPlanByType('STARTER')
+
+  if (respCancelSubscriptionJson.data.attributes.cancelled) {
+    await db.subscription.update({
+      where: { userId },
+      data: {
+        renews_at: respCancelSubscriptionJson.data.attributes.renews_at,
+        ends_at: respCancelSubscriptionJson.data.attributes.ends_at,
+        variant_id: null,
+        type: 'monthly',
+        planId: planStarter?.id,
+        ls_subsId: null,
+      }
+    })
+    return {
+      message: 'Subscription cancelled, you will be able to enjoy the service until the end of the current billing period.'
+    }
   }
-});
-
-export const setSubscriptionByUser = async (fkUser:string) => {
-  const subscriptionByUser = await getSubscriptionByUser(fkUser)
-  if (subscriptionByUser === null){
-    const plans = await getPlans();
-    const starterPlan = plans.filter((plan) => plan.name === 'STARTER')[0]
-    await supabase.from('subscription').insert({fk_user: fkUser, fk_plan:starterPlan.id, status:'active'});
+  return {
+    message: 'Subscription could not be cancelled'
   }
-};
+
+})

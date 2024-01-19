@@ -1,6 +1,6 @@
-import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik';
+import { $, component$, useOnDocument, useSignal, useStyles$ } from '@builder.io/qwik'
 
-import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown'
+import { useAuthSignout} from '~/routes/plugin@auth'
 
 import { MenuDropdown, type MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown'
 import { IconCatalog } from '../icon/icon'
@@ -13,15 +13,18 @@ export type ToggleAvatarProps = {
 
 export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     useStyles$(stylesAvatarNavbar)
+    const signOut = useAuthSignout()
 
     const isOpenDropdown = useSignal(false)
     const onCloseDropdown = $( () => !isOpenDropdown.value)
-    const { showMenuDropdown } = useMenuDropdown()
+    const onSignOut =  $(async() => await signOut.submit({ callbackUrl: '/' }))
+
     const menuOptions: MenuDropdownOptions[] = [
       {name: 'Dashboard', icon: IconCatalog.feBarChart, route: '/dashboard'},
-      {name: 'Pricing', icon: IconCatalog.feMoney, route: '/pricing'},
+      {name: 'Billing', icon: IconCatalog.feWallet, route: '/billing'},
       {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests', target:'_blank'},
-      {name: 'Sign Out', icon:IconCatalog.feLogout, route:'/logout'},
+      {name: 'Sign Out', icon:IconCatalog.feLogout, action: onSignOut},
+      // {name: 'Team', icon: IconCatalog.feUsers, route: '/team'},
   ]
     useOnDocument('keyup', $((event)=>{
       const key = event as KeyboardEvent
@@ -40,7 +43,7 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
                 alt={altText}
               />
           </div>
-          <MenuDropdown  onClose={showMenuDropdown} isVisible={isOpenDropdown.value} options={menuOptions}/>
+          <MenuDropdown isVisible={isOpenDropdown.value} options={menuOptions}/>
         </div>
     )
 })

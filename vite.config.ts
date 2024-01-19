@@ -8,8 +8,13 @@ import { join } from "path";
 export default defineConfig(() => {
   return {
     optimizeDeps:{
-      include:["@supabase/supabase-js", "@supabase/auth-helpers-shared", "cross-fetch"]
+      include:["@auth/core"]
     },
+    // resolve: {
+    //   alias: {
+    //     ".prisma/client/index-browser": "./node_modules/.prisma/client/index-browser.js"
+    //   }
+    // },
     plugins: [
       qwikCity(),
       qwikVite(),
