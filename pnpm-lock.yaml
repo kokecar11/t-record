@@ -4,21 +4,12 @@ dependencies:
   '@auth/prisma-adapter':
     specifier: ^1.0.12
     version: 1.0.12(@prisma/client@5.7.0)
-  '@supabase/auth-helpers-shared':
-    specifier: ^0.4.1
-    version: 0.4.1(@supabase/supabase-js@2.39.1)
-  '@supabase/supabase-js':
-    specifier: ^2.39.1
-    version: 2.39.1
   classnames:
     specifier: ^2.5.0
     version: 2.5.0
   date-fns:
     specifier: ^2.30.0
     version: 2.30.0
-  supabase-auth-helpers-qwik:
-    specifier: ^0.0.3
-    version: 0.0.3(@supabase/supabase-js@2.39.1)
 
 optionalDependencies:
   '@img/sharp-darwin-arm64':
@@ -2695,80 +2686,6 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /@supabase/auth-helpers-shared@0.3.4(@supabase/supabase-js@2.39.1):
-    resolution: {integrity: sha512-8I3D0SPHHexkFTSfPg0nZgJSVazWoB3tZDpT6IjRv6w89vDMUzO99Lit4H9anVLF4teW8c/nJJxawDNbDlgbgg==}
-    peerDependencies:
-      '@supabase/supabase-js': ^2.0.4
-    dependencies:
-      '@supabase/supabase-js': 2.39.1
-      jose: 4.15.4
-    dev: false
-
-  /@supabase/auth-helpers-shared@0.4.1(@supabase/supabase-js@2.39.1):
-    resolution: {integrity: sha512-IEDX9JzWkIjQiLUaP4Qy5YDiG0jFQatWfS+jw8cCQs6QfbNdEPd2Y3qonwGHnM90CZom9SvjuylBv2pFVAL7Lw==}
-    peerDependencies:
-      '@supabase/supabase-js': ^2.19.0
-    dependencies:
-      '@supabase/supabase-js': 2.39.1
-      jose: 4.15.4
-    dev: false
-
-  /@supabase/functions-js@2.1.5:
-    resolution: {integrity: sha512-BNzC5XhCzzCaggJ8s53DP+WeHHGT/NfTsx2wUSSGKR2/ikLFQTBCDzMvGz/PxYMqRko/LwncQtKXGOYp1PkPaw==}
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-    dev: false
-
-  /@supabase/gotrue-js@2.62.0:
-    resolution: {integrity: sha512-4eBuZNXGOk7ewqJuHPYMnk8clCtEx6Hfnu6yHLjZlx7w18TqcojcTRUBZagErtpgwwdfzUwKbquexhbrpH/ysw==}
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-    dev: false
-
-  /@supabase/node-fetch@2.6.15:
-    resolution: {integrity: sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==}
-    engines: {node: 4.x || >=6.0.0}
-    dependencies:
-      whatwg-url: 5.0.0
-    dev: false
-
-  /@supabase/postgrest-js@1.9.0:
-    resolution: {integrity: sha512-axP6cU69jDrLbfihJKQ6vU27tklD0gzb9idkMN363MtTXeJVt5DQNT3JnJ58JVNBdL74hgm26rAsFNvHk+tnSw==}
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-    dev: false
-
-  /@supabase/realtime-js@2.9.1:
-    resolution: {integrity: sha512-OxmY2qj+y6+KI4ifTL92j5+WYP+u5/PdThlYxVb0GMcMiMHfA7yIku9yaQNC5/oRdIvhuRpTMG/8/R40eB+8pA==}
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-      '@types/phoenix': 1.6.4
-      ws: 8.16.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
-  /@supabase/storage-js@2.5.5:
-    resolution: {integrity: sha512-OpLoDRjFwClwc2cjTJZG8XviTiQH4Ik8sCiMK5v7et0MDu2QlXjCAW3ljxJB5+z/KazdMOTnySi+hysxWUPu3w==}
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-    dev: false
-
-  /@supabase/supabase-js@2.39.1:
-    resolution: {integrity: sha512-nz0aQPButJWjChX+bLXqvhHutfiOuiJwzibyJs0uhFrQ6JRDZZsl9+nX2jgyox2v2V+e4PEwbn/eaEOFVUr8iA==}
-    dependencies:
-      '@supabase/functions-js': 2.1.5
-      '@supabase/gotrue-js': 2.62.0
-      '@supabase/node-fetch': 2.6.15
-      '@supabase/postgrest-js': 1.9.0
-      '@supabase/realtime-js': 2.9.1
-      '@supabase/storage-js': 2.5.5
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
   /@szmarczak/http-timer@4.0.6:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
@@ -2973,10 +2890,6 @@ packages:
     dependencies:
       undici-types: 5.26.5
     dev: true
-
-  /@types/phoenix@1.6.4:
-    resolution: {integrity: sha512-B34A7uot1Cv0XtaHRYDATltAdKx0BvVKNgYNqE4WjtPUa4VQJM7kxeXcVKaH+KS+kCmZ+6w+QaUdcljiheiBJA==}
-    dev: false
 
   /@types/qs@6.9.11:
     resolution: {integrity: sha512-oGk0gmhnEJK4Yyk+oI7EfXsLayXatCWPHary1MtcmbAifkobT9cM9yutG/hZKIseOU0MqbIwQ/u2nn/Gb+ltuQ==}
@@ -6101,6 +6014,7 @@ packages:
 
   /jose@4.15.4:
     resolution: {integrity: sha512-W+oqK4H+r5sITxfxpSU+MMdr/YSWGvgZMQDIsNoBDGGy4i7GBPTtvFKibQzW06n3U3TqHjhvBJsirShsEJ6eeQ==}
+    dev: true
 
   /jose@5.2.0:
     resolution: {integrity: sha512-oW3PCnvyrcm1HMvGTzqjxxfnEs9EoFOFWi2HsEGhlFVOXxTE3K9GKWVMFoFw06yPUqwpvEWic1BmtUZBI/tIjw==}
@@ -8347,15 +8261,6 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supabase-auth-helpers-qwik@0.0.3(@supabase/supabase-js@2.39.1):
-    resolution: {integrity: sha512-qZrg+yj0vq9Lhp3ygop6Ul7LUARBZKzsEuObMvBSWr91rEyxSpoJkH0SyyTX0ou7+Y8aJtt2Vr+ONd7ZeagUnA==}
-    peerDependencies:
-      '@supabase/supabase-js': ^2.0.4
-    dependencies:
-      '@supabase/auth-helpers-shared': 0.3.4(@supabase/supabase-js@2.39.1)
-      '@supabase/supabase-js': 2.39.1
-    dev: false
-
   /supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
     engines: {node: '>=4'}
@@ -8525,6 +8430,7 @@ packages:
 
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+    dev: true
 
   /trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
@@ -9109,12 +9015,14 @@ packages:
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+    dev: true
 
   /whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
+    dev: true
 
   /which-boxed-primitive@1.0.2:
     resolution: {integrity: sha512-bwZdv0AKLpplFY2KZRX6TvyuN7ojjr7lwkg6ml0roIy9YeuSr7JS372qlNW18UQYzgYK9ziGcerWqZOmEn9VNg==}
@@ -9212,19 +9120,6 @@ packages:
       utf-8-validate:
         optional: true
     dev: true
-
-  /ws@8.16.0:
-    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dev: false
 
   /xdm@2.1.0:
     resolution: {integrity: sha512-3LxxbxKcRogYY7cQSMy1tUuU1zKNK9YPqMT7/S0r7Cz2QpyF8O9yFySGD7caOZt+LWUOQioOIX+6ZzCoBCpcAA==}
