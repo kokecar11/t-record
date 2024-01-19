@@ -52,7 +52,7 @@ export interface SelectProps extends ButtonHTMLAttributes<HTMLButtonElement>{
     selectedValue: FiltersMarkerState
 }
 
-interface SelectOption {
+export interface SelectOption {
     name: string
     value: string
 }
@@ -81,8 +81,6 @@ export const Select = component$(({
     const selectOption = $((option: SelectOption) => {
         selectedOption.value = option
         isOpen.value = false
-        // selectedValue.byStatus.splice(0, selectedValue.byStatus.length)
-        // selectedValue.byStatus = [option.value as StatusMarker]
         selectedValue.status = option.value as StatusMarker
 
     })
@@ -94,9 +92,7 @@ export const Select = component$(({
         } else {
             selectedOption.value = undefined
         }
-        // selectedValue?.splice(0, selectedValue.length)
-        // selectedValue?.byStatus.splice(0, selectedValue.byStatus.length)
-        selectedValue.status = 'UNRECORDED'
+        selectedValue.status = undefined
     })
 
     useOnDocument('click', $((event)=>{

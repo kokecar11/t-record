@@ -1,9 +1,8 @@
-import { $, Resource, component$, useContext, useResource$, useSignal, useStore } from '@builder.io/qwik'
+import { $, Resource, component$, useContext, useResource$, useSignal, useStore, useTask$ } from '@builder.io/qwik'
 import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city'
 import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city'
 import { startOfToday } from 'date-fns'
 
-import { useLiveStream } from '~/hooks'
 import { LiveStreamContext } from '~/context'
 import { createMarker, deleteMarker, getAllMarkers, getMarkers } from '~/services'
 
@@ -20,8 +19,9 @@ import { Marker } from '~/components/marker/Marker'
 import { Icon, IconCatalog } from '~/components/icon/icon'
 import { Loader } from '~/components/loader/Loader'
 import { useAuthSession } from '~/routes/plugin@auth'
+// import Datepicker from '~/components/datepicker/Datepicker'
+import { Select, type SelectOption, SelectVariant } from '~/components/select/Select'
 import Datepicker from '~/components/datepicker/Datepicker'
-import { Select, SelectVariant } from '~/components/select/Select'
 
 
 
@@ -68,42 +68,43 @@ export const useCreateMarker = routeAction$(
 export type OrderByMarker = 'stream_date'| 'created_at' | 'status'
 
 export interface FiltersMarkerState {
-  byStatus: StatusMarker[]
   selectDayStream: Date
-  status : StatusMarker
+  status : StatusMarker | undefined
 }
 export default component$(() => {
     const today = startOfToday()
     const session = useAuthSession()
     const createMarker = useCreateMarker()
-
-    const { getStatusStream } = useLiveStream()
     const { isVisibleModal, showModal } = useModal()
     const { setToast, Toasts } = useToast()
 
     const live = useContext(LiveStreamContext)
     
-    const markersList = useSignal<MarkerList[]>([])    
+    const markersList = useSignal<MarkerList[]>([])
+    const optionsFilterStatus = useSignal<SelectOption[]>([
+      {name:'Unrecorded', value:'UNRECORDED'},
+      {name:'Recorded', value:'RECORDED'},
+      {name:'Recording', value:'RECORDING'},
+    ])
+    const loadingMarkers = useSignal<boolean>(false)    
     const allMarkersDate = useSignal<MarkerDate[]>([])    
     const filtersMarkers = useStore<FiltersMarkerState>({
-      byStatus: [],
       selectDayStream: today,
-      status: 'UNRECORDED'
+      status: undefined
+    })
+    
+    useTask$(async () => {
+      markersList.value = await getMarkers(session.value?.userId as string, filtersMarkers)
     })
 
     const markersResource = useResource$(async ({track, cleanup}) => {
       const filters = track(filtersMarkers)
+      track(loadingMarkers)
       const abortController = new AbortController()
-
       cleanup(() => abortController.abort("cleanup"))
-      const stream = await getStatusStream()
-      live.status = stream.status
-      live.isLoading = false
-      live.vod = stream?.vod
-      live.gameId = stream?.gameId
-      markersList.value = await getMarkers(session.value?.userId as string, filters)
       allMarkersDate.value = await getAllMarkers(session.value?.userId as string)
-      return markersList.value
+      markersList.value = await getMarkers(session.value?.userId as string, filters)
+      loadingMarkers.value = false
     })
 
     return (
@@ -117,11 +118,7 @@ export default component$(() => {
               </div>
               <div class="flex justify-center items-center space-x-4 mt-4 sm:m-0">
                 <Datepicker markers={allMarkersDate.value} filters={filtersMarkers} />
-                <Select variant={SelectVariant.primary} options={[
-                  {name:'Unrecorded', value:'UNRECORDED'},
-                  {name:'Recorded', value:'RECORDED'},
-                  {name:'Recording', value:'RECORDING'},
-                  ]} 
+                <Select variant={SelectVariant.primary} options={optionsFilterStatus.value} 
                   placeholder='Filter by status'
                   showClear
                   selectedValue={filtersMarkers}
@@ -130,12 +127,12 @@ export default component$(() => {
             </div>
                   {
                     <Resource value={markersResource}
-                    onPending={()=><Loader />}
-                    onResolved={(markers)=> markers.length > 0 ? (
+                    onPending={() => <Loader />}
+                    onResolved={() => markersList.value.length > 0 ? (
                       <>
                         <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3 md:my-6 md:gap-6 lg:grid-cols-4">
                           {
-                            markers.map((m) => (
+                            markersList.value.map((m) => (
                               <Marker key={m.id} marker={m} onDelete={$(() => {
                                 deleteMarker(m.id)
                                 live.isLoading = true
@@ -145,13 +142,16 @@ export default component$(() => {
                           }
                         </div>
                       </>
-                      ): (<div class="flex items-center justify-center mt-4 h-full">
-                      <div class="space-y-4"> 
-                        <h1 class="text-3xl font-bold text-white">
-                          You don't have any marker for your stream yet, create a marker.
-                        </h1>
-                      </div>
-                    </div>)} />
+                      ): 
+                      (
+                        <div class="flex items-center justify-center mt-4 h-full">
+                          <div class="space-y-4"> 
+                            <h1 class="text-3xl font-bold text-white">
+                              You don't have any marker for your stream yet, create a marker.
+                            </h1>
+                          </div>
+                        </div>
+                      )} />
                   }
 
           </div>
@@ -163,16 +163,14 @@ export default component$(() => {
             <div q:slot="modal-body" class={"mx-5"}>
               <Form action={createMarker}
               // onSubmit$={async() => {
-              
-              //   // markerList.isLoading = true
-
+              //   loadingMarkers.value= true
               // }}
               onSubmitCompleted$={() => {
-                // markerList.isLoading = true
                 if (createMarker.value?.success){
                   showModal();
                   setToast({message:createMarker.value?.msg})
-                } 
+                  loadingMarkers.value = true
+                }
               }}
               spaReset
               >

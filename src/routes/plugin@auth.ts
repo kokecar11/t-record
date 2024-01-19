@@ -12,6 +12,17 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
     adapter: PrismaAdapter(db),
     secret: env.get("AUTH_SECRET"),
     trustHost: true,
+    cookies: {
+      pkceCodeVerifier: {
+        name: "next-auth.pkce.code_verifier",
+        options: {
+          httpOnly: true,
+          sameSite: "none",
+          path: "/",
+          secure: true,
+        },
+      },
+    },
     providers: [
       Twitch({
         clientId: env.get("TWITCH_ID")!,

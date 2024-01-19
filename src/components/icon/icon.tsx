@@ -36,11 +36,17 @@ export enum IconCatalog {
     feLinkExternal = 'M6 8h5v2H6v8h8v-5h2v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Zm10.614-2H12V4h8v8h-2V7.442l-5.336 5.336l-1.414-1.414L16.614 6Z',
     feElipsisH = 'M18 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4ZM6 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4a2 2 0 0 1 0 4Z'
 }
-type IconProps = QwikIntrinsicElements['div'] & {
+type IconProps = QwikIntrinsicElements['svg'] & {
     name: IconCatalog
 }
-export function Icon({name ,...props}:IconProps, key: string) {
+export function Icon({name, ...props}:IconProps, key: string) {
     return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props} key={key}><g id="feMagic0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feMagic1" fill="currentColor"><path id="feMagic2" d={name}></path></g></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" key={key}  {...props}>
+            <g id="feMagic0" fill="none" fill-ule="evenodd" stroke="none">
+                <g id={key} fill="currentColor">
+                    <path id={key} d={name}></path>
+                </g>
+            </g>
+        </svg>
     )
 }

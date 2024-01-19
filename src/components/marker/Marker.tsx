@@ -102,7 +102,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
                         (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamEnd as string, marker?.ends_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
                             <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon>{`Ends at ${toTimeString(marker.ends_at as number)}`}
                         </Link>):
-                        (<span class="flex text-sm text-white text-opacity-70">{`Starts at ${toTimeString(marker.starts_at as number)}`}</span>)}
+                        (<span class="flex text-sm text-white text-opacity-70">{`Ends at ${toTimeString(marker.ends_at as number)}`}</span>)}
                 </div>                            
             </div>
             
@@ -115,6 +115,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
                         live.isLoading = true
                         if(response.markerUpdated){
                             marker.status = response.markerUpdated?.status
+                            marker.starts_at = response.markerUpdated?.starts_at
                             const markerUpdatedVOD = await setVODInMarker(btnMarker.isInit, response.markerUpdated, session.value?.userId as string)
                             if (response.markerUpdated?.status === 'RECORDING'){ 
                                 btnMarker.title = 'Finish'
@@ -124,7 +125,9 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
                                 marker.videoIdStreamStart = markerUpdatedVOD?.markerUpdated.videoIdStreamStart as string
                                 marker.videoIdStreamEnd = markerUpdatedVOD?.markerUpdated.videoIdStreamEnd as string
                             }
+                            marker.ends_at = response.markerUpdated?.ends_at
                         }
+                        console.log('updatede')
                     }}
                     disabled={validateMarker(marker.status, live, marker.stream_date, btnMarker.isInit)}
                 >

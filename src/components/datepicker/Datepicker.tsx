@@ -146,7 +146,7 @@ export default component$(({
 
     return (
       <div ref={selectRef} class='relative'>
-        <button class={clasess.button} onClick$={toggleDatePicker}>
+        <button class={clasess.button} onClick$={toggleDatePicker} type='button'>
           <Icon class='mr-1' name={IconCatalog.feCalendar} />
           {isEqual(today, filters.selectDayStream)? 'Today' : format(filters.selectDayStream, 'dd MMM')}
         </button>
@@ -201,7 +201,7 @@ export default component$(({
                           'text-red-500':(!isEqual(day, filters.selectDayStream) && isToday(day)),
                           'text-gray-50':(!isEqual(day, filters.selectDayStream) && !isToday(day) && isSameMonth(day, firstDayCurrentMonth.value)),
                           'text-gray-400':(!isEqual(day, filters.selectDayStream) && !isToday(day) && !isSameMonth(day, firstDayCurrentMonth.value)),
-                          '!bg-red-500':(isEqual(day, filters.selectDayStream) && isToday(day)),
+                          'bg-red-500':(isEqual(day, filters.selectDayStream) && isToday(day)),
                           'bg-secondary ':(isEqual(day, filters.selectDayStream) && !isToday(day)),
                           'hover:bg-secondary hover:bg-opacity-80':(!isEqual(day, filters.selectDayStream)),
                           'font-semibold':(isEqual(day, filters.selectDayStream) || isToday(day)),

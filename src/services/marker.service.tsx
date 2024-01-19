@@ -9,7 +9,7 @@ export const getMarkers = server$(async (userId:string, filters?:FiltersMarkerSt
     const markers = await db.marker.findMany({
         where: { 
             userId,
-            status: filters?.status,
+            status: filters?.status || undefined,
             stream_date: {
                 gte: new Date(filters!.selectDayStream),
                 lte: new Date(tomorrow.setDate(tomorrow.getDate()+1))
