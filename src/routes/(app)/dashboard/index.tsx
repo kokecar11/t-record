@@ -1,4 +1,4 @@
-import { $, Resource, component$, useContext, useResource$, useSignal, useStore, useTask$ } from '@builder.io/qwik'
+import { $, Resource, component$, useContext, useResource$, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
 import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city'
 import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city'
 import { startOfToday } from 'date-fns'
@@ -19,9 +19,10 @@ import { Marker } from '~/components/marker/Marker'
 import { Icon, IconCatalog } from '~/components/icon/icon'
 import { Loader } from '~/components/loader/Loader'
 import { useAuthSession } from '~/routes/plugin@auth'
-// import Datepicker from '~/components/datepicker/Datepicker'
+
 import { Select, type SelectOption, SelectVariant } from '~/components/select/Select'
 import Datepicker from '~/components/datepicker/Datepicker'
+import { utcToZonedTime } from 'date-fns-tz'
 
 
 
@@ -72,7 +73,7 @@ export interface FiltersMarkerState {
   status : StatusMarker | undefined
 }
 export default component$(() => {
-    const today = startOfToday()
+    const timezone = useSignal(Intl.DateTimeFormat().resolvedOptions().timeZone)
     const session = useAuthSession()
     const createMarker = useCreateMarker()
     const { isVisibleModal, showModal } = useModal()
@@ -89,10 +90,15 @@ export default component$(() => {
     const loadingMarkers = useSignal<boolean>(false)    
     const allMarkersDate = useSignal<MarkerDate[]>([])    
     const filtersMarkers = useStore<FiltersMarkerState>({
-      selectDayStream: today,
+      selectDayStream: startOfToday(),
       status: undefined
     })
     
+    useVisibleTask$(() => {
+      timezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone
+      filtersMarkers.selectDayStream = utcToZonedTime(startOfToday(), timezone.value)
+    })
+
     useTask$(async () => {
       markersList.value = await getMarkers(session.value?.userId as string, filtersMarkers)
     })

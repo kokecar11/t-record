@@ -36,7 +36,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
         isInit: true
     })
     const subscription = useSignal<SubscriptionBillingUser>()
-    const streamDate = format(new Date(marker.stream_date), "yyyy-MM-dd")
+    const streamDate = format(marker.stream_date, "yyyy-MM-dd")
 
     const toTimeString = (totalSeconds:number) => {
         const totalMs = totalSeconds * 1000;

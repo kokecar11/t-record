@@ -1,6 +1,6 @@
-import { $, component$, useOnDocument, useSignal } from '@builder.io/qwik'
+import { $, component$, useOnDocument, useSignal, useTask$, useVisibleTask$ } from '@builder.io/qwik'
 import cn from 'classnames'
-
+import { utcToZonedTime } from 'date-fns-tz'
 import {
     add,
     eachDayOfInterval,
@@ -12,6 +12,7 @@ import {
     isSameMonth,
     isToday,
     parse,
+    startOfMonth,
     startOfToday,
   } from 'date-fns'
 
@@ -75,15 +76,26 @@ export default component$(({
   filters,
 
   }: DatePickerProps) => {
-    const today = startOfToday()
-    const currentMonth = useSignal(format(today, 'MMM-yyyy'))
-    const firstDayCurrentMonth = useSignal(parse(currentMonth.value, 'MMM-yyyy', new Date()))
+    const timezone = useSignal(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    const today = useSignal(startOfToday())
+    const currentMonth = useSignal(format(today.value, 'MMM-yyyy'))
+    const firstDayCurrentMonth = useSignal(startOfMonth(startOfToday()))
     const showDatePicker = useSignal(false)
     const selectRef = useSignal<HTMLElement>()
+    const days = useSignal<Date[]>([])
 
-    const days = eachDayOfInterval({
+    useVisibleTask$(() => {
+      timezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone
+      today.value = utcToZonedTime(startOfToday(), timezone.value)
+      firstDayCurrentMonth.value = startOfMonth(utcToZonedTime(startOfToday(), timezone.value))
+    })
+
+    useTask$(({track})=> {
+      days.value = eachDayOfInterval({
         start: firstDayCurrentMonth.value,
         end: endOfMonth(firstDayCurrentMonth.value),
+      })
+      track(()=> [days.value, firstDayCurrentMonth.value, currentMonth.value])
     })
     
     const previousMonth = $(() => {
@@ -100,6 +112,10 @@ export default component$(({
 
     const toggleDatePicker = $(() => {
       showDatePicker.value = !showDatePicker.value
+    })
+
+    const selectDay = $((day:Date) => {
+      filters.selectDayStream = day
     })
     
     const setSizes = () => {
@@ -148,7 +164,7 @@ export default component$(({
       <div ref={selectRef} class='relative'>
         <button class={clasess.button} onClick$={toggleDatePicker} type='button'>
           <Icon class='mr-1' name={IconCatalog.feCalendar} />
-          {isEqual(today, filters.selectDayStream)? 'Today' : format(filters.selectDayStream, 'dd MMM')}
+          {isSameDay(today.value, filters.selectDayStream)? 'Today' : format(filters.selectDayStream, 'dd MMM')}
         </button>
         {showDatePicker.value && (
           <div class={clasess.container}>
@@ -163,7 +179,7 @@ export default component$(({
                   <Icon name={IconCatalog.feArrowLeft} />
                 </button>
                 <h2 class="font-semibold text-white mx-auto">
-                  {format(firstDayCurrentMonth.value, 'MMMM yyyy')}
+                  {currentMonth.value}
                 </h2>
                 <button
                   type="button"
@@ -175,16 +191,16 @@ export default component$(({
                 </button>
               </div>
               <div class="grid grid-cols-7 mt-4 text-xs leading-6 text-center font-bold text-gray-400">
-                <span>D</span>
-                <span>L</span>
+                <span>S</span>
                 <span>M</span>
+                <span>T</span>
                 <span>W</span>
-                <span>J</span>
-                <span>V</span>
+                <span>T</span>
+                <span>F</span>
                 <span>S</span>
               </div>
               <div class="grid grid-cols-7 mt-2 text-sm">
-                {days.map((day, dayIdx) => (
+                {days.value.map((day, dayIdx) => (
                   <div
                     key={day.toString()}
                     class={[
@@ -193,7 +209,7 @@ export default component$(({
                     ]}>
                     <button
                       type="button"
-                      onClick$={() => filters.selectDayStream = day}
+                      onClick$={$(()=>selectDay(day))}
                       class={[
                         clasess.day,
                         { 
