@@ -1,16 +1,15 @@
 import { component$, useSignal, useTask$ } from '@builder.io/qwik'
 import { useNavigate } from '@builder.io/qwik-city'
 
+import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
 import { capitalizeFirstLetter } from '~/utilities'
 import { getSubcriptionPlanByUser } from '~/services'
 import type { PlanAdapter } from '~/models'
 
 import Button, { ButtonSize, ButtonVariant } from '../button/Button'
-// import { Tag, TagSize, TagVariant } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon'
-import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
-import { type SubscriptionBillingUser } from '~/adapters'
 import { Tag, TagSize, TagVariant } from '../tag/Tag'
+import { type SubscriptionBillingUser } from '~/adapters'
 
 export type CardPricingProps = PlanAdapter;
 

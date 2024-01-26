@@ -1,4 +1,4 @@
-import { type PropFunction, component$, useStore, useSignal, useTask$ } from '@builder.io/qwik'
+import { type PropFunction, component$, useStore, useSignal, useTask$, $ } from '@builder.io/qwik'
 import { Link } from '@builder.io/qwik-city'
 import { format } from 'date-fns'
 
@@ -15,6 +15,7 @@ import { useMenuDropdown } from '../menu-dropdown/hooks/use-menu-dropdown'
 import { MenuDropdown, type  MenuDropdownOptions } from '../menu-dropdown/Menu-dropdown'
 import { type Marker  as MarkerType} from '@prisma/client'
 import { type SubscriptionBillingUser } from '~/adapters'
+import { useToast } from '../toast/hooks/use-toast'
 
 
 export type MarkerProps = {
@@ -37,6 +38,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
     })
     const subscription = useSignal<SubscriptionBillingUser>()
     const streamDate = format(marker.stream_date, "yyyy-MM-dd")
+    const { setToast, Toasts } = useToast()
 
     const toTimeString = (totalSeconds:number) => {
         const totalMs = totalSeconds * 1000;
@@ -72,68 +74,80 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
     })
 
     return (
-    <div class={`max-w-2xl bg-primary shadow-lg rounded-lg overflow-hidden`}>
-        <div class="p-4 relative">
-            <div class="flex mb-2">
-                <div class="flex-1 space-x-2">
-                    <Tag text={marker.status} size={TagSize.xs} variant={status[marker.status]} />
-                    <Tag text={streamDate} size={TagSize.xs}/>
-                </div>
-                
-                {/* <Button variant={ButtonVariant.ghost} onClick$={showMenuDropdown} isOnlyIcon> 
-                    <Icon name={IconCatalog.feElipsisH} class='text-xl' /> 
-                </Button> */}
-            </div>
-                <MenuDropdown isVisible={isVisibleMenuDropdown.value} options={markerMenuOptions}/>
-            
-            <h2 class="text-white capitalize font-bold text-lg">{marker.title}</h2>
-            
-            <div class="my-2 text-sm text-white text-opacity-90">
-                <div class="mt-4">
-                    {marker.videoIdStreamStart && subscription.value?.typePlan ==='PLUS' ? 
-                    (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamStart as string, marker?.starts_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
-                        <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon> {`Starts at ${toTimeString(marker.starts_at as number)}`}
-                    </Link> ): 
-                    (<span class="flex text-sm text-white text-opacity-70">{`Starts at ${toTimeString(marker.starts_at as number)}`}</span>)}
+        <>
+            <Toasts/>
+            <div class={`max-w-2xl bg-primary shadow-lg rounded-lg overflow-hidden`}>
+                <div class="p-4 relative">
+                    <div class="flex mb-2">
+                        <div class="flex-1 space-x-2">
+                            <Tag text={marker.status} size={TagSize.xs} variant={status[marker.status]} />
+                            <Tag text={streamDate} size={TagSize.xs}/>
+                        </div>
+                        
+                        {/* <Button variant={ButtonVariant.ghost} onClick$={showMenuDropdown} isOnlyIcon> 
+                            <Icon name={IconCatalog.feElipsisH} class='text-xl' /> 
+                        </Button> */}
+                    </div>
+                        <MenuDropdown isVisible={isVisibleMenuDropdown.value} options={markerMenuOptions}/>
+                    
+                    <h2 class="text-white capitalize font-bold text-lg">{marker.title}</h2>
+                    
+                    <div class="my-2 text-sm text-white text-opacity-90">
+                        <div class="mt-4">
+                            {marker.videoIdStreamStart && subscription.value?.typePlan ==='PLUS' ? 
+                            (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamStart as string, marker?.starts_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
+                                <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon> {`Starts at ${toTimeString(marker.starts_at as number)}`}
+                            </Link> ): 
+                            (<span class="flex text-sm text-white text-opacity-70">{`Starts at ${toTimeString(marker.starts_at as number)}`}</span>)}
+                        </div>
+
+                        <div class="mt-4">
+                            {marker.videoIdStreamEnd && subscription.value?.typePlan ==='PLUS' ? 
+                                (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamEnd as string, marker?.ends_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
+                                    <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon>{`Ends at ${toTimeString(marker.ends_at as number)}`}
+                                </Link>):
+                                (<span class="flex text-sm text-white text-opacity-70">{`Ends at ${toTimeString(marker.ends_at as number)}`}</span>)}
+                        </div>                            
+                    </div>
+                    
                 </div>
 
-                <div class="mt-4">
-                    {marker.videoIdStreamEnd && subscription.value?.typePlan ==='PLUS' ? 
-                        (<Link target='_blank' href={linkToHighlightTwitch(marker.videoIdStreamEnd as string, marker?.ends_at as number)} class="flex text-sm text-white text-opacity-70 hover:text-white">
-                            <Icon name={IconCatalog.feLinkExternal} class='mr-1 text-lg'></Icon>{`Ends at ${toTimeString(marker.ends_at as number)}`}
-                        </Link>):
-                        (<span class="flex text-sm text-white text-opacity-70">{`Ends at ${toTimeString(marker.ends_at as number)}`}</span>)}
-                </div>                            
+                <div class="flex place-content-center px-4 pb-3">
+                    <Button variant={ButtonVariant.secondary} isFullWidth size={ButtonSize.sm}
+                            onClick$={$(async () => { 
+                                const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string)
+                                
+                                live.isLoading = true
+                                if(response.markerUpdated){
+                                    marker.status = response.markerUpdated?.status
+                                    marker.starts_at = response.markerUpdated?.starts_at
+                                    const markerUpdatedVOD = await setVODInMarker(btnMarker.isInit, response.markerUpdated, session.value?.userId as string)
+                                    if (response.markerUpdated?.status === 'RECORDING'){ 
+                                        setToast({message:'Marker recording', variant:'recording'})
+                                        btnMarker.title = 'Finish'
+                                        btnMarker.isInit = false
+                                    }
+                                    if (response.markerUpdated?.status === 'RECORDED'){
+                                        setToast({message:'Marker recorded', variant:'recorded'})
+                                    }
+                                    
+                                    if(markerUpdatedVOD.markerUpdated){
+                                        marker.videoIdStreamStart = markerUpdatedVOD?.markerUpdated.videoIdStreamStart as string
+                                        marker.videoIdStreamEnd = markerUpdatedVOD?.markerUpdated.videoIdStreamEnd as string
+                                    }
+                                    marker.ends_at = response.markerUpdated?.ends_at
+                                }else{
+                                    setToast({message:response.title, variant:'danger'})
+                                }
+                            })}
+                            disabled={validateMarker(marker.status, live, marker.stream_date, btnMarker.isInit)}
+                        >
+                            {btnMarker.title}
+                    </Button>
+                </div>
             </div>
-            
-        </div>
+        </>
 
-        <div class="flex place-content-center px-4 pb-3">
-            <Button variant={ButtonVariant.secondary} isFullWidth size={ButtonSize.sm}
-                    onClick$={async () => { 
-                        const response = await setMarkerInStream(btnMarker.isInit, marker, session.value?.userId as string)
-                        live.isLoading = true
-                        if(response.markerUpdated){
-                            marker.status = response.markerUpdated?.status
-                            marker.starts_at = response.markerUpdated?.starts_at
-                            const markerUpdatedVOD = await setVODInMarker(btnMarker.isInit, response.markerUpdated, session.value?.userId as string)
-                            if (response.markerUpdated?.status === 'RECORDING'){ 
-                                btnMarker.title = 'Finish'
-                                btnMarker.isInit = false
-                            }
-                            if(markerUpdatedVOD.markerUpdated){
-                                marker.videoIdStreamStart = markerUpdatedVOD?.markerUpdated.videoIdStreamStart as string
-                                marker.videoIdStreamEnd = markerUpdatedVOD?.markerUpdated.videoIdStreamEnd as string
-                            }
-                            marker.ends_at = response.markerUpdated?.ends_at
-                        }
-                        console.log('updatede')
-                    }}
-                    disabled={validateMarker(marker.status, live, marker.stream_date, btnMarker.isInit)}
-                >
-                    {btnMarker.title}
-            </Button>
-        </div>
-    </div>
+
     )
 })

@@ -1,10 +1,8 @@
 import { component$, Slot, useSignal, useStore, useTask$ } from '@builder.io/qwik'
 import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
 
-// import { GlobalStore } from '~/context'
 
 import { useAuthSession, useAuthSignin } from '../plugin@auth'
-// import { getColorPreference, useToggleTheme } from '~/hooks'
 
 import type { NavMenuI } from '~/models'
 import { type Plan } from '@prisma/client'
@@ -25,9 +23,7 @@ export default component$(() => {
   
   const session = useAuthSession()
   const signIn = useAuthSignin()
-  // const state = useContext(GlobalStore)
-
-  // const { setPreference } = useToggleTheme()
+  
   const navItems = useStore<NavMenuI>({
     navs:[]
   })
@@ -38,14 +34,11 @@ export default component$(() => {
 
   useTask$(async() => {    
     if (session.value?.error === "RefreshAccessTokenError") signIn.submit({ providerId: 'twitch' })
-    // state.theme = getColorPreference()
-    // setPreference(state.theme)
-    // track(() => [state.theme])
   })
   
 
   return(     
-  <div class="bg-back dark:bg-back">
+  <div class="bg-gradient-to-b from-back to-primary">
     <Navbar>
       <div q:slot='navLogo'>
         <Link href='/' class={"font-bold text-xl text-white flex place-items-center space-x-2"}>
