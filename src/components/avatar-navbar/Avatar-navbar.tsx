@@ -22,7 +22,7 @@ export default component$( ({imageSrc, altText}:ToggleAvatarProps) => {
     const menuOptions: MenuDropdownOptions[] = [
       {name: 'Dashboard', icon: IconCatalog.feBarChart, route: '/dashboard'},
       {name: 'Billing', icon: IconCatalog.feWallet, route: '/billing'},
-      {name: 'Feature Request', icon: IconCatalog.feMagic, route: 'https://t-record.canny.io/feature-requests', target:'_blank'},
+      {name: 'Feedback', icon: IconCatalog.feMagic, route: 'https://trecord.featurebase.app/?b=65aef3148a898e7dd20aae96', target:'_blank'},
       {name: 'Sign Out', icon:IconCatalog.feLogout, action: onSignOut},
       // {name: 'Team', icon: IconCatalog.feUsers, route: '/team'},
   ]
