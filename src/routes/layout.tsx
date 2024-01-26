@@ -1,8 +1,6 @@
 import { component$, Slot, useStore, useTask$ } from '@builder.io/qwik';
 import { Link, useLocation } from '@builder.io/qwik-city';
 
-// import { GlobalStore } from '~/context';
-// import { getColorPreference, useToggleTheme } from '~/hooks';
 import { useAuthSignin,useAuthSession } from './plugin@auth';
 
 
@@ -20,32 +18,27 @@ export default component$(() => {
   const signIn = useAuthSignin();
   const session = useAuthSession();
 
-  // const state = useContext(GlobalStore);
-
-  // const { setPreference } = useToggleTheme();
   const navItems = useStore<NavMenuI>({
     navs:[
       {name:'Pricing', route:'/pricing'},
-      {name:'Feature Request', route: 'https://t-record.canny.io/feature-requests'},
-      {name:'Roadmap', route: 'https://t-record.canny.io/'},
+      {name:'Feedback', route: 'https://trecord.featurebase.app/?b=65aef3148a898e7dd20aae96'},
+      {name:'Roadmap', route: 'https://trecord.featurebase.app/roadmap'},
+      {name:'Changelog', route: 'https://trecord.featurebase.app/changelog'},
     ]
   }) ;
 
 
   useTask$(async() => {
     if (session.value?.error === "RefreshAccessTokenError") signIn.submit({ providerId: 'twitch' })
-    // state.theme = getColorPreference();
-    // track( () => [state.theme])
-    // setPreference(state.theme);
   });
   
 
 
   return(     
-  <div class="bg-back dark:bg-back">
+  <div class="bg-gradient-to-b from-back to-primary">
     <Navbar>
       <div q:slot='navLogo'>
-      <Link href='/' class={"font-bold text-xl text-white flex place-items-center space-x-2"}>
+        <Link href='/' class={"font-bold text-xl text-white flex place-items-center space-x-2"}>
           <img class="rounded-md" src='/images/logo.png' width={56} height={56} alt='Logo T-Record'/>
           <span>T-Record</span>
         </Link>

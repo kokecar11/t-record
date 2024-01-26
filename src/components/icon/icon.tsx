@@ -34,7 +34,9 @@ export enum IconCatalog {
     feEqualizer = 'M13.17 7a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2h-2.17a3.001 3.001 0 0 1-5.66 0H3a1 1 0 1 1 0-2h10.17Zm-8 8a3.001 3.001 0 0 1 5.66 0H21a1 1 0 0 1 0 2H10.83a3.001 3.001 0 0 1-5.66 0H3a1 1 0 0 1 0-2h2.17ZM16 9a1 1 0 1 0 0-2a1 1 0 0 0 0 2Zm-8 8a1 1 0 1 0 0-2a1 1 0 0 0 0 2Z',
     feUsers = 'M8 13a3 3 0 1 1 0-6a3 3 0 0 1 0 6Zm8 0a3 3 0 1 1 0-6a3 3 0 0 1 0 6Zm-8 2a7.98 7.98 0 0 1 6 2.708V19H2v-1.292A7.98 7.98 0 0 1 8 15Zm8 4v-2.048l-.5-.567a10.057 10.057 0 0 0-1.25-1.193A8.028 8.028 0 0 1 16 15a7.98 7.98 0 0 1 6 2.708V19h-6Z',
     feLinkExternal = 'M6 8h5v2H6v8h8v-5h2v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Zm10.614-2H12V4h8v8h-2V7.442l-5.336 5.336l-1.414-1.414L16.614 6Z',
-    feElipsisH = 'M18 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4ZM6 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4a2 2 0 0 1 0 4Z'
+    feElipsisH = 'M18 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4ZM6 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4a2 2 0 0 1 0 4Z',
+    feVideo = 'm15 9.649l5.646-2.137A1 1 0 0 1 22 8.448v7.109a1 1 0 0 1-1.351.936L15 14.375V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1.649Z',
+    feGift = 'M19 12v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1.17A3 3 0 1 1 12 5a3 3 0 1 1 5.83 1H19a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2Zm-8-4H5v2h6V8Zm2 0v2h6V8h-6Zm-6 4v8h10v-8H7Zm2-6h1V5a1 1 0 1 0-1 1Zm6 0a1 1 0 1 0-1-1v1h1Z'
 }
 type IconProps = QwikIntrinsicElements['svg'] & {
     name: IconCatalog
@@ -42,7 +44,7 @@ type IconProps = QwikIntrinsicElements['svg'] & {
 export function Icon({name, ...props}:IconProps, key: string) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" key={key}  {...props}>
-            <g id="feMagic0" fill="none" fill-ule="evenodd" stroke="none">
+            <g id={key} fill="none" fill-ule="evenodd" stroke="none">
                 <g id={key} fill="currentColor">
                     <path id={key} d={name}></path>
                 </g>
