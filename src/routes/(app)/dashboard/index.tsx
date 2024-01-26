@@ -161,7 +161,7 @@ export default component$(() => {
                   }
 
           </div>
-          <Toasts></Toasts>
+          <Toasts />
           <Modal isVisible={isVisibleModal} title='New Marker'>
             <h2 q:slot='modal-title' class="text-secondary dark:text-white font-bold text-2xl flex place-items-center">
               New task

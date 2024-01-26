@@ -1,14 +1,14 @@
 import { component$, useSignal, useTask$ } from '@builder.io/qwik'
 import { useNavigate } from '@builder.io/qwik-city'
 
+import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
 import { capitalizeFirstLetter } from '~/utilities'
 import { getSubcriptionPlanByUser } from '~/services'
 import type { PlanAdapter } from '~/models'
 
 import Button, { ButtonSize, ButtonVariant } from '../button/Button'
-// import { Tag, TagSize, TagVariant } from '../tag/Tag';
 import { Icon, IconCatalog } from '../icon/icon'
-import { useAuthSession, useAuthSignin } from '~/routes/plugin@auth'
+import { Tag, TagSize, TagVariant } from '../tag/Tag'
 import { type SubscriptionBillingUser } from '~/adapters'
 
 export type CardPricingProps = PlanAdapter;
@@ -52,13 +52,14 @@ export const CardPricing = component$(
         >
           <span class="mb-4 text-xl font-medium text-gray-400">
             {title}{' '}
-            {/* {popular && <Tag text="New" variant={TagVariant.pro} size={TagSize.xs} />} */}
           </span>
           <hr class="mb-8 border-white opacity-10"></hr>
 
           <div class="flex items-baseline text-white">
             <span class="text-5xl font-extrabold tracking-tight">${price}</span>
-            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(typeSubscription)}</span>
+            <span class="ml-1 text-gray-400">/ {capitalizeFirstLetter(typeSubscription)}
+              { (typeSubscription === 'yearly' && popular ) && <Tag classNames={'ml-1'} variant={TagVariant.pro} size={TagSize.xs} text={'2 months FREE'}/>}
+            </span>
           </div>
           <hr class="mt-8 border-white opacity-10"></hr>
           <ul role="list" class="space-y-5 my-7">

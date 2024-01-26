@@ -127,7 +127,7 @@ export const Select = component$(({
             classNames
         ),
         options: cn(
-            'origin-top-right absolute right-0 mt-2 w-full rounded-lg shadow-lg bg-accent z-20'
+            'origin-top-right absolute right-0 mt-2 w-full rounded-lg shadow-lg bg-primary z-20'
         ),
         option: cn(
             'block px-4 py-2 text-sm text-white hover:bg-white hover:bg-opacity-10 cursor-pointer'

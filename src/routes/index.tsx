@@ -1,61 +1,68 @@
-import { component$, useContext } from '@builder.io/qwik'
-import {
-  type DocumentHead,
-  useNavigate,
-} from '@builder.io/qwik-city'
+import { component$ } from '@builder.io/qwik'
+import { type DocumentHead, type RequestHandler } from '@builder.io/qwik-city'
+import { useAuthSession, useAuthSignin } from './plugin@auth'
 
-import { UserSessionContext } from '~/context'
-import { Collapse } from '~/components/collapse/Collapse'
+import Button, { ButtonSize, ButtonVariant } from '~/components/button/Button'
+import type { Session } from '@prisma/client'
 
+export const onRequest: RequestHandler = async(event) => {
+  const session: Session | null = event.sharedMap.get('session')
+  if (session) {
+    throw event.redirect(302, `/dashboard`)
+  }
+}
 
 export default component$(() => {
-  const userSession = useContext(UserSessionContext)
-  const nav = useNavigate()
-
-  if(userSession.isLoggedIn){
-    setTimeout(() => nav('/dashboard'), 1)
-  }
-
+  const session = useAuthSession();
+  const signIn = useAuthSignin();
 
   return (
     <div class="flex flex-col m-10">
-      <div class="container mx-auto">
-        <h1 class="font-bold text-center animate-fade-down text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-secondary max-w-[20ch] text-fluid-base leading-[1.3] mx-auto">
-          Discover the power of organization on Twitch
+      <div class="container mx-auto px-4">
+        <h1 class="font-bold text-center text-7xl leading-[1.1] max-w-[20ch] mx-auto animate-fade-down">
+          Discover the power of <span class="text-transparent bg-clip-text bg-gradient-to-r from-live via-violet-900 to-secondary animate-hero-title">organization on Twitch</span>
         </h1>
-        <p class="lg:text-2xl text-lg md:text-xl font-light text-white my-4 text-center animate-fade-down max-w-[60ch] mx-auto">
+        <h2 class="text-lg text-gray-300 my-4 text-center max-w-[60ch] mx-auto animate-fade-down">
           We optimize your markers and turn them into chapters, allowing you to
           explore your most exciting moments with ease and speed.
-        </p>
-
-        <div class="grid md:flex mb-10 gap-8 items-start mt-20">
-          <div class="space-y-4 animate-fade-right w-full md:w-2/5">
-            <Collapse
-              title="Organize Your Content"
-              description="The web application offers an intuitive TODO-style interface that allows you to organize your markers and give them descriptive titles. This way, you can quickly access specific moments from your broadcasts."
-              isOpen
-            />
-            <Collapse
-              title="Instant Marker Creation"
-              description="With T-Record, you no longer have to worry about missing exciting moments during your stream. You can create markers with just one click, ensuring that those epic moments never slip away again."
-            />
-            <Collapse
-              title="Streamlined Content Creation"
-              description="Spend less time editing and post-processing your streams with T-Record's ability to mark and save highlights during your live broadcasts, streamlining your content creation process."
-            />
-            <Collapse
-              title="Download and Share"
-              description="Once you've finished your stream, you can easily download the video with all the created markers. You can also share the links to these markers with your followers, so they can relive the most thrilling moments of your streams."
-            />
+        </h2>
+        {
+          !session.value?.userId &&
+          <div class="w-full mx-auto animate-fade-down my-4">
+            <Button classNames='mx-auto' variant={ButtonVariant.plus} size={ButtonSize.lg} onClick$={() => signIn.submit({ providerId: 'twitch' })}>Try T-Record for free</Button>
           </div>
-          <div class="flex items-center animate-fade-left w-full md:w-3/5">
+        }
+
+        <div class="flex items-center place-content-center animate-fade-down my-4">
             <video
-              class="rounded-lg border border-secondary border-opacity-30"
+            width={1080}
+              class="rounded-lg"
               loop
               src="https://res.cloudinary.com/dlcx4lubg/video/upload/f_auto:video,q_auto/s8uqnjezzoudl3b3euss"
             ></video>
+        </div>
+        <div class="my-6">
+          <h2 class="text-5xl font-bold text-center animate-fade-down">Features</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-2 p-4 rounded-lg bg-gradient-to-br from- via-secondary to-back backdrop-blur-lg">
+            <div class="p-6 rounded-lg col-span-1 sm:col-span-2 shadow-lg bg-transparent backdrop-filter backdrop-blur-3xl border border-opacity-10 border-white animate-fade-right">
+              <h3 class="text-xl font-medium text-white">Link to go to the marker on VOD highlighter.</h3>
+              <p class="mt-2 text-sm text-white">T-Record revolutionizes the viewing experience with its standout VOD Highlighter feature. This innovative system allows users to access key moments in their videos through personalized links, streamlining navigation and providing an efficient way to review meaningful content in seconds.</p>
+            </div>
+            <div class="p-6 rounded-lg shadow-lg bg-transparent backdrop-filter backdrop-blur-3xl border border-opacity-10 border-white animate-fade-left">
+                <h3 class="text-xl font-medium text-white">Manage your markers.</h3>
+                <p class="mt-2 text-sm text-white">Effortlessly manage your markers with T-Record's dashboard. Streamline your experience and organize key points efficiently.</p>
+            </div>
+            <div class="p-6 rounded-lg shadow-lg bg-transparent backdrop-filter backdrop-blur-3xl border border-opacity-10 border-white animate-fade-right">
+                <h3 class="text-xl font-medium text-white">Notification of marker closing in the chat (coming soon).</h3>
+                <p class="mt-2 text-sm text-white">Reminder notification to close the marker in the chat: Receive instant alerts to ensure you don't forget to close your markers."</p>
+            </div>
+            <div class="p-6 col-span-1 sm:col-span-2 rounded-lg shadow-lg bg-transparent backdrop-filter backdrop-blur-3xl border border-opacity-10 border-white animate-fade-left">
+                <h3 class="text-xl font-medium text-white">Team manage your markers (coming soon).</h3>
+                <p class="mt-2 text-sm text-white">Your team effortlessly manages your markers with T-Record. Simplify collaboration and streamline your workflow with this intuitive feature."</p>
+            </div>
           </div>
         </div>
+        
       </div>
     </div>
   )

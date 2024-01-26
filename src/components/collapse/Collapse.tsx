@@ -29,7 +29,7 @@ export const Collapse = component$(
         class="cursor-pointer border group border-secondary border-opacity-30 bg-accent p-4 rounded-lg hover:bg-opacity-50 focus:bg-opacity-50"
         onClick$={showCollapse}
       >
-        <div class="text-left text-2xl font-bold flex items-start justify-between">
+        <div class="text-left text-xl font-bold flex items-start justify-between">
           <span>{title}</span>
           <Link class="rounded-lg p-1 cursor-pointer transition duration-150 ease-in-out group-hover:bg-primary">
             <Icon
