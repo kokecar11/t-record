@@ -1,5 +1,5 @@
-import { $, Resource, component$, useContext, useResource$, useSignal, useStore, useTask$, useVisibleTask$ } from '@builder.io/qwik'
-import { Form, routeAction$, z, zod$} from '@builder.io/qwik-city'
+import { $, QRL, Resource, component$, useContext, useResource$, useSignal, useStore, useVisibleTask$ } from '@builder.io/qwik'
+import { routeAction$, routeLoader$, z, zod$} from '@builder.io/qwik-city'
 import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city'
 import { startOfToday } from 'date-fns'
 
@@ -14,7 +14,7 @@ import { useToast } from '~/components/toast/hooks/use-toast'
 
 import Modal from '~/components/modal/Modal'
 import Button, { ButtonVariant } from '~/components/button/Button'
-import { Input } from '~/components/input/Input'
+import { Input as InputComponent } from '~/components/input/Input'
 import { Marker } from '~/components/marker/Marker'
 import { Icon, IconCatalog } from '~/components/icon/icon'
 import { Loader } from '~/components/loader/Loader'
@@ -23,8 +23,19 @@ import { useAuthSession } from '~/routes/plugin@auth'
 import { Select, type SelectOption, SelectVariant } from '~/components/select/Select'
 import Datepicker from '~/components/datepicker/Datepicker'
 import { utcToZonedTime } from 'date-fns-tz'
+import { InitialValues, SubmitHandler, formAction$, reset, useForm, valiForm$ } from '@modular-forms/qwik'
+import { type Input, minLength, object, string, date } from 'valibot';
 
 
+const MarkerTaskSchema = object({
+  title: string([
+    minLength(1, 'Please enter your title.'),
+  ]),
+  stream_date: string(),
+  userId: string(),
+});
+
+type MarkerTaskForm = Input<typeof MarkerTaskSchema>;
 
 export const onRequest: RequestHandler = async(event) => {
   const session: Session | null = event.sharedMap.get('session')
@@ -32,6 +43,12 @@ export const onRequest: RequestHandler = async(event) => {
     throw event.redirect(302, `/`)
   }
 }
+
+export const useFormLoader = routeLoader$<InitialValues<MarkerTaskForm>>(() => ({
+  title: '',
+  stream_date: new Date().toString(),
+  userId: ''
+}));
 
 export const taskForm = zod$({
   title: z.string().nonempty({
@@ -75,7 +92,6 @@ export interface FiltersMarkerState {
 export default component$(() => {
     const timezone = useSignal(Intl.DateTimeFormat().resolvedOptions().timeZone)
     const session = useAuthSession()
-    const createMarker = useCreateMarker()
     const { isVisibleModal, showModal } = useModal()
     const { setToast, Toasts } = useToast()
 
@@ -87,30 +103,61 @@ export default component$(() => {
       {name:'Recorded', value:'RECORDED'},
       {name:'Recording', value:'RECORDING'},
     ])
-    const loadingMarkers = useSignal<boolean>(false)    
+    
+    const isSaved = useSignal(false)
+    const isAddedNewMarker = useSignal(false)
     const allMarkersDate = useSignal<MarkerDate[]>([])    
     const filtersMarkers = useStore<FiltersMarkerState>({
       selectDayStream: startOfToday(),
       status: undefined
     })
-    
+
+    const [markerTaskForm, { Form, Field }] = useForm<MarkerTaskForm>({
+      loader: useFormLoader(),
+      validate: valiForm$(MarkerTaskSchema),
+    });
+  
     useVisibleTask$(() => {
       timezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone
       filtersMarkers.selectDayStream = utcToZonedTime(startOfToday(), timezone.value)
     })
 
-    useTask$(async () => {
-      markersList.value = await getMarkers(session.value?.userId as string, filtersMarkers)
-    })
 
     const markersResource = useResource$(async ({track, cleanup}) => {
       const filters = track(filtersMarkers)
-      track(loadingMarkers)
+      track(isAddedNewMarker)
       const abortController = new AbortController()
       cleanup(() => abortController.abort("cleanup"))
       allMarkersDate.value = await getAllMarkers(session.value?.userId as string)
-      markersList.value = await getMarkers(session.value?.userId as string, filters)
-      loadingMarkers.value = false
+      return await getMarkers(session.value?.userId as string, filters)
+    })
+
+    const handleSubmit: QRL<SubmitHandler<MarkerTaskForm>> = $(async (values, event) => {
+      isSaved.value = true
+      const data = {
+        title: values.title,
+        stream_date: utcToZonedTime(values.stream_date, timezone.value),
+        userId: session.value?.userId as string
+      }
+      
+      const resp = await createMarker(data)
+      
+      if(!resp){
+        setToast({message:'Task could not be saved', variant:'danger'})
+        return {
+          success: false,
+          msg: 'Task could not be saved'
+        }  
+      }
+      isAddedNewMarker.value = !isAddedNewMarker.value
+      reset(markerTaskForm)
+      setToast({message:'Task successfully saved!', variant:'success'})
+      showModal()
+      isSaved.value = false
+      return {
+        success: true,
+        msg: 'Task successfully saved!'
+      }
     })
 
     return (
@@ -131,35 +178,35 @@ export default component$(() => {
                   />
               </div>
             </div>
-                  {
-                    <Resource value={markersResource}
-                    onPending={() => <Loader />}
-                    onResolved={() => markersList.value.length > 0 ? (
-                      <>
-                        <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3 md:my-6 md:gap-6 lg:grid-cols-4">
-                          {
-                            markersList.value.map((m) => (
-                              <Marker key={m.id} marker={m} onDelete={$(() => {
-                                deleteMarker(m.id)
-                                live.isLoading = true
-                                setToast({message:'Task has been deleted', variant:'info'})
-                              })} live={live}/>
-                            ))
-                          }
-                        </div>
-                      </>
-                      ): 
-                      (
-                        <div class="flex items-center justify-center mt-4 h-full">
-                          <div class="space-y-4"> 
-                            <h1 class="text-3xl font-bold text-white">
-                              You don't have any marker for your stream yet, create a marker.
-                            </h1>
-                          </div>
-                        </div>
-                      )} />
-                  }
-
+              {
+                <Resource 
+                value={markersResource}
+                onPending={() => <Loader />}
+                onResolved={(markers) => markers.length > 0 ? (
+                  <>
+                    <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3 md:my-6 md:gap-6 lg:grid-cols-4">
+                      {
+                        markers.map((m) => (
+                          <Marker key={m.id} marker={m} onDelete={$(() => {
+                            deleteMarker(m.id)
+                            live.isLoading = true
+                            setToast({message:'Task has been deleted', variant:'info'})
+                          })} live={live}/>
+                        ))
+                      }
+                    </div>
+                  </>
+                  ): 
+                  (
+                    <div class="flex items-center justify-center mt-4 h-full">
+                      <div class="space-y-4"> 
+                        <h1 class="text-3xl font-bold text-white">
+                          You don't have any marker for your stream yet, create a marker.
+                        </h1>
+                      </div>
+                    </div>
+                  )} />
+              }
           </div>
           <Toasts />
           <Modal isVisible={isVisibleModal} title='New Marker'>
@@ -167,28 +214,35 @@ export default component$(() => {
               New task
             </h2>
             <div q:slot="modal-body" class={"mx-5"}>
-              <Form action={createMarker}
-              // onSubmit$={async() => {
-              //   loadingMarkers.value= true
-              // }}
-              onSubmitCompleted$={() => {
-                if (createMarker.value?.success){
-                  showModal();
-                  setToast({message:createMarker.value?.msg})
-                  loadingMarkers.value = true
-                }
-              }}
-              spaReset
-              >
-                <Input type="hidden" name='userId' value={session.value?.userId as string}></Input>
-                <Input label='Marker title' name='title' type='text' placeholder='Marker title' value={createMarker.formData?.get('title')} />
-                {createMarker.value?.fieldErrors?.title && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.title}</p>}
+              <Form onSubmit$={handleSubmit}>
+                
+                <Field name='userId' type='string'>
+                  {(field, props) => (
+                    <InputComponent {...props} type='hidden' name='userId' value={field.value} />
+                  )}
+                </Field>
 
-                <Input name='stream_date' label='Stream date' placeholder='Stream date' type='datetime-local' value={createMarker.formData?.get('stream_date')} />
-                {createMarker.value?.fieldErrors?.stream_date && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{createMarker.value.fieldErrors?.stream_date}</p>}
+                <Field name='title' type='string'>
+                  {(field, props) => (
+                    <div>
+                      <InputComponent {...props } label='Marker title' name='title' type='text' placeholder='Marker title' value={field.value} />
+                      {field.error && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{field.error}</p>}
+                    </div>
+                  )}
+                </Field>
+
+                <Field name='stream_date'>
+                  {(field, props) => (
+                    <div>
+                      <InputComponent {...props} name='stream_date' label='Stream date' placeholder='Stream date' type='datetime-local' value={field.value} />
+                      {field.error && <p class={"mt-2 p-2 rounded-lg bg-red-100 text-red-500"}>{field.error}</p>}
+                    </div>
+                  )}
+                </Field>
+              
                 <div class={"mt-6 flex space-x-4"}>
                   <Button variant={ButtonVariant.primary} isFullWidth type='button' onClick$={showModal}>Cancel</Button>
-                  <Button variant={ButtonVariant.secondary} isFullWidth type='submit'>Save</Button>
+                  <Button variant={ButtonVariant.secondary} disabled={isSaved.value} isFullWidth type='submit'>Save</Button>
                 </div>
               </Form>
             </div>

@@ -90,7 +90,7 @@ export const Marker = component$(({marker, live}: MarkerProps) => {
                     </div>
                         <MenuDropdown isVisible={isVisibleMenuDropdown.value} options={markerMenuOptions}/>
                     
-                    <h2 class="text-white capitalize font-bold text-lg">{marker.title}</h2>
+                        <h2 class="text-white capitalize font-bold text-lg overflow-hidden text-overflow-ellipsis whitespace-nowrap" title={marker.title}>{marker.title}</h2>
                     
                     <div class="my-2 text-sm text-white text-opacity-90">
                         <div class="mt-4">

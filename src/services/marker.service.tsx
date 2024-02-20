@@ -15,8 +15,6 @@ export const getMarkers = server$(async (userId:string, filters?:FiltersMarkerSt
                 lte: new Date(tomorrow.setDate(tomorrow.getDate()+1))
             }
         },
-    }).finally(() => {
-        db.$disconnect();
     })
     return markers
 })
@@ -27,8 +25,6 @@ export const getAllMarkers = server$(async (userId:string) => {
             userId
         },
         select:{stream_date:true, title:true}
-    }).finally(() => {
-        db.$disconnect();
     })
     return markers
 })
@@ -41,8 +37,6 @@ export const createMarker = server$(async (data: {title:string, stream_date: Dat
             title,
             stream_date
         }
-    }).finally(() => {
-        db.$disconnect();
     })
     return marker
 })
@@ -50,8 +44,6 @@ export const createMarker = server$(async (data: {title:string, stream_date: Dat
 export const deleteMarker = server$(async (markerId: string) => {
     const markerDeleted = await db.marker.delete({
         where: { id: markerId }
-    }).finally(() => {
-        db.$disconnect();
     })
     return markerDeleted
 })
@@ -62,8 +54,6 @@ export const setVODInMarker = server$(async function( isStartMarker:boolean = tr
 
     const account = await db.account.findFirst({
         where: { userId }
-    }).finally(() => {
-        db.$disconnect();
     })
 
     const accesTokenProvider = account?.access_token as string
@@ -113,8 +103,6 @@ export const setMarkerInStream = server$(async function(isStartMarker: boolean =
 
     const account = await db.account.findFirst({
         where: { userId }
-    }).finally(() => {
-        db.$disconnect();
     })
     const accesTokenProvider = account?.access_token as string
     const providerAccountId = account?.providerAccountId as string
